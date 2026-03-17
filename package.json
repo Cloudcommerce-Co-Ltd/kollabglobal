@@ -40,12 +40,7 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
-  ],
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/engines", "prisma", "sharp", "unrs-resolver"]
+  }
 }
