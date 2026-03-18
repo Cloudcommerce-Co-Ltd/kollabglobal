@@ -45,6 +45,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  campaigns     Campaign[]
 
   @@map("users")
 }
@@ -56,4 +57,173 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum PromotionType {
+  PRODUCT
+  SERVICE
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_PAYMENT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CreatorStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COMPLETED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  BANK_TRANSFER
+  QR_CODE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ─── Business Models ─────────────────────────────────────────────────────────
+
+model Country {
+  id            String     @id
+  name          String
+  flag          String
+  creatorsAvail Int        @default(0) @map("creators_avail")
+  avgEyeball    String?    @map("avg_eyeball")
+  avgCPE        String?    @map("avg_cpe")
+  foodBevEng    String?    @map("food_bev_eng")
+  beautyEng     String?    @map("beauty_eng")
+  snackTrend    String?    @map("snack_trend")
+  platforms     String[]
+  cats          String[]
+  estReach      String?    @map("est_reach")
+  estOrders     String?    @map("est_orders")
+  isActive      Boolean    @default(true) @map("is_active")
+  campaigns     Campaign[]
+
+  @@map("countries")
+}
+
+model Package {
+  id              String  @id
+  name            String
+  badge           String?
+  numCreators     Int     @map("num_creators")
+  pricePerCreator Int     @map("price_per_creator")
+  discountPct     Int     @default(0) @map("discount_pct")
+  estReach        String? @map("est_reach")
+  estEngagement   String? @map("est_engagement")
+  campaigns       Campaign[]
+
+  @@map("packages")
+}
+
+model Creator {
+  id          String  @id @default(cuid())
+  name        String
+  niche       String
+  engagement  String
+  reach       String
+  avatar      String
+  countryFlag String  @map("country_flag")
+  isBackup    Boolean           @default(false) @map("is_backup")
+  campaigns   CampaignCreator[]
+
+  @@map("creators")
+}
+
+model Campaign {
+  id            String         @id @default(cuid())
+  userId        String         @map("user_id")
+  countryId     String         @map("country_id")
+  packageId     String         @map("package_id")
+  promotionType PromotionType  @map("promotion_type")
+  status        CampaignStatus @default(DRAFT)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country Country @relation(fields: [countryId], references: [id])
+  package Package @relation(fields: [packageId], references: [id])
+  product   CampaignProduct?
+  brief     CampaignBrief?
+  creators  CampaignCreator[]
+  payment   Payment?
+
+  @@map("campaigns")
+}
+
+model CampaignProduct {
+  id            String   @id @default(cuid())
+  campaignId    String   @unique @map("campaign_id")
+  brandName     String   @map("brand_name")
+  productName   String   @map("product_name")
+  category      String
+  description   String   @db.Text
+  sellingPoints String   @map("selling_points") @db.Text
+  url           String?
+  imageUrl      String?  @map("image_url")
+  isService     Boolean  @default(false) @map("is_service")
+  weight        Float?
+  length        Float?
+  width         Float?
+  height        Float?
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_products")
+}
+
+model CampaignBrief {
+  id         String   @id @default(cuid())
+  campaignId String   @unique @map("campaign_id")
+  content    String   @db.Text
+  contentTh  String?  @map("content_th") @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_briefs")
+}
+
+model CampaignCreator {
+  id         String        @id @default(cuid())
+  campaignId String        @map("campaign_id")
+  creatorId  String        @map("creator_id")
+  status     CreatorStatus @default(PENDING)
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creator  Creator  @relation(fields: [creatorId], references: [id])
+
+  @@unique([campaignId, creatorId])
+  @@map("campaign_creators")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  campaignId    String        @unique @map("campaign_id")
+  amount        Int
+  currency      String        @default("THB")
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  omiseChargeId String?       @unique @map("omise_charge_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
