@@ -8,6 +8,8 @@
 5. Everything need tests, start from unit tests to integration tests, and make sure to cover all edge cases. This ensures that your code is robust and can handle unexpected scenarios.
 6. Implement E2E test to entire flow of the feature, this will help to identify any issues that may arise when different components interact with each other. E2E tests are crucial for ensuring that the entire system works as expected.
 7. Use `pnpm` everywhere — NOT npm or npx. Use `pnpm exec` to run binaries (e.g. `pnpm exec prisma migrate dev`).
+8. UI Have to match the design in `../mvp-template/` exactly. This is the source of truth for all visual and copy elements. When in doubt, refer back to the static prototype, and port it carefully into Next.js + Tailwind + shadcn components. Pixel-perfect implementation is required. you are allow to use shadcn components, but make sure to customize the styles to match the design exactly. Do not deviate from the design or add any extra UI elements that are not present in the prototype and do not use inline styles, all styles should be in Tailwind classes or shadcn component variants.
+9. UI have to be mobile-responsive and Thai-first with English labels. This means that the UI should be designed to work well on mobile devices, and the primary language should be Thai, with English used for labels and any secondary text (Copy exactly from `../mvp-template/`). Make sure to test the UI on different screen sizes to ensure it is responsive and looks good on all devices.
 
 ## Definition Of Done
 - Code is clean, well-structured, and follows best practices.
@@ -41,10 +43,3 @@ All three external services have credentials pending from company. Scaffold env-
 - **Next.js 16:** Middleware is `src/proxy.ts` (not middleware.ts). Dynamic route params are `Promise<{}>`.
 - **Zustand** for multi-step campaign creation state (no persistence — resets on refresh).
 - **Proxy auth** excludes `/api/webhooks` so Omise webhooks can hit without session.
-
-## Design Tokens
-```
-Primary: #4ECDC4    Secondary: #4A90D9    Accent: #9B7ED8
-Dark: #4A4A4A       Muted: #8A90A3       BG: #F5F7FA
-Border: #E8ECF0
-```
