@@ -49,7 +49,7 @@ export default function SelectCountryPage() {
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
       {/* Page header */}
-      <div className="border-b border-[#e8ecf0] bg-white px-8 py-5">
+      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-[1100px]">
           <button
             onClick={() => router.push("/")}
@@ -58,19 +58,19 @@ export default function SelectCountryPage() {
             <ArrowLeft size={16} />
             กลับหน้าหลัก
           </button>
-          <h1 className="m-0 text-[26px] font-bold text-[#4A4A4A]">เลือกตลาดเป้าหมาย</h1>
+          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">เลือกตลาดเป้าหมาย</h1>
           <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">เลือกพื้นที่ที่คุณต้องการโปรโมทแบรนด์</p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1100px] px-8">
+      <div className="mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
         {/* Tab bar */}
         <div className="mb-7 flex gap-1 border-b-2 border-[#e8ecf0]">
           {(["asia", "global"] as Tab[]).map((k) => (
             <button
               key={k}
               onClick={() => { setTab(k); setSelected(null); }}
-              className={`cursor-pointer border-x-0 border-t-0 border-b-[3px] bg-transparent px-7 py-3 text-[15px] font-semibold transition-all ${
+              className={`cursor-pointer border-x-0 border-t-0 border-b-[3px] bg-transparent px-4 py-3 text-[15px] font-semibold transition-all sm:px-7 ${
                 tab === k
                   ? "border-[#4ECDC4] text-[#4ECDC4]"
                   : "border-transparent text-[#8a90a3]"
@@ -82,8 +82,8 @@ export default function SelectCountryPage() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-[1fr_380px] gap-6">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {loading ? (
               <div className="col-span-2 py-12 text-center text-[#8a90a3]">
                 กำลังโหลด...
@@ -132,7 +132,7 @@ export default function SelectCountryPage() {
           <button
             disabled={!selected}
             onClick={handleNext}
-            className={`rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all ${
+            className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
               selected ? "cursor-pointer bg-[#4ECDC4]" : "cursor-not-allowed bg-[#ccc]"
             }`}
           >

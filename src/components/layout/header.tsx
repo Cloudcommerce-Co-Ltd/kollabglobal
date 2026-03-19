@@ -12,7 +12,7 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between border-b border-[#e8ecf0] bg-white px-8 py-5">
+    <header className="flex items-center justify-between border-b border-[#e8ecf0] bg-white px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
       <Link href="/" className="flex items-center gap-2.5">
         <div
           className="flex size-[34px] items-center justify-center rounded-[9px]"
@@ -20,7 +20,7 @@ export function Header({ user }: HeaderProps) {
         >
           <Globe size={17} color="#fff" />
         </div>
-        <span className="text-[18px] font-extrabold text-[#4a4a4a]">
+        <span className="text-[16px] font-extrabold text-[#4a4a4a] sm:text-[18px]">
           KOLLAB <span className="text-[#4ECDC4]">Global</span>
         </span>
       </Link>
@@ -39,7 +39,7 @@ export function Header({ user }: HeaderProps) {
             <span className="text-sm">👤</span>
           )}
         </div>
-        <span className="text-[13px] font-semibold text-[#4a4a4a]">
+        <span className="hidden text-[13px] font-semibold text-[#4a4a4a] sm:inline">
           {user.name}
         </span>
         <button

@@ -3,7 +3,7 @@ import { Globe } from 'lucide-react';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[linear-gradient(160deg,#e8f8f7_0%,#e8f0fa_40%,#f0ebf8_100%)] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[linear-gradient(160deg,#e8f8f7_0%,#e8f0fa_40%,#f0ebf8_100%)] flex items-center justify-center p-4 sm:p-6">
       <div className="animate-fade-up w-full max-w-[420px]">
         {/* Logo + brand */}
         <div className="text-center mb-9">
@@ -12,7 +12,7 @@ export default function LoginPage() {
               <Globe size={28} color="#fff" />
             </div>
           </div>
-          <h1 className="text-[32px] font-extrabold text-[#4a4a4a] mb-1 tracking-[-0.5px]">
+          <h1 className="text-[24px] font-extrabold text-[#4a4a4a] mb-1 tracking-[-0.5px] sm:text-[32px]">
             KOLLAB <span className="text-[#4ECDC4]">Global</span>
           </h1>
           <p className="text-[15px] text-[#8a90a3] leading-[1.5]">
@@ -21,7 +21,7 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-[20px] px-8 py-9 shadow-[0_12px_48px_rgba(0,0,0,0.08)] border border-[#e8ecf0]">
+        <div className="bg-white rounded-[20px] px-5 py-7 shadow-[0_12px_48px_rgba(0,0,0,0.08)] border border-[#e8ecf0] sm:px-8 sm:py-9">
           <h2 className="text-[20px] font-bold text-[#4a4a4a] mb-[6px] text-center">
             ยินดีต้อนรับ
           </h2>

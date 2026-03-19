@@ -4,5 +4,5 @@ export default function CreateBriefPage({
   params: Promise<{ id: string }>;
 }) {
   void params;
-  return <div className="p-8">Create Brief</div>;
+  return <div className="p-4 sm:p-6 lg:p-8">Create Brief</div>;
 }

@@ -15,7 +15,7 @@ export function CampaignHeader() {
   const step = useCampaignStore((s) => s.step);
 
   return (
-    <div className="border-b border-[#e8ecf0] bg-white px-6 py-4">
+    <div className="border-b border-[#e8ecf0] bg-white px-3 py-4 sm:px-6">
       <div className="mx-auto flex max-w-3xl items-center justify-between">
         {STEPS.map((s, i) => {
           const isDone = step > s.n;
@@ -24,7 +24,7 @@ export function CampaignHeader() {
             <div key={s.n} className="flex items-center">
               <div className="flex flex-col items-center gap-1">
                 <div
-                  className={`flex size-8 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                  className={`flex size-6 items-center justify-center rounded-full text-sm font-bold transition-colors sm:size-8 ${
                     isDone
                       ? "bg-[#4ECDC4] text-white"
                       : isActive
@@ -42,7 +42,7 @@ export function CampaignHeader() {
               </div>
               {i < STEPS.length - 1 && (
                 <div
-                  className={`mx-2 h-px w-12 sm:w-20 ${step > s.n ? "bg-[#4ECDC4]" : "bg-[#e8ecf0]"}`}
+                  className={`mx-1 h-px w-6 sm:mx-2 sm:w-12 md:w-20 ${step > s.n ? "bg-[#4ECDC4]" : "bg-[#e8ecf0]"}`}
                 />
               )}
             </div>

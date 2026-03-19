@@ -61,7 +61,7 @@ export default function SelectPackagePage() {
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
       {/* Page header */}
-      <div className="border-b border-[#e8ecf0] bg-white px-8 py-5">
+      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-[1060px]">
           <button
             onClick={handleBack}
@@ -70,7 +70,7 @@ export default function SelectPackagePage() {
             <ArrowLeft size={16} />
             กลับไปเพิ่มสินค้า / บริการ
           </button>
-          <h1 className="m-0 text-[26px] font-bold text-[#4A4A4A]">เลือกแพ็กเกจ</h1>
+          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">เลือกแพ็กเกจ</h1>
           <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">ยิ่งเลือกครีเอเตอร์เยอะ ยิ่งครอบคลุมทุก platform</p>
         </div>
       </div>
@@ -78,9 +78,9 @@ export default function SelectPackagePage() {
       {loading ? (
         <div className="py-16 text-center text-[#8a90a3]">กำลังโหลด...</div>
       ) : (
-        <div className="mx-auto max-w-[1060px] px-8 pb-10 pt-6">
+        <div className="mx-auto max-w-[1060px] px-4 pb-10 pt-6 sm:px-6 lg:px-8">
           {/* Package cards */}
-          <div className="mb-5 grid grid-cols-3 gap-4">
+          <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
             {packages.map((pkg) => {
               const isSelected = selected === pkg.id;
               const extras = PACKAGE_EXTRAS[pkg.id] ?? { platforms: [], deliverables: [] };
@@ -122,7 +122,7 @@ export default function SelectPackagePage() {
                       ราคา / ครีเอเตอร์
                     </div>
                     <div className="mb-1.5 flex items-baseline gap-1">
-                      <span className={`text-[32px] font-extrabold ${isSelected ? "text-[#4ECDC4]" : "text-[#4A4A4A]"}`}>
+                      <span className={`text-[24px] font-extrabold sm:text-[32px] ${isSelected ? "text-[#4ECDC4]" : "text-[#4A4A4A]"}`}>
                         ฿{pkg.pricePerCreator.toLocaleString()}
                       </span>
                       <span className="text-[13px] text-[#8a90a3]">/คน</span>
@@ -236,7 +236,7 @@ export default function SelectPackagePage() {
             <button
               disabled={!selected}
               onClick={handleNext}
-              className={`rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all ${
+              className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
                 selected ? "cursor-pointer bg-[#4ECDC4]" : "cursor-not-allowed bg-[#ccc]"
               }`}
             >

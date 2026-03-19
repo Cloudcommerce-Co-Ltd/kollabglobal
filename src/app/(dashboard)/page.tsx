@@ -17,7 +17,7 @@ export default async function DashboardPage() {
       `}</style>
 
       {/* Center content */}
-      <div className="fade-up flex flex-1 flex-col items-center justify-center px-8">
+      <div className="fade-up flex flex-1 flex-col items-center justify-center px-4 sm:px-8">
         {/* Globe icon */}
         <div
           className="mb-6 flex size-16 items-center justify-center rounded-[18px]"
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
           <Globe size={32} color="#fff" />
         </div>
 
-        <h1 className="mb-2 text-center text-[28px] font-extrabold tracking-[-0.3px] text-[#4a4a4a]">
+        <h1 className="mb-2 text-center text-[22px] font-extrabold tracking-[-0.3px] text-[#4a4a4a] sm:text-[28px]">
           ยินดีต้อนรับ, {userName} 👋
         </h1>
         <p className="mb-12 text-center text-[15px] text-[#8a90a3]">
@@ -37,11 +37,11 @@ export default async function DashboardPage() {
         </p>
 
         {/* Action cards */}
-        <div className="grid w-full max-w-[560px] grid-cols-2 gap-4">
+        <div className="grid w-full max-w-[560px] grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Create campaign */}
           <Link
             href="/campaigns/new/country"
-            className="group flex flex-col gap-[14px] rounded-2xl border-2 border-[#e8ecf0] bg-white p-7 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-[180ms] hover:-translate-y-0.5 hover:border-[#4ECDC4] hover:bg-[#e8f8f7] hover:shadow-[0_6px_24px_rgba(78,205,196,0.20)]"
+            className="group flex flex-col gap-[14px] rounded-2xl border-2 border-[#e8ecf0] bg-white p-5 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-[180ms] hover:-translate-y-0.5 hover:border-[#4ECDC4] hover:bg-[#e8f8f7] hover:shadow-[0_6px_24px_rgba(78,205,196,0.20)] sm:p-7"
           >
             <div className="flex size-11 items-center justify-center rounded-xl bg-[rgba(78,205,196,0.15)] transition-all duration-[180ms] group-hover:bg-[#4ECDC4]">
               <Plus
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
           {/* My campaigns */}
           <Link
             href="/campaigns"
-            className="group flex flex-col gap-[14px] rounded-2xl border-2 border-[#e8ecf0] bg-white p-7 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-[180ms] hover:-translate-y-0.5 hover:border-[#4A90D9] hover:bg-[#e8f0fa] hover:shadow-[0_6px_24px_rgba(74,144,217,0.20)]"
+            className="group flex flex-col gap-[14px] rounded-2xl border-2 border-[#e8ecf0] bg-white p-5 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-[180ms] hover:-translate-y-0.5 hover:border-[#4A90D9] hover:bg-[#e8f0fa] hover:shadow-[0_6px_24px_rgba(74,144,217,0.20)] sm:p-7"
           >
             <div className="relative flex size-11 items-center justify-center rounded-xl bg-[rgba(74,144,217,0.15)] transition-all duration-[180ms] group-hover:bg-[#4A90D9]">
               <BarChart3
