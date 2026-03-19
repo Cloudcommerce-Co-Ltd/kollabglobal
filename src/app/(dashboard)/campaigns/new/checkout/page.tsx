@@ -8,6 +8,11 @@ import type { Package, Creator } from "@/types/index";
 
 const formatNumber = (n: number) => n.toLocaleString("th-TH");
 
+function calcTotal(pkg: Package) {
+  const base = pkg.numCreators * pkg.pricePerCreator * (1 - pkg.discountPct / 100);
+  return base + base * 0.07 + base * 0.03;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
 
@@ -38,25 +43,18 @@ export default function CheckoutPage() {
     String(Math.floor(1000 + Math.random() * 9000))
   );
 
-  // Price calculations
-  const basePriceTHB = pkg
-    ? pkg.numCreators * pkg.pricePerCreator * (1 - pkg.discountPct / 100)
-    : 0;
-  const vat = basePriceTHB * 0.07;
-  const serviceFee = basePriceTHB * 0.03;
-  const totalTHB = basePriceTHB + vat + serviceFee;
-
-  // Auto-fill + data loading
+  // Auto-fill + data loading + auto-charge creation
   useEffect(() => {
     async function load() {
       setIsLoading(true);
 
+      let resolvedCountryId = countryId;
       let resolvedPackageId = packageId;
       let resolvedCreatorIds = selectedCreatorIds;
+      let resolvedPromotionType = promotionType ?? "PRODUCT";
       let didAutoFill = false;
 
-      if (!countryId || !resolvedPackageId || resolvedCreatorIds.length === 0) {
-        // Fetch packages, creators, and countries in parallel
+      if (!resolvedCountryId || !resolvedPackageId || resolvedCreatorIds.length === 0) {
         const [pkgsRes, creatorsRes, countriesRes] = await Promise.all([
           fetch("/api/packages"),
           fetch("/api/creators"),
@@ -67,8 +65,9 @@ export default function CheckoutPage() {
         const creatorsData: Creator[] = await creatorsRes.json();
         const countriesData: { id: string }[] = await countriesRes.json();
 
-        if (!countryId && countriesData.length > 0) {
+        if (!resolvedCountryId && countriesData.length > 0) {
           const randomCountry = countriesData[Math.floor(Math.random() * countriesData.length)];
+          resolvedCountryId = randomCountry.id;
           setCountry(randomCountry.id);
         }
 
@@ -78,20 +77,20 @@ export default function CheckoutPage() {
           setPackage(randomPkg.id);
 
           const shuffled = [...creatorsData].sort(() => Math.random() - 0.5);
-          resolvedCreatorIds = shuffled
-            .slice(0, randomPkg.numCreators)
-            .map((c) => c.id);
+          resolvedCreatorIds = shuffled.slice(0, randomPkg.numCreators).map((c) => c.id);
           setCreators(resolvedCreatorIds);
         }
 
         if (!promotionType) {
           setPromotionType("PRODUCT");
+          resolvedPromotionType = "PRODUCT";
         }
 
         didAutoFill = true;
       }
 
-      // Fetch full data for display
+      // Fetch display data
+      let foundPkg: Package | null = null;
       if (resolvedPackageId) {
         const [pkgsRes, creatorsRes] = await Promise.all([
           fetch("/api/packages"),
@@ -101,20 +100,45 @@ export default function CheckoutPage() {
         const pkgsData: Package[] = await pkgsRes.json();
         const creatorsData: Creator[] = await creatorsRes.json();
 
-        const foundPkg = pkgsData.find((p) => p.id === resolvedPackageId);
+        foundPkg = pkgsData.find((p) => p.id === resolvedPackageId) ?? null;
         if (foundPkg) setPkg(foundPkg);
 
-        const selectedCreators = creatorsData.filter((c) =>
-          resolvedCreatorIds.includes(c.id)
-        );
-        setCreatorsState(selectedCreators);
+        setCreatorsState(creatorsData.filter((c) => resolvedCreatorIds.includes(c.id)));
       }
 
-      if (didAutoFill) {
-        setAutoFilled(true);
-      }
-
+      if (didAutoFill) setAutoFilled(true);
       setIsLoading(false);
+
+      // Auto-create charge immediately after data is ready
+      if (foundPkg && resolvedCountryId && resolvedPackageId && resolvedPromotionType) {
+        setIsCreatingCharge(true);
+        const amountSatang = Math.round(calcTotal(foundPkg) * 100);
+        try {
+          const res = await fetch("/api/payments/create-charge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              amount: amountSatang,
+              countryId: resolvedCountryId,
+              packageId: resolvedPackageId,
+              promotionType: resolvedPromotionType,
+              creatorIds: resolvedCreatorIds,
+            }),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            setChargeId(data.chargeId);
+            setQrCodeUrl(data.qrCodeUrl);
+            setPaymentStatus("pending");
+          } else {
+            setPaymentStatus("failed");
+          }
+        } catch {
+          setPaymentStatus("failed");
+        }
+        setIsCreatingCharge(false);
+      }
     }
 
     load();
@@ -143,39 +167,19 @@ export default function CheckoutPage() {
     return () => clearInterval(interval);
   }, [paymentStatus, chargeId]);
 
-  const handleConfirmPayment = async () => {
-    if (!pkg || !countryId || !packageId || !promotionType) return;
-    setIsCreatingCharge(true);
-
-    const amountSatang = Math.round(totalTHB * 100);
-
-    try {
-      const res = await fetch("/api/payments/create-charge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: amountSatang,
-          countryId,
-          packageId,
-          promotionType,
-          creatorIds: selectedCreatorIds,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setChargeId(data.chargeId);
-        setQrCodeUrl(data.qrCodeUrl);
-        setPaymentStatus("pending");
-      } else {
-        setPaymentStatus("failed");
-      }
-    } catch {
-      setPaymentStatus("failed");
+  // Auto-redirect on success
+  useEffect(() => {
+    if (paymentStatus === "completed") {
+      router.push("/campaigns");
     }
+  }, [paymentStatus, router]);
 
-    setIsCreatingCharge(false);
-  };
+  const basePriceTHB = pkg
+    ? pkg.numCreators * pkg.pricePerCreator * (1 - pkg.discountPct / 100)
+    : 0;
+  const vat = basePriceTHB * 0.07;
+  const serviceFee = basePriceTHB * 0.03;
+  const totalTHB = basePriceTHB + vat + serviceFee;
 
   if (isLoading) {
     return (
@@ -226,28 +230,20 @@ export default function CheckoutPage() {
               <dl className="space-y-3">
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-[#8a90a3]">แพ็กเกจ</dt>
-                  <dd className="text-sm font-semibold text-[#4A4A4A]">
-                    {pkg.name}
-                  </dd>
+                  <dd className="text-sm font-semibold text-[#4A4A4A]">{pkg.name}</dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-[#8a90a3]">ระยะเวลา</dt>
-                  <dd className="text-sm font-semibold text-[#4A4A4A]">
-                    30 วัน
-                  </dd>
+                  <dd className="text-sm font-semibold text-[#4A4A4A]">30 วัน</dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-[#8a90a3]">จำนวนครีเอเตอร์</dt>
-                  <dd className="text-sm font-semibold text-[#4A4A4A]">
-                    {pkg.numCreators} คน
-                  </dd>
+                  <dd className="text-sm font-semibold text-[#4A4A4A]">{pkg.numCreators} คน</dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-[#8a90a3]">ประเภทแคมเปญ</dt>
                   <dd className="text-sm font-semibold text-[#4A4A4A]">
-                    {(promotionType ?? "PRODUCT") === "PRODUCT"
-                      ? "สินค้า"
-                      : "บริการ"}
+                    {(promotionType ?? "PRODUCT") === "PRODUCT" ? "สินค้า" : "บริการ"}
                   </dd>
                 </div>
               </dl>
@@ -256,45 +252,22 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Creators Card */}
+          {/* Creators Card — avatars only */}
           <div className="rounded-2xl border border-[#e8ecf0] bg-white p-6">
             <h2 className="mb-4 text-base font-bold text-[#4A4A4A]">
               ครีเอเตอร์ที่เลือก
             </h2>
             {creators.length > 0 ? (
-              <div className="space-y-2">
-                {/* Avatar row */}
-                <div className="mb-3 flex flex-wrap gap-1.5">
-                  {creators.slice(0, 8).map((c) => (
-                    <div
-                      key={c.id}
-                      className="flex size-9 items-center justify-center rounded-full bg-[#e8f8f7] text-sm font-bold text-[#4ECDC4]"
-                      title={c.name}
-                    >
-                      {c.name.charAt(0).toUpperCase()}
-                    </div>
-                  ))}
-                  {creators.length > 8 && (
-                    <div className="flex size-9 items-center justify-center rounded-full bg-[#e8ecf0] text-xs font-bold text-[#8a90a3]">
-                      +{creators.length - 8}
-                    </div>
-                  )}
-                </div>
-                {/* Creator list */}
-                <ul className="space-y-1.5">
-                  {creators.map((c) => (
-                    <li
-                      key={c.id}
-                      className="flex items-center gap-2 text-sm text-[#4A4A4A]"
-                    >
-                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e8f8f7] text-xs font-bold text-[#4ECDC4]">
-                        {c.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="font-medium">{c.name}</span>
-                      <span className="text-xs text-[#8a90a3]">{c.niche}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="flex flex-wrap gap-2">
+                {creators.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex size-10 items-center justify-center rounded-full bg-[#e8f8f7] text-sm font-bold text-[#4ECDC4]"
+                    title={c.name}
+                  >
+                    {c.name.charAt(0).toUpperCase()}
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-sm text-[#8a90a3]">ไม่พบครีเอเตอร์</p>
@@ -309,27 +282,19 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#8a90a3]">ค่าแพ็กเกจ</span>
-                <span className="font-medium text-[#4A4A4A]">
-                  {formatNumber(basePriceTHB)} THB
-                </span>
+                <span className="font-medium text-[#4A4A4A]">{formatNumber(basePriceTHB)} THB</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#8a90a3]">VAT 7%</span>
-                <span className="font-medium text-[#4A4A4A]">
-                  {formatNumber(vat)} THB
-                </span>
+                <span className="font-medium text-[#4A4A4A]">{formatNumber(vat)} THB</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#8a90a3]">ค่าบริการ 3%</span>
-                <span className="font-medium text-[#4A4A4A]">
-                  {formatNumber(serviceFee)} THB
-                </span>
+                <span className="font-medium text-[#4A4A4A]">{formatNumber(serviceFee)} THB</span>
               </div>
               <hr className="border-[#e8ecf0]" />
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#4A4A4A]">
-                  รวมทั้งหมด
-                </span>
+                <span className="text-sm font-semibold text-[#4A4A4A]">รวมทั้งหมด</span>
                 <span className="text-2xl font-bold text-[#4ECDC4]">
                   {formatNumber(totalTHB)} THB
                 </span>
@@ -340,16 +305,18 @@ export default function CheckoutPage() {
 
         {/* Right Column: QR Payment */}
         <div className="space-y-4">
-          {/* QR Payment Card */}
           <div className="rounded-2xl bg-gradient-to-br from-[#4A4A4A] to-[#333] p-6 text-center text-white">
             <h2 className="mb-1 text-xl font-bold">สแกนเพื่อชำระเงิน</h2>
-            <p className="mb-5 text-sm text-[#bbb]">
-              ใช้แอปธนาคารสแกน QR Code
-            </p>
+            <p className="mb-5 text-sm text-[#bbb]">ใช้แอปธนาคารสแกน QR Code</p>
 
             {/* QR area */}
             <div className="mx-auto mb-4 flex size-[180px] items-center justify-center rounded-xl bg-white">
-              {qrCodeUrl ? (
+              {isCreatingCharge ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="size-8 animate-spin rounded-full border-4 border-[#4ECDC4] border-t-transparent" />
+                  <p className="text-xs text-[#8a90a3]">กำลังสร้าง QR Code...</p>
+                </div>
+              ) : qrCodeUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={qrCodeUrl}
@@ -360,74 +327,8 @@ export default function CheckoutPage() {
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-[#e8ecf0]">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="text-[#8a90a3]"
-                    >
-                      <rect
-                        x="3"
-                        y="3"
-                        width="7"
-                        height="7"
-                        rx="1"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <rect
-                        x="14"
-                        y="3"
-                        width="7"
-                        height="7"
-                        rx="1"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <rect
-                        x="3"
-                        y="14"
-                        width="7"
-                        height="7"
-                        rx="1"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <rect
-                        x="14"
-                        y="14"
-                        width="3"
-                        height="3"
-                        fill="currentColor"
-                      />
-                      <rect
-                        x="18"
-                        y="14"
-                        width="3"
-                        height="3"
-                        fill="currentColor"
-                      />
-                      <rect
-                        x="14"
-                        y="18"
-                        width="3"
-                        height="3"
-                        fill="currentColor"
-                      />
-                      <rect
-                        x="18"
-                        y="18"
-                        width="3"
-                        height="3"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-xs text-[#8a90a3]">
-                    QR Code จะปรากฏที่นี่
-                  </p>
+                  <div className="size-8 animate-spin rounded-full border-4 border-[#4ECDC4] border-t-transparent" />
+                  <p className="text-xs text-[#8a90a3]">กำลังโหลด...</p>
                 </div>
               )}
             </div>
@@ -446,7 +347,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Confirm / Status Button */}
+          {/* Status indicator */}
           {paymentStatus === "failed" ? (
             <button
               disabled
@@ -455,31 +356,16 @@ export default function CheckoutPage() {
               การชำระเงินล้มเหลว
             </button>
           ) : paymentStatus === "completed" ? (
-            <button
-              onClick={() => router.push("/campaigns")}
-              className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-[#4ECDC4] to-[#4A90D9] py-4 font-bold text-white transition-opacity hover:opacity-90"
-            >
+            <div className="w-full rounded-xl bg-gradient-to-r from-[#4ECDC4] to-[#4A90D9] py-4 text-center font-bold text-white">
               ชำระเงินสำเร็จ ✓
-            </button>
-          ) : isCreatingCharge || paymentStatus === "pending" ? (
-            <button
-              disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4ECDC4] to-[#4A90D9] py-4 font-bold text-white opacity-70"
-            >
+            </div>
+          ) : (
+            <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4ECDC4] to-[#4A90D9] py-4 font-bold text-white opacity-70">
               <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               กำลังรอการชำระเงิน...
-            </button>
-          ) : (
-            <button
-              onClick={handleConfirmPayment}
-              disabled={!pkg || !countryId || !packageId || !promotionType}
-              className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-[#4ECDC4] to-[#4A90D9] py-4 font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              ยืนยันการชำระเงิน
-            </button>
+            </div>
           )}
 
-          {/* Terms */}
           <p className="text-center text-xs text-[#8a90a3]">
             เมื่อกดยืนยัน ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ
           </p>
