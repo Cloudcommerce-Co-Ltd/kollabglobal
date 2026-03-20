@@ -96,6 +96,33 @@ describe("buildFillBriefPayload", () => {
     const payload = buildFillBriefPayload({ ...product, url: "" });
     expect(payload.url).toBeUndefined();
   });
+
+  it("includes campaign context when provided", () => {
+    const payload = buildFillBriefPayload(product, {
+      countryName: "Vietnam",
+      platforms: ["TikTok", "Instagram"],
+      packageDeliverables: ["1 TikTok video", "3 IG Stories"],
+    });
+    expect(payload.countryName).toBe("Vietnam");
+    expect(payload.platforms).toEqual(["TikTok", "Instagram"]);
+    expect(payload.packageDeliverables).toEqual(["1 TikTok video", "3 IG Stories"]);
+  });
+
+  it("omits context fields when context is undefined", () => {
+    const payload = buildFillBriefPayload(product);
+    expect(payload.countryName).toBeUndefined();
+    expect(payload.platforms).toBeUndefined();
+    expect(payload.packageDeliverables).toBeUndefined();
+  });
+
+  it("omits context fields when empty arrays", () => {
+    const payload = buildFillBriefPayload(product, {
+      platforms: [],
+      packageDeliverables: [],
+    });
+    expect(payload.platforms).toBeUndefined();
+    expect(payload.packageDeliverables).toBeUndefined();
+  });
 });
 
 describe("buildTranslatePayload", () => {

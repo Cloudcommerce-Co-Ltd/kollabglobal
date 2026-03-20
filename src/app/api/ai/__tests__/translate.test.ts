@@ -7,6 +7,14 @@ vi.mock("@/lib/ai", () => ({
 
 vi.mock("ai", () => ({
   generateText: vi.fn(),
+  Output: { object: vi.fn((opts: unknown) => opts) },
+  NoObjectGeneratedError: class NoObjectGeneratedError extends Error {
+    text: string;
+    constructor(msg: string) { super(msg); this.text = msg; }
+    static isInstance(e: unknown): e is InstanceType<typeof NoObjectGeneratedError> {
+      return e instanceof NoObjectGeneratedError;
+    }
+  },
 }));
 
 import { POST } from "../translate/route";
@@ -60,7 +68,7 @@ describe("POST /api/ai/translate", () => {
     expect(data).toEqual(sampleFields);
   });
 
-  it("calls generateText when AI is configured", async () => {
+  it("calls generateText with Output.object when AI is configured", async () => {
     mockIsAIConfigured.mockReturnValue(true);
     const translated = {
       keys: "Key in Vietnamese",
@@ -70,7 +78,7 @@ describe("POST /api/ai/translate", () => {
       name: "Campaign",
     };
     mockGenerateText.mockResolvedValue({
-      text: JSON.stringify(translated),
+      output: translated,
     } as Awaited<ReturnType<typeof aiSdk.generateText>>);
 
     const res = await POST(
@@ -87,11 +95,9 @@ describe("POST /api/ai/translate", () => {
     expect(mockGenerateText).toHaveBeenCalledOnce();
   });
 
-  it("returns 500 when AI response cannot be parsed", async () => {
+  it("returns 500 when generateText throws", async () => {
     mockIsAIConfigured.mockReturnValue(true);
-    mockGenerateText.mockResolvedValue({
-      text: "not valid json",
-    } as Awaited<ReturnType<typeof aiSdk.generateText>>);
+    mockGenerateText.mockRejectedValue(new Error("model error"));
 
     const res = await POST(
       makeRequest({
@@ -106,7 +112,7 @@ describe("POST /api/ai/translate", () => {
   it("prompt includes target language name", async () => {
     mockIsAIConfigured.mockReturnValue(true);
     mockGenerateText.mockResolvedValue({
-      text: JSON.stringify(sampleFields),
+      output: sampleFields,
     } as Awaited<ReturnType<typeof aiSdk.generateText>>);
 
     await POST(
