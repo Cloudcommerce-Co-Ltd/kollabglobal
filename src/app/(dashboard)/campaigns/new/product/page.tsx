@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Link, Package, Target, Truck, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Link,
+  Package,
+  Target,
+  Truck,
+  Upload,
+} from "lucide-react";
 import { useCampaignStore } from "@/stores/campaign-store";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "@/lib/constants";
@@ -31,17 +39,32 @@ function typeEmoji(cat: string, isService: boolean): string {
 
 export default function AddProductPage() {
   const router = useRouter();
-  const { countryId, promotionType, productData, setPromotionType, setProduct, nextStep, goToStep } =
-    useCampaignStore();
+  const {
+    countryId,
+    promotionType,
+    productData,
+    setPromotionType,
+    setProduct,
+    nextStep,
+    goToStep,
+  } = useCampaignStore();
 
   const [type, setType] = useState<"product" | "service" | null>(
-    promotionType === "PRODUCT" ? "product" : promotionType === "SERVICE" ? "service" : null
+    promotionType === "PRODUCT"
+      ? "product"
+      : promotionType === "SERVICE"
+        ? "service"
+        : null,
   );
   const [brandName, setBrandName] = useState(productData?.brandName ?? "");
   const [name, setName] = useState(productData?.productName ?? "");
   const [category, setCategory] = useState(productData?.category ?? "");
-  const [description, setDescription] = useState(productData?.description ?? "");
-  const [sellingPoints, setSellingPoints] = useState(productData?.sellingPoints ?? "");
+  const [description, setDescription] = useState(
+    productData?.description ?? "",
+  );
+  const [sellingPoints, setSellingPoints] = useState(
+    productData?.sellingPoints ?? "",
+  );
   const [url, setUrl] = useState(productData?.url ?? "");
   const [weight, setWeight] = useState(productData?.weight?.toString() ?? "");
   const [length, setLength] = useState(productData?.length?.toString() ?? "");
@@ -94,7 +117,7 @@ export default function AddProductPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
-      {/* Gradient header */}
+      {/* page header */}
       <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-275">
           <button
@@ -164,12 +187,18 @@ export default function AddProductPage() {
                   <div className="flex-1">
                     <div
                       className={`mb-1 text-[15px] font-bold ${
-                        active ? (isProduct ? "text-[#4ECDC4]" : "text-[#4A90D9]") : "text-[#4A4A4A]"
+                        active
+                          ? isProduct
+                            ? "text-[#4ECDC4]"
+                            : "text-[#4A90D9]"
+                          : "text-[#4A4A4A]"
                       }`}
                     >
                       {t.label}
                     </div>
-                    <div className="text-[13px] leading-relaxed text-[#8a90a3]">{t.desc}</div>
+                    <div className="text-[13px] leading-relaxed text-[#8a90a3]">
+                      {t.desc}
+                    </div>
                   </div>
                   <div
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
@@ -181,7 +210,12 @@ export default function AddProductPage() {
                     }`}
                   >
                     {active && (
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
                         <polyline
                           points="20 6 9 17 4 12"
                           stroke="white"
@@ -226,23 +260,29 @@ export default function AddProductPage() {
                 />
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className={`relative h-28 w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition-all ${
-                    imageUrl ? "border-[#4ECDC4]" : "border-[#e8ecf0] bg-[#fafbfc]"
-                  } ${!imageUrl ? "flex flex-col items-center justify-center gap-1.5" : "h-50"}`}
+                  className={`relative h-46 w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition-all ${
+                    imageUrl
+                      ? "border-[#4ECDC4]"
+                      : "border-[#e8ecf0] bg-[#fafbfc]"
+                  } ${!imageUrl ? "flex flex-col items-center justify-center gap-1.5" : ""}`}
                 >
                   {imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imageUrl}
                       alt="preview"
-                      className="absolute inset-0 h-full w-full object-scale-down"
+                      className="absolute inset-0 h-full w-full object-contain"
                     />
                   ) : uploading ? (
-                    <span className="text-sm text-[#8a90a3]">กำลังอัปโหลด...</span>
+                    <span className="text-sm text-[#8a90a3]">
+                      กำลังอัปโหลด...
+                    </span>
                   ) : (
                     <>
                       <Upload size={20} color="#8a90a3" />
-                      <span className="text-[13px] text-[#8a90a3]">คลิกเพื่ออัปโหลดรูป</span>
+                      <span className="text-[13px] text-[#8a90a3]">
+                        คลิกเพื่ออัปโหลดรูป
+                      </span>
                     </>
                   )}
                 </div>
@@ -316,7 +356,9 @@ export default function AddProductPage() {
                               : "border-[#e8ecf0] bg-white text-[#4A4A4A]"
                           }`}
                         >
-                          <span className="text-sm">{typeEmoji(cat, isService)}</span>
+                          <span className="text-sm">
+                            {typeEmoji(cat, isService)}
+                          </span>
                           {cat}
                         </button>
                       );
@@ -342,7 +384,9 @@ export default function AddProductPage() {
                 <div className="mb-3.5">
                   <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
                     URL {isService ? "บริการ" : "สินค้า"}{" "}
-                    <span className="text-[11px] font-normal text-[#8a90a3]">(ไม่บังคับ)</span>
+                    <span className="text-[11px] font-normal text-[#8a90a3]">
+                      (ไม่บังคับ)
+                    </span>
                   </label>
                   <div className="relative">
                     <Link
@@ -372,7 +416,9 @@ export default function AddProductPage() {
                 <div className="mb-3.5">
                   <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
                     รายละเอียด{" "}
-                    <span className="text-[11px] font-normal text-[#8a90a3]">สั้นๆ</span>
+                    <span className="text-[11px] font-normal text-[#8a90a3]">
+                      สั้นๆ
+                    </span>
                   </label>
                   <textarea
                     value={description}
@@ -414,7 +460,9 @@ export default function AddProductPage() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
                       <Truck size={16} color="#d97706" />
                     </div>
-                    <span className="text-[15px] font-bold text-[#4A4A4A]">ข้อมูลจัดส่ง</span>
+                    <span className="text-[15px] font-bold text-[#4A4A4A]">
+                      ข้อมูลจัดส่ง
+                    </span>
                     <span className="text-xs text-[#8a90a3]">(ไม่บังคับ)</span>
                   </div>
                   <p className="mb-3.5 ml-10.5 text-xs text-[#8a90a3]">
@@ -469,7 +517,8 @@ export default function AddProductPage() {
                       ไม่ต้องจัดส่งสินค้า
                     </div>
                     <div className="text-xs leading-relaxed text-[#8a90a3]">
-                      แคมเปญบริการไม่มีขั้นตอนส่งของ — ครีเอเตอร์จะรับ Brief และเริ่มสร้างคอนเทนต์ได้เลย
+                      แคมเปญบริการไม่มีขั้นตอนส่งของ — ครีเอเตอร์จะรับ Brief
+                      และเริ่มสร้างคอนเทนต์ได้เลย
                     </div>
                   </div>
                 </div>
@@ -484,7 +533,9 @@ export default function AddProductPage() {
             disabled={!isValid}
             onClick={handleSubmit}
             className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
-              isValid ? "cursor-pointer bg-[#4ECDC4]" : "cursor-not-allowed bg-[#ccc]"
+              isValid
+                ? "cursor-pointer bg-[#4ECDC4]"
+                : "cursor-not-allowed bg-[#ccc]"
             }`}
           >
             ยืนยัน — ถัดไป
