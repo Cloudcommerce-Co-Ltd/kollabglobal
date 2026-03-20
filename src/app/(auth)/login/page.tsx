@@ -4,25 +4,25 @@ import { Globe } from 'lucide-react';
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[linear-gradient(160deg,#e8f8f7_0%,#e8f0fa_40%,#f0ebf8_100%)] flex items-center justify-center p-4 sm:p-6">
-      <div className="animate-fade-up w-full max-w-[420px]">
+      <div className="animate-fade-up w-full max-w-105">
         {/* Logo + brand */}
         <div className="text-center mb-9">
           <div className="animate-float inline-flex mb-3">
-            <div className="size-[52px] rounded-[14px] bg-[linear-gradient(135deg,#4ECDC4,#4A90D9)] flex items-center justify-center shadow-[0_8px_24px_rgba(78,205,196,0.4)]">
+            <div className="size-13 rounded-[14px] bg-[linear-gradient(135deg,#4ECDC4,#4A90D9)] flex items-center justify-center shadow-[0_8px_24px_rgba(78,205,196,0.4)]">
               <Globe size={28} color="#fff" />
             </div>
           </div>
           <h1 className="text-[24px] font-extrabold text-[#4a4a4a] mb-1 tracking-[-0.5px] sm:text-[32px]">
             KOLLAB <span className="text-[#4ECDC4]">Global</span>
           </h1>
-          <p className="text-[15px] text-[#8a90a3] leading-[1.5]">
+          <p className="text-[15px] text-[#8a90a3] leading-normal">
             แพลตฟอร์ม Influencer Marketing สำหรับทุกแบรนด์
           </p>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-[20px] px-5 py-7 shadow-[0_12px_48px_rgba(0,0,0,0.08)] border border-[#e8ecf0] sm:px-8 sm:py-9">
-          <h2 className="text-[20px] font-bold text-[#4a4a4a] mb-[6px] text-center">
+          <h2 className="text-[20px] font-bold text-[#4a4a4a] mb-1.5 text-center">
             ยินดีต้อนรับ
           </h2>
           <p className="text-[14px] text-[#8a90a3] mb-7 text-center">
@@ -37,7 +37,7 @@ export default function LoginPage() {
           >
             <button
               type="submit"
-              className="w-full py-[14px] px-5 rounded-xl border-[1.5px] border-[#e8ecf0] bg-white cursor-pointer flex items-center justify-center gap-3 transition-all text-[15px] font-semibold text-[#4a4a4a] hover:border-[#4ECDC4] hover:bg-[rgba(78,205,196,0.06)] active:scale-[0.98]"
+              className="w-full py-3.5 px-5 rounded-xl border-[1.5px] border-[#e8ecf0] bg-white cursor-pointer flex items-center justify-center gap-3 transition-all text-[15px] font-semibold text-[#4a4a4a] hover:border-[#4ECDC4] hover:bg-[rgba(78,205,196,0.06)] active:scale-[0.98]"
             >
               <svg
                 width="20"

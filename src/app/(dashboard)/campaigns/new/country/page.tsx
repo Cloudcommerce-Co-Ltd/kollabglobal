@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Check } from "lucide-react";
-import { useCampaignStore } from "@/stores/campaign-store";
-import { ASIA_COUNTRY_IDS } from "@/lib/constants";
-import type { Country } from "@/types";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Check } from 'lucide-react';
+import { useCampaignStore } from '@/stores/campaign-store';
+import { ASIA_COUNTRY_IDS } from '@/lib/constants';
+import type { Country } from '@/types';
 
-type Tab = "asia" | "global";
+type Tab = 'asia' | 'global';
 
 export default function SelectCountryPage() {
   const router = useRouter();
   const { countryId, setCountry, nextStep, goToStep } = useCampaignStore();
 
-  const [tab, setTab] = useState<Tab>("asia");
+  const [tab, setTab] = useState<Tab>('asia');
   const [selected, setSelected] = useState<string | null>(countryId);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,17 +23,17 @@ export default function SelectCountryPage() {
   }, [goToStep]);
 
   useEffect(() => {
-    fetch("/api/countries")
-      .then((r) => r.json())
+    fetch('/api/countries')
+      .then(r => r.json())
       .then((data: Country[]) => {
         setCountries(data);
         setLoading(false);
       });
   }, []);
 
-  const asiaCountries = countries.filter((c) => ASIA_COUNTRY_IDS.has(c.id));
-  const globalCountries = countries.filter((c) => !ASIA_COUNTRY_IDS.has(c.id));
-  const list = tab === "asia" ? asiaCountries : globalCountries;
+  const asiaCountries = countries.filter(c => ASIA_COUNTRY_IDS.has(c.id));
+  const globalCountries = countries.filter(c => !ASIA_COUNTRY_IDS.has(c.id));
+  const list = tab === 'asia' ? asiaCountries : globalCountries;
 
   function handleSelect(id: string) {
     setSelected(id);
@@ -43,40 +43,47 @@ export default function SelectCountryPage() {
   function handleNext() {
     if (!selected) return;
     nextStep();
-    router.push("/campaigns/new/product");
+    router.push('/campaigns/new/product');
   }
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
       {/* Page header */}
       <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1100px]">
+        <div className="mx-auto max-w-275">
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
             className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]"
           >
             <ArrowLeft size={16} />
             กลับหน้าหลัก
           </button>
-          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">เลือกตลาดเป้าหมาย</h1>
-          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">เลือกพื้นที่ที่คุณต้องการโปรโมทแบรนด์</p>
+          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">
+            เลือกตลาดเป้าหมาย
+          </h1>
+          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
+            เลือกพื้นที่ที่คุณต้องการโปรโมทแบรนด์
+          </p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-275 px-4 sm:px-6 lg:px-8">
         {/* Tab bar */}
         <div className="mb-7 flex gap-1 border-b-2 border-[#e8ecf0]">
-          {(["asia", "global"] as Tab[]).map((k) => (
+          {(['asia', 'global'] as Tab[]).map(k => (
             <button
               key={k}
-              onClick={() => { setTab(k); setSelected(null); }}
+              onClick={() => {
+                setTab(k);
+                setSelected(null);
+              }}
               className={`cursor-pointer border-x-0 border-t-0 border-b-[3px] bg-transparent px-4 py-3 text-[15px] font-semibold transition-all sm:px-7 ${
                 tab === k
-                  ? "border-[#4ECDC4] text-[#4ECDC4]"
-                  : "border-transparent text-[#8a90a3]"
+                  ? 'border-[#4ECDC4] text-[#4ECDC4]'
+                  : 'border-transparent text-[#8a90a3]'
               }`}
             >
-              {k === "asia" ? "Asia" : "Global"}
+              {k === 'asia' ? 'Asia' : 'Global'}
             </button>
           ))}
         </div>
@@ -89,23 +96,25 @@ export default function SelectCountryPage() {
                 กำลังโหลด...
               </div>
             ) : (
-              list.map((c) => {
+              list.map(c => {
                 const isSelected = selected === c.id;
                 return (
                   <button
                     key={c.id}
                     onClick={() => handleSelect(c.id)}
-                    className={`flex cursor-pointer items-center gap-3.5 rounded-[14px] border-2 p-[18px] text-left transition-all ${
+                    className={`flex cursor-pointer items-center gap-3.5 rounded-[14px] border-2 p-4.5 text-left transition-all ${
                       isSelected
-                        ? "border-[#4ECDC4] bg-[#e8f8f7]"
-                        : "border-[#e8ecf0] bg-white"
+                        ? 'border-[#4ECDC4] bg-[#e8f8f7]'
+                        : 'border-[#e8ecf0] bg-white'
                     }`}
                   >
-                    <div className="flex size-[52px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8f8f7] to-[#e8f0fa] text-[30px]">
+                    <div className="flex size-13 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#e8f8f7] to-[#e8f0fa] text-[30px]">
                       {c.flag}
                     </div>
                     <div className="flex-1">
-                      <div className={`text-base font-semibold ${isSelected ? "text-[#4ECDC4]" : "text-[#4A4A4A]"}`}>
+                      <div
+                        className={`text-base font-semibold ${isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'}`}
+                      >
                         {c.name}
                       </div>
                       {c.creatorsAvail != null && (
@@ -114,9 +123,13 @@ export default function SelectCountryPage() {
                         </div>
                       )}
                     </div>
-                    <div className={`flex size-[22px] items-center justify-center rounded-full border-2 ${
-                      isSelected ? "border-[#4ECDC4] bg-[#4ECDC4]" : "border-[#ccc] bg-transparent"
-                    }`}>
+                    <div
+                      className={`flex size-5.5 items-center justify-center rounded-full border-2 ${
+                        isSelected
+                          ? 'border-[#4ECDC4] bg-[#4ECDC4]'
+                          : 'border-[#ccc] bg-transparent'
+                      }`}
+                    >
                       {isSelected && <Check size={13} color="#fff" />}
                     </div>
                   </button>
@@ -133,7 +146,9 @@ export default function SelectCountryPage() {
             disabled={!selected}
             onClick={handleNext}
             className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
-              selected ? "cursor-pointer bg-[#4ECDC4]" : "cursor-not-allowed bg-[#ccc]"
+              selected
+                ? 'cursor-pointer bg-[#4ECDC4]'
+                : 'cursor-not-allowed bg-[#ccc]'
             }`}
           >
             ถัดไป — เพิ่มสินค้า / บริการ
