@@ -1,23 +1,24 @@
 import { create } from "zustand";
 import type { ProductData } from "@/types/campaign";
+import { Country, Creator, Package } from "@/types";
 
 export type { ProductData };
 
 interface CampaignCreationState {
   step: number;
-  countryId: string | null;
+  countryData: Country | null;
   promotionType: "PRODUCT" | "SERVICE" | null;
   productData: ProductData | null;
-  packageId: string | null;
-  selectedCreatorIds: string[];
+  packageData: Package | null;
+  selectedCreatorsData: Creator[];
 }
 
 interface CampaignCreationActions {
-  setCountry: (id: string) => void;
+  setCountry: (data: Country) => void;
   setPromotionType: (type: "PRODUCT" | "SERVICE") => void;
   setProduct: (data: ProductData) => void;
-  setPackage: (id: string) => void;
-  setCreators: (ids: string[]) => void;
+  setPackage: (data: Package) => void;
+  setCreators: (data: Creator[]) => void;
   nextStep: () => void;
   prevStep: () => void;
   goToStep: (step: number) => void;
@@ -38,11 +39,11 @@ const initialState: CampaignCreationState = {
 export const useCampaignStore = create<CampaignStore>((set) => ({
   ...initialState,
 
-  setCountry: (id) => set({ countryId: id }),
+  setCountry: (data) => set({ countryData: data }),
   setPromotionType: (type) => set({ promotionType: type }),
   setProduct: (data) => set({ productData: data }),
-  setPackage: (id) => set({ packageId: id }),
-  setCreators: (ids) => set({ selectedCreatorIds: ids }),
+  setPackage: (data) => set({ packageData: data }),
+  setCreators: (data) => set({ selectedCreatorsData: data }),
   nextStep: () => set((state) => ({ step: state.step + 1 })),
   prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
   goToStep: (step) => set({ step }),

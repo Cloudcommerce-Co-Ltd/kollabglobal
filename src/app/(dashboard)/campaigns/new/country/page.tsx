@@ -11,10 +11,10 @@ type Tab = 'asia' | 'global';
 
 export default function SelectCountryPage() {
   const router = useRouter();
-  const { countryId, setCountry, nextStep, goToStep } = useCampaignStore();
+  const { countryData, setCountry, nextStep, goToStep } = useCampaignStore();
 
   const [tab, setTab] = useState<Tab>('asia');
-  const [selected, setSelected] = useState<string | null>(countryId);
+  const [selected, setSelected] = useState<string | null>(countryData?.id || null);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,9 +35,9 @@ export default function SelectCountryPage() {
   const globalCountries = countries.filter(c => !ASIA_COUNTRY_IDS.has(c.id));
   const list = tab === 'asia' ? asiaCountries : globalCountries;
 
-  function handleSelect(id: string) {
-    setSelected(id);
-    setCountry(id);
+  function handleSelect(data: Country) {
+    setSelected(data.id);
+    setCountry(data);
   }
 
   function handleNext() {
@@ -101,7 +101,7 @@ export default function SelectCountryPage() {
                 return (
                   <button
                     key={c.id}
-                    onClick={() => handleSelect(c.id)}
+                    onClick={() => handleSelect(c)}
                     className={`flex cursor-pointer items-center gap-3.5 rounded-[14px] border-2 p-4.5 text-left transition-all ${
                       isSelected
                         ? 'border-[#4ECDC4] bg-[#e8f8f7]'

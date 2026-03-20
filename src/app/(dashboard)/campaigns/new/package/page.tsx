@@ -10,12 +10,12 @@ import type { Package } from '@/types';
 
 export default function SelectPackagePage() {
   const router = useRouter();
-  const { countryId, packageId, setPackage, nextStep, prevStep, goToStep } =
+  const { countryData, packageData, setPackage, nextStep, prevStep, goToStep } =
     useCampaignStore();
 
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<string | null>(packageId);
+  const [selected, setSelected] = useState<string | null>(packageData?.id || null);
   const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function SelectPackagePage() {
   }, [goToStep]);
 
   useEffect(() => {
-    if (!countryId) {
+    if (!countryData) {
       router.replace('/campaigns/new/country');
       return;
     }
@@ -31,20 +31,20 @@ export default function SelectPackagePage() {
       .then(r => r.json())
       .then((data: Package[]) => {
         setPackages(data);
-        if (!packageId) {
+        if (!packageData) {
           const popular = data.find(p => p.badge !== null);
           if (popular) {
             setSelected(popular.id);
-            setPackage(popular.id);
+            setPackage(popular);
           }
         }
         setLoading(false);
       });
-  }, [countryId, packageId, router, setPackage]);
+  }, [countryData, packageData, router, setPackage]);
 
-  function handleSelect(id: string) {
-    setSelected(id);
-    setPackage(id);
+  function handleSelect(data: Package) {
+    setSelected(data.id);
+    setPackage(data);
   }
 
   function handleNext() {
@@ -101,7 +101,7 @@ export default function SelectPackagePage() {
               return (
                 <div
                   key={pkg.id}
-                  onClick={() => handleSelect(pkg.id)}
+                  onClick={() => handleSelect(pkg)}
                   className={`relative flex cursor-pointer flex-col rounded-2xl border-2 px-5 pb-4.5 pt-5.5 transition-all ${
                     isSelected
                       ? 'border-[#4ECDC4] shadow-[0_4px_24px_#4ECDC420]'

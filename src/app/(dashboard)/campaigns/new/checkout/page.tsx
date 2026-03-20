@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, CreditCard, Building2, Lock } from "lucide-react";
 import { SAMPLE_CREATOR_AVATARS, STATIC_CHECKOUT_DATA } from "@/lib/constants";
 import Link from "next/link";
@@ -11,6 +11,8 @@ const { packageName, numCreators, numPosts, duration, campaignType, basePrice, v
 const vat = Math.round(basePrice * vatRate);
 const serviceFee = Math.round(basePrice * serviceFeeRate);
 const total = basePrice + vat + serviceFee;
+
+
 
 export default function CheckoutPage() {
   const [showAltPayment, setShowAltPayment] = useState(false);
