@@ -74,6 +74,23 @@ export default function LoginPage() {
           </div>*/}
         </div>
 
+        {process.env.NODE_ENV === "development" && (
+          <div className="mt-4 rounded-[16px] border border-dashed border-amber-300 bg-amber-50 px-5 py-4">
+            <p className="mb-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-amber-600">
+              Dev Only
+            </p>
+            <a
+              href="/api/dev/login"
+              className="block w-full rounded-xl border border-amber-300 bg-white py-3 text-center text-[14px] font-semibold text-amber-700 transition-colors hover:bg-amber-50"
+            >
+              Login as Dev User
+            </a>
+            <p className="mt-2 text-center text-[11px] text-amber-500">
+              dev@kollabglobal.com • campaign: dev-campaign-1
+            </p>
+          </div>
+        )}
+
         {/* Bottom footer */}
         <p className="text-center mt-6 text-[12px] text-[#8a90a3]">
           © 2026 KOLLAB Global • Powered by Connex

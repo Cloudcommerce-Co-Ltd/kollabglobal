@@ -322,6 +322,52 @@ async function main() {
     });
   }
 
+  // ── Dev test data ──────────────────────────────────────────────────────────
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Seeding dev test data...');
+
+    const devUser = await prisma.user.upsert({
+      where: { email: 'dev@kollabglobal.com' },
+      update: {},
+      create: {
+        id: 'dev-user-1',
+        name: 'Dev User',
+        email: 'dev@kollabglobal.com',
+      },
+    });
+
+    const devCampaign = await prisma.campaign.upsert({
+      where: { id: 'dev-campaign-1' },
+      update: {},
+      create: {
+        id: 'dev-campaign-1',
+        userId: devUser.id,
+        countryId: 'vietnam',
+        packageId: 'popular',
+        promotionType: 'PRODUCT',
+        status: 'DRAFT',
+      },
+    });
+
+    await prisma.campaignProduct.upsert({
+      where: { campaignId: devCampaign.id },
+      update: {},
+      create: {
+        campaignId: devCampaign.id,
+        brandName: 'KOLLAB Global',
+        productName: 'มะม่วงอบแห้ง Premium',
+        category: 'Food & Snack',
+        description: 'มะม่วงอบแห้งคัดพิเศษจากเชียงราย รสชาติหวานอมเปรี้ยว ไม่มีสารกันบูด',
+        sellingPoints: 'ออร์แกนิค 100% | ไม่มีน้ำตาลเพิ่ม | บรรจุถุงซิปล็อก | ส่งตรงจากสวน',
+        isService: false,
+        url: 'https://kollabglobal.com/dried-mango',
+      },
+    });
+
+    console.log(`  - Dev campaign ID: ${devCampaign.id}`);
+    console.log(`  - Visit: /campaigns/${devCampaign.id}/brief/new`);
+  }
+
   console.log('Seed complete!');
   console.log('  - 11 countries (8 active, 3 inactive)');
   console.log('  - 3 packages');
