@@ -34,7 +34,7 @@ describe("useImageUpload", () => {
   it("handleFileSelect rejects invalid content type — no fetch", () => {
     const { result } = renderHook(() => useImageUpload());
     act(() => { result.current.handleFileSelect(makeFile("photo.gif", "image/gif")); });
-    expect(result.current.error).toMatch(/jpeg|png|webp/i);
+    expect(result.current.error).toMatch(/ประเภทไฟล์|jpeg|png|webp/i);
     expect(result.current.imageUrl).toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();
   });

@@ -25,7 +25,9 @@ export function useImageUpload(): UseImageUploadResult {
     setError(null);
 
     if (!ALLOWED_TYPES.includes(file.type as typeof ALLOWED_TYPES[number])) {
-      setError("ไฟล์ต้องเป็น jpeg, png หรือ webp เท่านั้น");
+      const msg = "ประเภทไฟล์ไม่รองรับ";
+      setError(msg);
+      toast.error(msg, { description: "กรุณาเลือกไฟล์ jpeg, png หรือ webp เท่านั้น" });
       return;
     }
 
@@ -76,7 +78,9 @@ export function useImageUpload(): UseImageUploadResult {
       });
       return data.objectUrl!;
     } catch (err) {
-      setError(`Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setError(`Upload failed: ${msg}`);
+      toast.error("อัปโหลดไม่สำเร็จ", { description: msg });
       return null;
     } finally {
       setUploading(false);
