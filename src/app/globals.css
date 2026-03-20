@@ -132,6 +132,15 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@layer utilities {
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #4ECDC4, #4A90D9);
+  }
+  .shadow-brand-glow {
+    box-shadow: 0 8px 28px rgba(78, 205, 196, 0.35);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

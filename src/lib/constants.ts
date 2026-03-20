@@ -48,6 +48,17 @@ export const PACKAGE_EXTRAS: Record<string, PackageExtra> = {
   },
 };
 
+/** Filters countries by region tab. */
+export function filterCountriesByRegion<T extends { id: string }>(
+  countries: T[],
+  region: "asia" | "global"
+): T[] {
+  if (region === "asia") {
+    return countries.filter((c) => ASIA_COUNTRY_IDS.has(c.id));
+  }
+  return countries.filter((c) => !ASIA_COUNTRY_IDS.has(c.id));
+}
+
 export const SAMPLE_CREATOR_AVATARS = [
   { avatar: "👩🏻", name: "Linh Tran", niche: "Food Review", eng: "8.5%", reach: "250K", flag: "🇻🇳" },
   { avatar: "👩🏽", name: "Salwa Ahmad", niche: "Lifestyle", eng: "7.2%", reach: "180K", flag: "🇲🇾" },

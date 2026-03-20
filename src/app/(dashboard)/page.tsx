@@ -8,24 +8,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-73px)] flex-col bg-white">
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp .5s ease; }
-      `}</style>
-
       {/* Center content */}
-      <div className="fade-up flex flex-1 flex-col items-center justify-center px-4 sm:px-8">
+      <div className="animate-fade-up flex flex-1 flex-col items-center justify-center px-4 sm:px-8">
         {/* Globe icon */}
-        <div
-          className="mb-6 flex size-16 items-center justify-center rounded-[18px]"
-          style={{
-            background: 'linear-gradient(135deg, #4ECDC4, #4A90D9)',
-            boxShadow: '0 8px 28px rgba(78,205,196,0.35)',
-          }}
-        >
+        <div className="bg-brand-gradient shadow-brand-glow mb-6 flex size-16 items-center justify-center rounded-[18px]">
           <Globe size={32} color="#fff" />
         </div>
 

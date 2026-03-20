@@ -39,6 +39,13 @@ describe("POST /api/ai/fill-brief", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 400 when required fields are missing", async () => {
+    mockIsAIConfigured.mockReturnValue(false);
+
+    const res = await POST(makeRequest({ brandName: "BrandOnly" }));
+    expect(res.status).toBe(400);
+  });
+
   it("returns mock data when AI is not configured", async () => {
     mockIsAIConfigured.mockReturnValue(false);
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { campaignUpdateSchema } from "@/lib/validations/campaign-update";
 
 export async function GET(
   _req: NextRequest,
@@ -49,11 +50,15 @@ export async function PATCH(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const body = await req.json();
+  const raw = await req.json();
+  const parsed = campaignUpdateSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+  }
 
   const updated = await prisma.campaign.update({
     where: { id },
-    data: body,
+    data: parsed.data,
   });
 
   return NextResponse.json(updated);

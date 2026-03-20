@@ -100,6 +100,15 @@ describe("POST /api/campaigns/[id]/brief", () => {
     expect(res.status).toBe(404);
   });
 
+  it("returns 400 when content body is invalid", async () => {
+    mockAuth.mockResolvedValue(mockSession);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign);
+
+    // Missing required fields in content
+    const res = await POST(makeRequest("POST", { content: { keys: "" } }), makeParams());
+    expect(res.status).toBe(400);
+  });
+
   it("saves brief and updates campaign to ACTIVE", async () => {
     mockAuth.mockResolvedValue(mockSession);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign);

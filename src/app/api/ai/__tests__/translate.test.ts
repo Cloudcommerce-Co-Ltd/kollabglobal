@@ -37,6 +37,13 @@ describe("POST /api/ai/translate", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 400 when required fields are missing", async () => {
+    mockIsAIConfigured.mockReturnValue(false);
+
+    const res = await POST(makeRequest({ fields: sampleFields })); // missing targetLang and targetLangName
+    expect(res.status).toBe(400);
+  });
+
   it("returns fields unchanged when AI is not configured (mock passthrough)", async () => {
     mockIsAIConfigured.mockReturnValue(false);
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { prepareBriefContent, type BriefContent, type TranslatedContent } from "@/lib/brief-utils";
+import { prepareBriefContent } from "@/lib/brief-utils";
+import { briefSubmitSchema } from "@/lib/validations/brief";
 
 export async function GET(
   _req: NextRequest,
@@ -47,8 +48,13 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const body = await req.json() as { content: BriefContent; translated?: TranslatedContent };
-  const { content, translated } = body;
+  const raw = await req.json();
+  const parsed = briefSubmitSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { content, translated } = parsed.data;
   const { finalContent, contentTh } = prepareBriefContent(content, translated);
 
   const brief = await prisma.campaignBrief.upsert({

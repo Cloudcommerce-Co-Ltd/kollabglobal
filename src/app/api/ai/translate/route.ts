@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getAIModel, isAIConfigured } from "@/lib/ai";
+import { translateSchema } from "@/lib/validations/translate";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { fields, targetLang, targetLangName } = body;
+  const raw = await req.json();
+  const parsed = translateSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { fields, targetLang, targetLangName } = parsed.data;
 
   if (!isAIConfigured()) {
     return NextResponse.json(fields);
@@ -24,6 +30,12 @@ ${fieldsJson}
     return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
   }
 
-  const result = JSON.parse(jsonMatch[0]);
+  let result: unknown;
+  try {
+    result = JSON.parse(jsonMatch[0]);
+  } catch {
+    return NextResponse.json({ error: "Failed to parse AI JSON" }, { status: 500 });
+  }
+
   return NextResponse.json(result);
 }

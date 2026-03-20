@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, use } from 'react';
+import { useState, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -16,41 +16,22 @@ import {
   Target,
   Package,
 } from 'lucide-react';
-import { CREATOR_LANG_BY_COUNTRY, PACKAGE_EXTRAS } from '@/lib/constants';
-
-interface ProductData {
-  brandName: string;
-  productName: string;
-  category: string;
-  description: string;
-  sellingPoints: string;
-  isService: boolean;
-  url?: string;
-}
-
-interface Campaign {
-  id: string;
-  countryId: string;
-  packageId: string;
-  product: ProductData | null;
-}
-
-interface BriefForm {
-  name: string;
-  keys: string;
-  dos: string;
-  deliverables: string;
-  disclosure: string;
-  deadline: string;
-}
-
-interface TranslatedFields {
-  keys: string;
-  dos: string;
-  deliverables: string;
-  disclosure: string;
-  name: string;
-}
+import { CREATOR_LANG_BY_COUNTRY } from '@/lib/constants';
+import {
+  getPackagePlatforms,
+  getPackageDeliverables,
+} from '@/lib/package-utils';
+import { isBriefContentFilled, canPublishBrief } from '@/lib/brief-utils';
+import {
+  fetchCampaign,
+  fillBriefAI,
+  translateBrief,
+  publishBrief,
+} from '@/lib/brief-api';
+import { useScrollToRef } from '@/hooks/use-scroll-to-ref';
+import type { BriefForm, TranslatedFields } from '@/types/brief';
+import type { CampaignWithRelations } from '@/types/campaign';
+import { useEffect } from 'react';
 
 export default function CreateBriefPage({
   params,
@@ -64,8 +45,9 @@ export default function CreateBriefPage({
   const translateRef = useRef<HTMLDivElement>(null);
   const publishRef = useRef<HTMLDivElement>(null);
 
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [campaign, setCampaign] = useState<CampaignWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError] = useState<string | null>(null);
 
   const [form, setForm] = useState<BriefForm>({
     name: '',
@@ -82,17 +64,14 @@ export default function CreateBriefPage({
     name: string;
     flag: string;
   } | null>(null);
-  const briefScrolledRef = useRef(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/campaigns/${id}`)
-      .then(r => {
-        if (!r.ok) throw new Error('Not found');
-        return r.json();
-      })
+    fetchCampaign(id)
       .then(data => {
         setCampaign(data);
         setForm(f => ({
@@ -113,87 +92,33 @@ export default function CreateBriefPage({
   }, [id, router]);
 
   const isService = campaign?.product?.isService ?? false;
-  const platforms = PACKAGE_EXTRAS[campaign?.packageId ?? '']?.platforms ?? [
-    'tiktok',
-    'instagram',
-  ];
-  const campaignDeliverables = PACKAGE_EXTRAS[campaign?.packageId ?? '']
-    ?.deliverables ?? ['TikTok 1 วิดีโอ (30–60 วิ)', 'IG 1 Reel + 3 Stories'];
+  const platforms = getPackagePlatforms(campaign?.packageId);
+  const campaignDeliverables = getPackageDeliverables(campaign?.packageId);
 
-  const isContentFilled = !!(
-    form.keys &&
-    form.dos &&
-    form.deliverables &&
-    form.disclosure
-  );
+  const isContentFilled = isBriefContentFilled(form);
   const isDeadlineFilled = !!form.deadline;
-  const needsTranslation = targetLang && targetLang.code !== 'th';
-  const isTranslateDone = !needsTranslation || !!translated;
-  const canPublish = isContentFilled && isDeadlineFilled && isTranslateDone;
+  const needsTranslation = !!(targetLang && targetLang.code !== 'th');
+  const canPublish = canPublishBrief(form, needsTranslation, !!translated);
 
-  useEffect(() => {
-    if (isContentFilled && !briefScrolledRef.current) {
-      briefScrolledRef.current = true;
-      setTimeout(
-        () =>
-          deadlineRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          }),
-        300,
-      );
-    }
-  }, [isContentFilled]);
+  // Scroll to deadline section once content is filled
+  useScrollToRef(deadlineRef, isContentFilled);
 
-  useEffect(() => {
-    if (
-      isContentFilled &&
-      isDeadlineFilled &&
-      needsTranslation &&
-      !translated
-    ) {
-      setTimeout(
-        () =>
-          translateRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          }),
-        300,
-      );
-    }
-  }, [isDeadlineFilled, isContentFilled, needsTranslation, translated]);
+  // Scroll to translate section once deadline is filled (and translation needed)
+  useScrollToRef(
+    translateRef,
+    isContentFilled && isDeadlineFilled && needsTranslation && !translated,
+    false,
+  );
 
-  useEffect(() => {
-    if (translated) {
-      setTimeout(
-        () =>
-          publishRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          }),
-        300,
-      );
-    }
-  }, [translated]);
+  // Scroll to publish section once translated
+  useScrollToRef(publishRef, !!translated, false);
 
   async function fillAI() {
     if (!campaign?.product) return;
     setAiLoading(true);
+    setAiError(null);
     try {
-      const res = await fetch('/api/ai/fill-brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          brandName: campaign.product.brandName,
-          productName: campaign.product.productName,
-          category: campaign.product.category,
-          description: campaign.product.description,
-          sellingPoints: campaign.product.sellingPoints,
-          isService: campaign.product.isService,
-          url: campaign.product.url,
-        }),
-      });
-      const data = await res.json();
+      const data = await fillBriefAI(campaign.product);
       setForm(f => ({
         ...f,
         keys: data.keys ?? f.keys,
@@ -202,7 +127,7 @@ export default function CreateBriefPage({
         disclosure: data.disclosure ?? f.disclosure,
       }));
     } catch {
-      // silently fail
+      setAiError('AI fill ล้มเหลว กรุณาลองอีกครั้ง');
     }
     setAiLoading(false);
   }
@@ -212,22 +137,7 @@ export default function CreateBriefPage({
     setTranslating(true);
     setTranslateError(null);
     try {
-      const res = await fetch('/api/ai/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            keys: form.keys,
-            dos: form.dos,
-            deliverables: form.deliverables,
-            disclosure: form.disclosure,
-            name: form.name,
-          },
-          targetLang: targetLang.code,
-          targetLangName: targetLang.name,
-        }),
-      });
-      const data = await res.json();
+      const data = await translateBrief(form, targetLang);
       setTranslated(data);
     } catch {
       setTranslateError('การแปลล้มเหลว กรุณาลองอีกครั้ง');
@@ -238,27 +148,27 @@ export default function CreateBriefPage({
   async function handlePublish() {
     if (!canPublish) return;
     setPublishing(true);
+    setPublishError(null);
     try {
-      const res = await fetch(`/api/campaigns/${id}/brief`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: {
-            keys: form.keys,
-            dos: form.dos,
-            deliverables: form.deliverables,
-            disclosure: form.disclosure,
-            deadline: form.deadline,
-            name: form.name,
-          },
-          translated: translated ?? undefined,
-        }),
-      });
-      if (res.ok) {
+      const ok = await publishBrief(
+        id,
+        {
+          keys: form.keys,
+          dos: form.dos,
+          deliverables: form.deliverables,
+          disclosure: form.disclosure,
+          deadline: form.deadline,
+          name: form.name,
+        },
+        translated ?? undefined,
+      );
+      if (ok) {
         router.push(`/campaigns/${id}`);
+      } else {
+        setPublishError('การเผยแพร่ล้มเหลว กรุณาลองอีกครั้ง');
       }
     } catch {
-      // silently fail
+      setPublishError('การเผยแพร่ล้มเหลว กรุณาลองอีกครั้ง');
     }
     setPublishing(false);
   }
@@ -269,6 +179,14 @@ export default function CreateBriefPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa] text-[#8a90a3]">
         กำลังโหลด...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa] text-red-500">
+        {loadError}
       </div>
     );
   }
@@ -317,6 +235,11 @@ export default function CreateBriefPage({
             )}
           </button>
         </div>
+        {aiError && (
+          <div className="mx-auto mt-2 max-w-290 rounded-lg border border-red-300 bg-red-50 px-3.5 py-2 text-[13px] text-red-600">
+            {aiError}
+          </div>
+        )}
       </div>
 
       <div className="mx-auto grid max-w-290 grid-cols-1 items-start gap-7 px-4 pb-20 pt-8 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
@@ -765,6 +688,11 @@ export default function CreateBriefPage({
                 )}
               </div>
             </div>
+            {publishError && (
+              <div className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-600">
+                {publishError}
+              </div>
+            )}
             <button
               onClick={handlePublish}
               disabled={!canPublish || publishing}

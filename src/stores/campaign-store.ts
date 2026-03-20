@@ -1,19 +1,7 @@
 import { create } from "zustand";
+import type { ProductData } from "@/types/campaign";
 
-interface ProductData {
-  brandName: string;
-  productName: string;
-  category: string;
-  description: string;
-  sellingPoints: string;
-  url: string;
-  imageUrl: string;
-  isService: boolean;
-  weight?: number;
-  length?: number;
-  width?: number;
-  height?: number;
-}
+export type { ProductData };
 
 interface CampaignCreationState {
   step: number;

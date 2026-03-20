@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getAIModel, isAIConfigured } from "@/lib/ai";
+import { fillBriefSchema } from "@/lib/validations/fill-brief";
 
 const MOCK_BRIEF = {
   keys: "เน้นจุดเด่นของสินค้า — คุณภาพสูง รสชาติอร่อย เหมาะกับทุกโอกาส",
@@ -10,8 +11,13 @@ const MOCK_BRIEF = {
 };
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { brandName, productName, category, description, sellingPoints, isService, url } = body;
+  const raw = await req.json();
+  const parsed = fillBriefSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { brandName, productName, category, description, sellingPoints, isService, url } = parsed.data;
 
   if (!isAIConfigured()) {
     return NextResponse.json({
@@ -47,11 +53,16 @@ ${url ? `URL: ${url}` : ""}
     return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
   }
 
-  const raw = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+  let raw2: Record<string, unknown>;
+  try {
+    raw2 = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "Failed to parse AI JSON" }, { status: 500 });
+  }
 
   // Normalize: flatten any nested objects/arrays to plain strings
   const result = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [
+    Object.entries(raw2).map(([k, v]) => [
       k,
       typeof v === "string" ? v : JSON.stringify(v),
     ])
