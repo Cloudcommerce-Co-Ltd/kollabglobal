@@ -5,7 +5,6 @@ import { Country, Creator, Package } from "@/types";
 export type { ProductData };
 
 interface CampaignCreationState {
-  step: number;
   countryData: Country | null;
   promotionType: "PRODUCT" | "SERVICE" | null;
   productData: ProductData | null;
@@ -19,16 +18,12 @@ interface CampaignCreationActions {
   setProduct: (data: ProductData) => void;
   setPackage: (data: Package) => void;
   setCreators: (data: Creator[]) => void;
-  nextStep: () => void;
-  prevStep: () => void;
-  goToStep: (step: number) => void;
   reset: () => void;
 }
 
 type CampaignStore = CampaignCreationState & CampaignCreationActions;
 
 const initialState: CampaignCreationState = {
-  step: 1,
   countryData: null,
   promotionType: null,
   productData: null,
@@ -44,8 +39,5 @@ export const useCampaignStore = create<CampaignStore>((set) => ({
   setProduct: (data) => set({ productData: data }),
   setPackage: (data) => set({ packageData: data }),
   setCreators: (data) => set({ selectedCreatorsData: data }),
-  nextStep: () => set((state) => ({ step: state.step + 1 })),
-  prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
-  goToStep: (step) => set({ step }),
   reset: () => set(initialState),
 }));

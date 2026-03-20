@@ -11,16 +11,12 @@ type Tab = 'asia' | 'global';
 
 export default function SelectCountryPage() {
   const router = useRouter();
-  const { countryData, setCountry, nextStep, goToStep } = useCampaignStore();
+  const { countryData, setCountry } = useCampaignStore();
 
   const [tab, setTab] = useState<Tab>('asia');
   const [selected, setSelected] = useState<string | null>(countryData?.id || null);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    goToStep(1);
-  }, [goToStep]);
 
   useEffect(() => {
     fetch('/api/countries')
@@ -42,7 +38,6 @@ export default function SelectCountryPage() {
 
   function handleNext() {
     if (!selected) return;
-    nextStep();
     router.push('/campaigns/new/product');
   }
 
@@ -75,7 +70,6 @@ export default function SelectCountryPage() {
               key={k}
               onClick={() => {
                 setTab(k);
-                setSelected(null);
               }}
               className={`cursor-pointer border-x-0 border-t-0 border-b-[3px] bg-transparent px-4 py-3 text-[15px] font-semibold transition-all sm:px-7 ${
                 tab === k

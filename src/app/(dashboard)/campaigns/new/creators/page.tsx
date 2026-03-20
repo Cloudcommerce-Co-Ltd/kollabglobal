@@ -9,14 +9,16 @@ import { useRouter } from 'next/navigation';
 
 export default function SelectCreatorsPage() {
   const router = useRouter();
-  const { selectedCreatorsData, setCreators, nextStep } = useCampaignStore();
-  
+  const { packageData, selectedCreatorsData, setCreators } = useCampaignStore();
+
+  const maxCreators = packageData?.numCreators ?? 10;
+
   const [selectedIds, setSelectedIds] = useState<string[]>(
     (selectedCreatorsData && selectedCreatorsData.length > 0) ?
       selectedCreatorsData.map((c: Creator) => c.id) : []
   );
   const [displayCreators, setDisplayCreators] = useState<Creator[]>([]);
-  
+
   const CreatorCard = ({ creator, isSelected, isDisabled }:
     { creator: Creator, isSelected: boolean, isDisabled: boolean }) => {
     return (
@@ -61,34 +63,30 @@ export default function SelectCreatorsPage() {
       </div>
     );
 }
-  
+
   useEffect(() => {
     fetch("/api/creators")
       .then((r) => r.json())
       .then((data: Creator[]) => {
         setDisplayCreators(data);
-        setSelectedIds(data.slice(0, 10).map((c) => c.id));
+        setSelectedIds(data.slice(0, maxCreators).map((c) => c.id));
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function toggleCreator(id: string) {
-    setSelectedIds((prev) => {
-      const next = [...prev];
-      if (next.includes(id)) {
-        next.splice(next.indexOf(id), 1);
-      } else if (next.length < 10) {
-        next.push(id);
-      }
-      return next;
-    });
-    setCreators(displayCreators.filter((c) => selectedIds.includes(c.id)));
+    const next = selectedIds.includes(id)
+      ? selectedIds.filter((i) => i !== id)
+      : selectedIds.length < maxCreators ? [...selectedIds, id] : selectedIds;
+    setSelectedIds(next);
+    setCreators(displayCreators.filter((c) => next.includes(c.id)));
   }
-  
-  const isComplete = selectedIds.length === 10;
-  
+
+  const isComplete = selectedIds.length === maxCreators;
+
   function handleNext() {
     if (!isComplete) return;
-    nextStep();
+    setCreators(displayCreators.filter((c) => selectedIds.includes(c.id)));
     router.push("/campaigns/new/checkout");
   }
 
@@ -105,7 +103,7 @@ export default function SelectCreatorsPage() {
           </Link>
           <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">เลือกครีเอเตอร์</h1>
           <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
-            {selectedIds.length}/10 คนที่เลือก • เลือกได้สูงสุด 10 คน
+            {selectedIds.length}/{maxCreators} คนที่เลือก • เลือกได้สูงสุด {maxCreators} คน
           </p>
         </div>
       </div>
@@ -137,7 +135,7 @@ export default function SelectCreatorsPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {displayCreators.slice(0, 10).map((creator, i) => {
               const isSelected = selectedIds.includes(creator.id);
-              const isDisabled = !isSelected && selectedIds.length >= 10;
+              const isDisabled = !isSelected && selectedIds.length >= maxCreators;
               return (
                 <CreatorCard
                   key={i}
@@ -157,7 +155,7 @@ export default function SelectCreatorsPage() {
               <span className="h-fit rounded-[8px] bg-[#e8ecf0] px-2.5 py-0.5 text-xs font-bold text-[#8a90a3]">สำรอง</span>
               <span className="text-sm font-semibold text-[#4A4A4A]">ตัวเลือกอื่น</span>
             </div>
-  
+
             {/* Yellow tip box */}
             <div className="mb-3 rounded-lg border border-[#fde68a] bg-[#fffbeb] px-4 py-2.5 text-xs text-[#92400e]">
               ครีเอเตอร์สำรองจะถูกเรียกใช้งานโดยอัตโนมัติ หากครีเอเตอร์หลักไม่ตอบรับงาน
@@ -168,7 +166,7 @@ export default function SelectCreatorsPage() {
             {displayCreators.slice(10, 15).map((creator, offset) => {
               const i = 10 + offset;
               const isSelected = selectedIds.includes(creator.id);
-              const isDisabled = !isSelected && selectedIds.length >= 10;
+              const isDisabled = !isSelected && selectedIds.length >= maxCreators;
               return (
                 <CreatorCard
                   key={i}
@@ -189,7 +187,7 @@ export default function SelectCreatorsPage() {
             {isComplete ? (
               <span className="text-[#4ECDC4]">✓ เลือกครบจำนวนแล้ว</span>
             ) : (
-              `เลือกได้อีก ${10 - selectedIds.length} คน`
+              `เลือกได้อีก ${maxCreators - selectedIds.length} คน`
             )}
           </div>
           <button

@@ -100,9 +100,4 @@ describe("SelectCountryPage", () => {
     expect(cta).not.toBeDisabled();
   });
 
-  it("calls goToStep(1) on mount", async () => {
-    useCampaignStore.getState().goToStep(3);
-    render(<SelectCountryPage />);
-    await waitFor(() => expect(useCampaignStore.getState().step).toBe(1));
-  });
 });

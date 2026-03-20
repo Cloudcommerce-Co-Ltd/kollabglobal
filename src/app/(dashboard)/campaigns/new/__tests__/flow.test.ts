@@ -1,87 +1,99 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useCampaignStore } from "@/stores/campaign-store";
-import type { Country, Package } from "@/types";
+import { validateStep } from "@/lib/campaign-steps";
+import type { Country, Package, Creator } from "@/types";
 
-const mkCountry = (id: string, name: string): Country => ({
-  id, name, flag: '🏳️', creatorsAvail: 0,
+const mkCountry = (id: string): Country => ({
+  id, name: id, flag: '🏳️', creatorsAvail: 0,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
-const mkPackage = (id: string, name: string): Package => ({
-  id, name, badge: null,
+const mkPackage = (id: string): Package => ({
+  id, name: id, badge: null,
   numCreators: 10, pricePerCreator: 3500, discountPct: 0,
   estReach: null, estEngagement: null,
 });
 
-describe("Campaign creation flow — store integration", () => {
+const mkCreator = (id: string): Creator => ({
+  id, name: id, niche: 'Food', engagement: '5%',
+  reach: '100K', avatar: '👩', countryFlag: '🇹🇭', isBackup: false,
+});
+
+const product = {
+  brandName: 'Brand', productName: 'Product', category: 'Food',
+  description: '', sellingPoints: '', url: '', imageUrl: '', isService: false as const,
+};
+
+describe("Campaign creation flow — validateStep", () => {
   beforeEach(() => {
     useCampaignStore.getState().reset();
   });
 
-  it("starts at step 1 with no selections", () => {
+  it("step 1 is always allowed with empty store", () => {
     const state = useCampaignStore.getState();
-    expect(state.step).toBe(1);
-    expect(state.countryData).toBeNull();
-    expect(state.packageData).toBeNull();
+    expect(validateStep(1, state)).toEqual({ allowed: true });
   });
 
-  it("step 1: setCountry then nextStep advances to step 2", () => {
-    const store = useCampaignStore.getState();
-    store.setCountry(mkCountry("thailand", "Thailand"));
-    expect(useCampaignStore.getState().countryData?.id).toBe("thailand");
-    store.nextStep();
-    expect(useCampaignStore.getState().step).toBe(2);
+  it("step 2 blocked with no countryData, redirects to country", () => {
+    const state = useCampaignStore.getState();
+    expect(validateStep(2, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/country" });
   });
 
-  it("step 3: goToStep(3) then setPackage sets packageData", () => {
-    const store = useCampaignStore.getState();
-    store.setCountry(mkCountry("thailand", "Thailand"));
-    store.goToStep(3);
-    expect(useCampaignStore.getState().step).toBe(3);
-    store.setPackage(mkPackage("popular", "Popular"));
-    expect(useCampaignStore.getState().packageData?.id).toBe("popular");
+  it("step 2 allowed after setCountry", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    const state = useCampaignStore.getState();
+    expect(validateStep(2, state)).toEqual({ allowed: true });
   });
 
-  it("full country → package flow advances step correctly", () => {
-    const store = useCampaignStore.getState();
-
-    // Step 1: select country
-    store.setCountry(mkCountry("vietnam", "Vietnam"));
-    expect(useCampaignStore.getState().countryData?.id).toBe("vietnam");
-
-    // Advance to step 2
-    store.nextStep();
-    expect(useCampaignStore.getState().step).toBe(2);
-
-    // Jump to step 3 (package)
-    store.goToStep(3);
-    expect(useCampaignStore.getState().step).toBe(3);
-
-    // Select package
-    store.setPackage(mkPackage("popular", "Popular"));
-    expect(useCampaignStore.getState().packageData?.id).toBe("popular");
-
-    // Advance to step 4
-    store.nextStep();
-    expect(useCampaignStore.getState().step).toBe(4);
+  it("step 3 blocked when only countryData, redirects to product", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    const state = useCampaignStore.getState();
+    expect(validateStep(3, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/product" });
   });
 
-  it("countryData persists across goToStep calls", () => {
-    const store = useCampaignStore.getState();
-    store.setCountry(mkCountry("malaysia", "Malaysia"));
-    store.goToStep(3);
+  it("step 3 allowed after country + product", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setProduct(product);
+    const state = useCampaignStore.getState();
+    expect(validateStep(3, state)).toEqual({ allowed: true });
+  });
+
+  it("step 4 blocked when packageData missing, redirects to package", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setProduct(product);
+    const state = useCampaignStore.getState();
+    expect(validateStep(4, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/package" });
+  });
+
+  it("step 4 allowed after country + product + package", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setProduct(product);
+    useCampaignStore.getState().setPackage(mkPackage("popular"));
+    const state = useCampaignStore.getState();
+    expect(validateStep(4, state)).toEqual({ allowed: true });
+  });
+
+  it("step 5 blocked when no creators, redirects to creators", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setProduct(product);
+    useCampaignStore.getState().setPackage(mkPackage("popular"));
+    const state = useCampaignStore.getState();
+    expect(validateStep(5, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/creators" });
+  });
+
+  it("step 5 allowed after all data including creators", () => {
+    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setProduct(product);
+    useCampaignStore.getState().setPackage(mkPackage("popular"));
+    useCampaignStore.getState().setCreators([mkCreator("c1")]);
+    const state = useCampaignStore.getState();
+    expect(validateStep(5, state)).toEqual({ allowed: true });
+  });
+
+  it("countryData persists after setting other data", () => {
+    useCampaignStore.getState().setCountry(mkCountry("malaysia"));
+    useCampaignStore.getState().setProduct(product);
     expect(useCampaignStore.getState().countryData?.id).toBe("malaysia");
-  });
-
-  it("packageData guard: countryData must be set before package selection makes sense", () => {
-    // This test documents the expected guard behavior at store level
-    const state = useCampaignStore.getState();
-    expect(state.countryData).toBeNull();
-    // Setting a package without a country is technically allowed in store,
-    // but the page component redirects when countryData is null
-    state.setPackage(mkPackage("starter", "Starter"));
-    expect(useCampaignStore.getState().packageData?.id).toBe("starter");
-    expect(useCampaignStore.getState().countryData).toBeNull();
   });
 });

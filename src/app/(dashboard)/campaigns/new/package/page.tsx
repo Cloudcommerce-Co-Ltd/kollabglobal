@@ -6,11 +6,12 @@ import { ArrowLeft, Check } from 'lucide-react';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { PACKAGE_EXTRAS, SAMPLE_CREATOR_AVATARS } from '@/lib/constants';
 import { PlatformIcon } from '@/components/icons/platform-icons';
+import { calculatePackageTotal } from '@/lib/package-utils';
 import type { Package } from '@/types';
 
 export default function SelectPackagePage() {
   const router = useRouter();
-  const { countryData, packageData, setPackage, nextStep, prevStep, goToStep } =
+  const { countryData, packageData, setPackage } =
     useCampaignStore();
 
   const [packages, setPackages] = useState<Package[]>([]);
@@ -19,14 +20,7 @@ export default function SelectPackagePage() {
   const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
-    goToStep(3);
-  }, [goToStep]);
-
-  useEffect(() => {
-    if (!countryData) {
-      router.replace('/campaigns/new/country');
-      return;
-    }
+    if (!countryData) return;
     fetch('/api/packages')
       .then(r => r.json())
       .then((data: Package[]) => {
@@ -40,7 +34,8 @@ export default function SelectPackagePage() {
         }
         setLoading(false);
       });
-  }, [countryData, packageData, router, setPackage]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryData, setPackage]);
 
   function handleSelect(data: Package) {
     setSelected(data.id);
@@ -49,12 +44,10 @@ export default function SelectPackagePage() {
 
   function handleNext() {
     if (!selected) return;
-    nextStep();
     router.push('/campaigns/new/creators');
   }
 
   function handleBack() {
-    prevStep();
     router.push('/campaigns/new/product');
   }
 
@@ -91,11 +84,7 @@ export default function SelectPackagePage() {
                 platforms: [],
                 deliverables: [],
               };
-              const total = Math.round(
-                pkg.numCreators *
-                  pkg.pricePerCreator *
-                  (1 - pkg.discountPct / 100),
-              );
+              const total = calculatePackageTotal(pkg);
               const avatarCount = Math.min(pkg.numCreators, 8);
 
               return (

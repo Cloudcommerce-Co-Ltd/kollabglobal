@@ -43,7 +43,6 @@ describe('campaign-store', () => {
 
   it('has correct initial state', () => {
     const state = useCampaignStore.getState();
-    expect(state.step).toBe(1);
     expect(state.countryData).toBeNull();
     expect(state.promotionType).toBeNull();
     expect(state.productData).toBeNull();
@@ -91,38 +90,14 @@ describe('campaign-store', () => {
     expect(useCampaignStore.getState().selectedCreatorsData).toEqual([CREATOR_1, CREATOR_2]);
   });
 
-  it('nextStep increments step', () => {
-    useCampaignStore.getState().nextStep();
-    expect(useCampaignStore.getState().step).toBe(2);
-  });
-
-  it('prevStep decrements step', () => {
-    useCampaignStore.getState().goToStep(3);
-    useCampaignStore.getState().prevStep();
-    expect(useCampaignStore.getState().step).toBe(2);
-  });
-
-  it('prevStep floors at 1', () => {
-    useCampaignStore.getState().prevStep();
-    expect(useCampaignStore.getState().step).toBe(1);
-  });
-
-  it('goToStep sets arbitrary step', () => {
-    useCampaignStore.getState().goToStep(4);
-    expect(useCampaignStore.getState().step).toBe(4);
-  });
-
   it('reset returns to initial state after mutations', () => {
     useCampaignStore.getState().setCountry(COUNTRY_SG);
     useCampaignStore.getState().setPackage(PKG_POPULAR);
     useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
-    useCampaignStore.getState().nextStep();
-    useCampaignStore.getState().nextStep();
 
     useCampaignStore.getState().reset();
 
     const state = useCampaignStore.getState();
-    expect(state.step).toBe(1);
     expect(state.countryData).toBeNull();
     expect(state.promotionType).toBeNull();
     expect(state.productData).toBeNull();

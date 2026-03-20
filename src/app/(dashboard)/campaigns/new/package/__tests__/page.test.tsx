@@ -96,14 +96,6 @@ describe("SelectPackagePage", () => {
     expect(screen.getByText("ประหยัด 10%")).toBeInTheDocument();
   });
 
-  it("redirects to country page if no countryData in store", async () => {
-    useCampaignStore.getState().reset(); // clears countryData
-    render(<SelectPackagePage />);
-    await waitFor(() =>
-      expect(mockReplace).toHaveBeenCalledWith("/campaigns/new/country")
-    );
-  });
-
   it("CTA navigates to creators page", async () => {
     render(<SelectPackagePage />);
     await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
@@ -116,12 +108,6 @@ describe("SelectPackagePage", () => {
     await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
     fireEvent.click(screen.getByText("กลับไปเพิ่มสินค้า / บริการ"));
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/product");
-  });
-
-  it("calls goToStep(3) on mount", async () => {
-    useCampaignStore.getState().goToStep(1);
-    render(<SelectPackagePage />);
-    await waitFor(() => expect(useCampaignStore.getState().step).toBe(3));
   });
 
   it("shows price per creator correctly", async () => {

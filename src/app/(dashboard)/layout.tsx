@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { Header } from "@/components/layout/header";
 
 export default async function DashboardLayout({
   children,
@@ -13,10 +12,5 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  return (
-    <div className="min-h-screen">
-      <Header user={session.user} />
-      <main>{children}</main>
-    </div>
-  );
+  return <div className="min-h-screen">{children}</div>;
 }

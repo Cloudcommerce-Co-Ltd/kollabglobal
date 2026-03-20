@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
 import { BarChart3, ChevronRight, Globe, Plus } from 'lucide-react';
+import { Header } from '@/components/layout/header';
 
 export default async function DashboardPage() {
   const session = await auth();
   const userName = session?.user?.name ?? 'คุณ';
 
   return (
+    <>
+      <Header user={session!.user!} />
     <div className="flex min-h-[calc(100vh-73px)] flex-col bg-white">
       {/* Center content */}
       <div className="animate-fade-up flex flex-1 flex-col items-center justify-center px-4 sm:px-8">
@@ -79,5 +82,6 @@ export default async function DashboardPage() {
         © 2026 KOLLAB Global • Powered by Connex
       </p>
     </div>
+    </>
   );
 }

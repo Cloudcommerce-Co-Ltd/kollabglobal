@@ -11,37 +11,28 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
+const mockUpload = vi.fn().mockResolvedValue(null);
 vi.mock("@/hooks/use-image-upload", () => ({
   useImageUpload: () => ({
     imageUrl: null,
     uploading: false,
     error: null,
     handleFileSelect: vi.fn(),
-    upload: vi.fn().mockResolvedValue(null),
+    upload: mockUpload,
     reset: vi.fn(),
   }),
 }));
 
 beforeEach(() => {
   useCampaignStore.getState().reset();
-  useCampaignStore.getState().setCountry("thailand");
+  useCampaignStore.getState().setCountry("thailand" as never);
   mockPush.mockClear();
   mockReplace.mockClear();
+  mockUpload.mockClear();
+  mockUpload.mockResolvedValue(null);
 });
 
 describe("AddProductPage", () => {
-  it("calls goToStep(2) on mount", () => {
-    useCampaignStore.getState().goToStep(1);
-    render(<AddProductPage />);
-    expect(useCampaignStore.getState().step).toBe(2);
-  });
-
-  it("redirects to country page if countryId is null", () => {
-    useCampaignStore.getState().reset();
-    render(<AddProductPage />);
-    expect(mockReplace).toHaveBeenCalledWith("/campaigns/new/country");
-  });
-
   it("renders promotion type selector", () => {
     render(<AddProductPage />);
     expect(screen.getByText("สินค้า")).toBeInTheDocument();
@@ -128,6 +119,23 @@ describe("AddProductPage", () => {
 
     fireEvent.click(screen.getByText("บริการ").closest("button")!);
     expect(screen.queryByText("ข้อมูลจัดส่ง")).not.toBeInTheDocument();
+  });
+
+  it("CTA is disabled during upload", () => {
+    mockUpload.mockReturnValueOnce(new Promise(() => {})); // never resolves
+
+    render(<AddProductPage />);
+    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
+      target: { value: "My Brand" },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
+      target: { value: "My Product" },
+    });
+    fireEvent.click(screen.getByText("Food & Snack"));
+
+    fireEvent.click(screen.getByText("ยืนยัน — ถัดไป"));
+    expect(screen.getByText("ยืนยัน — ถัดไป")).toBeDisabled();
   });
 
   it("image upload area is present", () => {

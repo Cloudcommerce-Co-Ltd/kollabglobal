@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -40,12 +40,10 @@ function typeEmoji(cat: string, isService: boolean): string {
 export default function AddProductPage() {
   const router = useRouter();
   const {
-    step,
     promotionType,
     productData,
     setPromotionType,
     setProduct,
-    nextStep,
   } = useCampaignStore();
 
   const [type, setType] = useState<"product" | "service" | null>(
@@ -70,14 +68,10 @@ export default function AddProductPage() {
   const [width, setWidth] = useState(productData?.width?.toString() ?? "");
   const [height, setHeight] = useState(productData?.height?.toString() ?? "");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (step < 2) {
-      router.replace("/campaigns/new/country");
-    }
-  }, [step, router]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload(productData?.imageUrl ?? undefined);
 
   const isService = type === "service";
   const categories = isService ? SERVICE_CATEGORIES : PRODUCT_CATEGORIES;
@@ -89,7 +83,9 @@ export default function AddProductPage() {
   }
 
   async function handleSubmit() {
-    if (!isValid || !type) return;
+    if (!isValid || !type || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
     const storedImageUrl = await upload();
     setPromotionType(type === "product" ? "PRODUCT" : "SERVICE");
     setProduct({
@@ -106,8 +102,10 @@ export default function AddProductPage() {
       width: width ? parseFloat(width) : undefined,
       height: height ? parseFloat(height) : undefined,
     });
-    nextStep();
     router.push("/campaigns/new/package");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -424,8 +422,7 @@ export default function AddProductPage() {
                         : "เช่น ผลไม้อบแห้งจากสวนจันทบุรี ไม่ใส่สารกันบูด"
                     }
                     rows={3}
-                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
-                    style={{ minHeight: 72 }}
+                    className="w-full min-h-18 resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
                   />
                 </div>
 
@@ -442,8 +439,7 @@ export default function AddProductPage() {
                         : "เช่น ได้รับรางวัล OTOP 5 ดาว"
                     }
                     rows={2}
-                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
-                    style={{ minHeight: 56 }}
+                    className="w-full min-h-14 resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
                   />
                 </div>
               </div>
@@ -525,10 +521,10 @@ export default function AddProductPage() {
         {/* CTA */}
         <div className="flex justify-center pb-10">
           <button
-            disabled={!isValid}
+            disabled={!isValid || isSubmitting}
             onClick={handleSubmit}
             className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
-              isValid
+              isValid && !isSubmitting
                 ? "cursor-pointer bg-[#4ECDC4]"
                 : "cursor-not-allowed bg-[#ccc]"
             }`}

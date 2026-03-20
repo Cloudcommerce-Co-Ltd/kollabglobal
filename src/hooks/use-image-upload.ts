@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
@@ -15,11 +15,20 @@ export interface UseImageUploadResult {
   reset: () => void;
 }
 
-export function useImageUpload(): UseImageUploadResult {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+export function useImageUpload(initialUrl?: string): UseImageUploadResult {
+  const [imageUrl, setImageUrl] = useState<string | null>(initialUrl ?? null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<File | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+    };
+  }, []);
 
   function handleFileSelect(file: File) {
     setError(null);
@@ -38,8 +47,13 @@ export function useImageUpload(): UseImageUploadResult {
       return;
     }
 
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+    }
+    const url = URL.createObjectURL(file);
+    blobUrlRef.current = url;
     fileRef.current = file;
-    setImageUrl(URL.createObjectURL(file));
+    setImageUrl(url);
   }
 
   async function upload(): Promise<string | null> {
@@ -88,6 +102,10 @@ export function useImageUpload(): UseImageUploadResult {
   }
 
   function reset() {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
     fileRef.current = null;
     setImageUrl(null);
     setUploading(false);
