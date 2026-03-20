@@ -1,3 +1,20 @@
+export const CREATOR_LANG_BY_COUNTRY: Record<
+  string,
+  { code: string; name: string; flag: string }
+> = {
+  thailand: { code: "th", name: "Thai", flag: "🇹🇭" },
+  vietnam: { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
+  malaysia: { code: "ms", name: "Malay", flag: "🇲🇾" },
+  laos: { code: "lo", name: "Lao", flag: "🇱🇦" },
+  japan: { code: "ja", name: "Japanese", flag: "🇯🇵" },
+  korea: { code: "ko", name: "Korean", flag: "🇰🇷" },
+  usa: { code: "en", name: "English", flag: "🇺🇸" },
+  uk: { code: "en", name: "English", flag: "🇬🇧" },
+  australia: { code: "en", name: "English", flag: "🇦🇺" },
+  eu: { code: "en", name: "English", flag: "🇪🇺" },
+  clmv: { code: "en", name: "English", flag: "🌏" },
+};
+
 export const ASIA_COUNTRY_IDS = new Set([
   "thailand",
   "vietnam",
