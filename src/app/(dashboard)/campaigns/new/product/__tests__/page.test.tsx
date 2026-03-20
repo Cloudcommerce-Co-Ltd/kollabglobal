@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { act, render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import AddProductPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
@@ -91,7 +91,7 @@ describe("AddProductPage", () => {
     expect(screen.getByText("ยืนยัน — ถัดไป")).not.toBeDisabled();
   });
 
-  it("submit calls store actions and navigates to package page", () => {
+  it("submit calls store actions and navigates to package page", async () => {
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("สินค้า").closest("button")!);
 
@@ -102,7 +102,10 @@ describe("AddProductPage", () => {
       target: { value: "My Product" },
     });
     fireEvent.click(screen.getByText("Food & Snack"));
-    fireEvent.click(screen.getByText("ยืนยัน — ถัดไป"));
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("ยืนยัน — ถัดไป"));
+    });
 
     const state = useCampaignStore.getState();
     expect(state.promotionType).toBe("PRODUCT");

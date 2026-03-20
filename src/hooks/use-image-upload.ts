@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const MAX_SIZE = 5_242_880; // 5MB
@@ -29,7 +30,9 @@ export function useImageUpload(): UseImageUploadResult {
     }
 
     if (file.size > MAX_SIZE) {
-      setError("ขนาดไฟล์ต้องไม่เกิน 5MB");
+      const msg = "ขนาดไฟล์ต้องไม่เกิน 5MB";
+      setError(msg);
+      toast.error(msg, { description: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB" });
       return;
     }
 

@@ -40,13 +40,12 @@ function typeEmoji(cat: string, isService: boolean): string {
 export default function AddProductPage() {
   const router = useRouter();
   const {
-    countryId,
+    step,
     promotionType,
     productData,
     setPromotionType,
     setProduct,
     nextStep,
-    goToStep,
   } = useCampaignStore();
 
   const [type, setType] = useState<"product" | "service" | null>(
@@ -75,14 +74,10 @@ export default function AddProductPage() {
   const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload();
 
   useEffect(() => {
-    goToStep(2);
-  }, [goToStep]);
-
-  useEffect(() => {
-    if (!countryId) {
+    if (step < 2) {
       router.replace("/campaigns/new/country");
     }
-  }, [countryId, router]);
+  }, [step, router]);
 
   const isService = type === "service";
   const categories = isService ? SERVICE_CATEGORIES : PRODUCT_CATEGORIES;
