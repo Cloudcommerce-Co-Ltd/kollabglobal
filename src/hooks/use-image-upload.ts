@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const MAX_SIZE = 5_242_880; // 5MB
 
 export interface UseImageUploadResult {
-  imageUrl: string | null;
+  imageUrl: string | null;    // blob URL for preview only
   uploading: boolean;
   error: string | null;
-  handleFileSelect: (file: File) => Promise<void>;
+  handleFileSelect: (file: File) => void; // sync — just validates + shows preview
+  upload: () => Promise<string | null>;   // async — PUTs to S3, returns stored URL
   reset: () => void;
 }
 
@@ -17,8 +18,9 @@ export function useImageUpload(): UseImageUploadResult {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<File | null>(null);
 
-  async function handleFileSelect(file: File) {
+  function handleFileSelect(file: File) {
     setError(null);
 
     if (!ALLOWED_TYPES.includes(file.type as typeof ALLOWED_TYPES[number])) {
@@ -31,7 +33,16 @@ export function useImageUpload(): UseImageUploadResult {
       return;
     }
 
+    fileRef.current = file;
+    setImageUrl(URL.createObjectURL(file));
+  }
+
+  async function upload(): Promise<string | null> {
+    const file = fileRef.current;
+    if (!file) return null;
+
     setUploading(true);
+    setError(null);
     try {
       const res = await fetch("/api/upload/presign", {
         method: "POST",
@@ -52,27 +63,29 @@ export function useImageUpload(): UseImageUploadResult {
       };
 
       if (data.mock) {
-        setImageUrl(URL.createObjectURL(file));
-      } else {
-        await fetch(data.presignedUrl!, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-        setImageUrl(data.objectUrl!);
+        return imageUrl; // blob URL is fine for mock
       }
+
+      await fetch(data.presignedUrl!, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+      return data.objectUrl!;
     } catch (err) {
       setError(`Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      return null;
     } finally {
       setUploading(false);
     }
   }
 
   function reset() {
+    fileRef.current = null;
     setImageUrl(null);
     setUploading(false);
     setError(null);
   }
 
-  return { imageUrl, uploading, error, handleFileSelect, reset };
+  return { imageUrl, uploading, error, handleFileSelect, upload, reset };
 }

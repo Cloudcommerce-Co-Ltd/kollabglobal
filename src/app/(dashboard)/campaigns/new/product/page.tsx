@@ -49,7 +49,7 @@ export default function AddProductPage() {
   const [height, setHeight] = useState(productData?.height?.toString() ?? "");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { imageUrl, uploading, handleFileSelect } = useImageUpload();
+  const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload();
 
   useEffect(() => {
     goToStep(2);
@@ -70,8 +70,9 @@ export default function AddProductPage() {
     setCategory("");
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!isValid || !type) return;
+    const storedImageUrl = await upload();
     setPromotionType(type === "product" ? "PRODUCT" : "SERVICE");
     setProduct({
       brandName: brandName.trim(),
@@ -80,7 +81,7 @@ export default function AddProductPage() {
       description: description.trim(),
       sellingPoints: sellingPoints.trim(),
       url: url.trim(),
-      imageUrl: imageUrl ?? "",
+      imageUrl: storedImageUrl ?? "",
       isService,
       weight: weight ? parseFloat(weight) : undefined,
       length: length ? parseFloat(length) : undefined,
@@ -94,27 +95,27 @@ export default function AddProductPage() {
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
       {/* Gradient header */}
-      <div className="bg-gradient-to-br from-[#4ECDC4] to-[#4A90D9] px-4 py-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1060px]">
+      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-275">
           <button
             onClick={() => router.push("/campaigns/new/country")}
-            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-white/80"
+            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]"
           >
             <ArrowLeft size={16} />
             กลับไปเลือกตลาด
           </button>
-          <h1 className="m-0 text-xl font-bold text-white sm:text-2xl">
+          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">
             เพิ่มสินค้าหรือบริการที่จะโปรโมท
           </h1>
-          <p className="m-0 mt-0.5 text-sm text-white/75">
+          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
             กรอกข้อมูลให้ครีเอเตอร์เข้าใจสิ่งที่ต้องโปรโมท
           </p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1060px] px-4 py-7 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-265 px-4 py-7 sm:px-6 lg:px-8">
         {/* Promotion type selector */}
-        <div className="mb-5 rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+        <div className="mb-5 rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
           <div className="mb-3.5 text-[15px] font-bold text-[#4A4A4A]">
             คุณต้องการโปรโมทอะไร? <span className="text-red-500">*</span>
           </div>
@@ -203,7 +204,7 @@ export default function AddProductPage() {
             {/* Left column */}
             <div className="flex flex-col gap-5">
               {/* Image upload card */}
-              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
                 <div className="mb-3.5 flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f8f7]">
                     <Upload size={16} color="#4ECDC4" />
@@ -225,16 +226,16 @@ export default function AddProductPage() {
                 />
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className={`flex h-[110px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed transition-all ${
-                    imageUrl ? "border-[#4ECDC4] bg-[#e8f8f7]" : "border-[#e8ecf0] bg-[#fafbfc]"
-                  }`}
+                  className={`relative h-28 w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition-all ${
+                    imageUrl ? "border-[#4ECDC4]" : "border-[#e8ecf0] bg-[#fafbfc]"
+                  } ${!imageUrl ? "flex flex-col items-center justify-center gap-1.5" : "h-50"}`}
                 >
                   {imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imageUrl}
                       alt="preview"
-                      className="h-full w-full rounded-xl object-cover"
+                      className="absolute inset-0 h-full w-full object-scale-down"
                     />
                   ) : uploading ? (
                     <span className="text-sm text-[#8a90a3]">กำลังอัปโหลด...</span>
@@ -248,7 +249,7 @@ export default function AddProductPage() {
               </div>
 
               {/* Product / Service info card */}
-              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
                 <div className="mb-4 flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f0fa]">
                     {isService ? (
@@ -272,7 +273,7 @@ export default function AddProductPage() {
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                     placeholder="เช่น KOLLAB, FitLife, The Table"
-                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-[11px] text-sm outline-none transition-colors ${
+                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none transition-colors ${
                       brandName ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
                     }`}
                   />
@@ -292,7 +293,7 @@ export default function AddProductPage() {
                         ? "เช่น คอร์สเรียนโยคะออนไลน์, ร้านอาหารไทย The Table"
                         : "เช่น มะม่วงอบแห้ง Premium"
                     }
-                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-[11px] text-sm outline-none transition-colors ${
+                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none transition-colors ${
                       name ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
                     }`}
                   />
@@ -309,7 +310,7 @@ export default function AddProductPage() {
                         <button
                           key={cat}
                           onClick={() => setCategory(cat)}
-                          className={`flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-[7px] text-xs font-semibold transition-all ${
+                          className={`flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.75 text-xs font-semibold transition-all ${
                             active
                               ? "border-[#4ECDC4] bg-[#e8f8f7] text-[#4ECDC4]"
                               : "border-[#e8ecf0] bg-white text-[#4A4A4A]"
@@ -328,7 +329,7 @@ export default function AddProductPage() {
             {/* Right column */}
             <div className="flex flex-col gap-5">
               {/* Creator details card */}
-              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
                 <div className="mb-4 flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0f4ff]">
                     <FileText size={16} color="#7c6ef7" />
@@ -358,7 +359,7 @@ export default function AddProductPage() {
                           ? "https://www.yourservice.com"
                           : "https://www.yourshop.com/product"
                       }
-                      className={`w-full rounded-[10px] border-[1.5px] py-[10px] pl-8 pr-3.5 text-sm outline-none transition-colors ${
+                      className={`w-full rounded-[10px] border-[1.5px] py-2.5 pl-8 pr-3.5 text-sm outline-none transition-colors ${
                         url ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
                       }`}
                     />
@@ -382,7 +383,7 @@ export default function AddProductPage() {
                         : "เช่น ผลไม้อบแห้งจากสวนจันทบุรี ไม่ใส่สารกันบูด"
                     }
                     rows={3}
-                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-[11px] text-sm outline-none"
+                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
                     style={{ minHeight: 72 }}
                   />
                 </div>
@@ -400,7 +401,7 @@ export default function AddProductPage() {
                         : "เช่น ได้รับรางวัล OTOP 5 ดาว"
                     }
                     rows={2}
-                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-[11px] text-sm outline-none"
+                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
                     style={{ minHeight: 56 }}
                   />
                 </div>
@@ -408,7 +409,7 @@ export default function AddProductPage() {
 
               {/* Shipping card (product only) */}
               {!isService && (
-                <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+                <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
                   <div className="mb-1 flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
                       <Truck size={16} color="#d97706" />
@@ -416,7 +417,7 @@ export default function AddProductPage() {
                     <span className="text-[15px] font-bold text-[#4A4A4A]">ข้อมูลจัดส่ง</span>
                     <span className="text-xs text-[#8a90a3]">(ไม่บังคับ)</span>
                   </div>
-                  <p className="mb-3.5 ml-[42px] text-xs text-[#8a90a3]">
+                  <p className="mb-3.5 ml-10.5 text-xs text-[#8a90a3]">
                     กรอกเพื่อประเมินค่าจัดส่งสินค้าให้ครีเอเตอร์
                   </p>
 
@@ -429,7 +430,7 @@ export default function AddProductPage() {
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       placeholder="เช่น 250"
-                      className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-[10px] text-sm outline-none"
+                      className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.5 text-sm outline-none"
                     />
                   </div>
 
@@ -451,7 +452,7 @@ export default function AddProductPage() {
                           value={val}
                           onChange={(e) => setter(e.target.value)}
                           placeholder={placeholder}
-                          className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3 py-[10px] text-sm outline-none"
+                          className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3 py-2.5 text-sm outline-none"
                         />
                       ))}
                     </div>
@@ -461,7 +462,7 @@ export default function AddProductPage() {
 
               {/* No-shipping banner (service only) */}
               {isService && (
-                <div className="flex items-center gap-2.5 rounded-xl border border-[#4A90D9]/20 bg-[#e8f0fa] px-[18px] py-3.5">
+                <div className="flex items-center gap-2.5 rounded-xl border border-[#4A90D9]/20 bg-[#e8f0fa] px-4.5 py-3.5">
                   <span className="shrink-0 text-xl">✅</span>
                   <div>
                     <div className="mb-0.5 text-[13px] font-semibold text-[#4A90D9]">

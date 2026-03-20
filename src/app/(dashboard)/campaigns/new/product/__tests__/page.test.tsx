@@ -17,6 +17,7 @@ vi.mock("@/hooks/use-image-upload", () => ({
     uploading: false,
     error: null,
     handleFileSelect: vi.fn(),
+    upload: vi.fn().mockResolvedValue(null),
     reset: vi.fn(),
   }),
 }));
