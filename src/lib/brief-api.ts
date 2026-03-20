@@ -1,6 +1,6 @@
 import type { CampaignWithRelations, ProductData } from "@/types/campaign";
 import type { BriefForm, TranslatedFields } from "@/types/brief";
-import type { BriefContent, TranslatedContent } from "@/lib/brief-utils";
+import type { BriefContent, TranslatedContent, FillBriefContext } from "@/lib/brief-utils";
 import { buildFillBriefPayload, buildTranslatePayload } from "@/lib/brief-utils";
 
 export async function fetchCampaign(id: string): Promise<CampaignWithRelations> {
@@ -9,11 +9,14 @@ export async function fetchCampaign(id: string): Promise<CampaignWithRelations> 
   return res.json() as Promise<CampaignWithRelations>;
 }
 
-export async function fillBriefAI(product: ProductData): Promise<Partial<BriefForm>> {
+export async function fillBriefAI(
+  product: ProductData,
+  context?: FillBriefContext
+): Promise<Partial<BriefForm>> {
   const res = await fetch("/api/ai/fill-brief", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(buildFillBriefPayload(product)),
+    body: JSON.stringify(buildFillBriefPayload(product, context)),
   });
   if (!res.ok) throw new Error("AI fill failed");
   return res.json() as Promise<Partial<BriefForm>>;

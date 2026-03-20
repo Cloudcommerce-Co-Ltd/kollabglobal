@@ -1,14 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateText } from "ai";
+import { generateText, Output, NoObjectGeneratedError } from "ai";
+import { z } from "zod";
 import { getAIModel, isAIConfigured } from "@/lib/ai";
 import { fillBriefSchema } from "@/lib/validations/fill-brief";
 
-const MOCK_BRIEF = {
-  keys: "เน้นจุดเด่นของสินค้า — คุณภาพสูง รสชาติอร่อย เหมาะกับทุกโอกาส",
-  dos: "DO: แสดงประสบการณ์จริงของคุณกับสินค้า/บริการ\nDO: โชว์จุดเด่นที่น่าสนใจและทำให้ดูน่าใช้\n\nDON'T: เปรียบเทียบกับคู่แข่งโดยตรง\nDON'T: อ้างสรรพคุณเกินจริงหรือสิ่งที่ไม่เป็นความจริง",
-  deliverables:
-    "• 1 วิดีโอ TikTok (30-60 วินาที) รีวิวหรือแนะนำ\n• 3 Instagram Stories (มีลิงก์สวายป์อัพ)\n• 1 Instagram Reel",
+const DEFAULT_MOCK_DELIVERABLES =
+  "• 1 วิดีโอ TikTok (30-60 วินาที) — รีวิวหรือแนะนำสินค้า โชว์การใช้งานจริง เน้นจุดเด่น\n• 3 Instagram Stories — ภาพนิ่งหรือสั้น ๆ โชว์สินค้า พร้อม Swipe-up link\n• 1 Instagram Reel — คลิปสั้นสนุก เน้น hook แรก 3 วินาที";
+
+const DELIVERABLE_HINTS: Record<string, string> = {
+  tiktok: "รีวิว/แนะนำสินค้าจริง โชว์การใช้งาน เน้น hook แรก 3 วินาที ใช้เสียงเทรนด์",
+  "ig reel": "คลิปสั้นสนุก เน้น hook แรก 3 วินาที โชว์จุดเด่นสินค้า",
+  "ig stories": "ภาพหรือวิดีโอสั้น โชว์สินค้า พร้อม Swipe-up link หรือ tag แบรนด์",
+  instagram: "โพสต์ภาพคุณภาพสูง caption เล่าประสบการณ์ tag แบรนด์",
+  facebook: "โพสต์รีวิวพร้อมภาพ/วิดีโอ บรรยายประสบการณ์การใช้งาน",
 };
+
+function enrichDeliverable(raw: string): string {
+  const lower = raw.toLowerCase();
+  for (const [key, hint] of Object.entries(DELIVERABLE_HINTS)) {
+    if (lower.includes(key)) {
+      return `• ${raw} — ${hint}`;
+    }
+  }
+  return `• ${raw}`;
+}
+
+function buildMockDeliverables(packageDeliverables?: string[]): string {
+  if (packageDeliverables?.length) {
+    return packageDeliverables.map(enrichDeliverable).join("\n");
+  }
+  return DEFAULT_MOCK_DELIVERABLES;
+}
 
 export async function POST(req: NextRequest) {
   const raw = await req.json();
@@ -17,56 +39,79 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { brandName, productName, category, description, sellingPoints, isService, url } = parsed.data;
+  const {
+    brandName,
+    productName,
+    category,
+    description,
+    sellingPoints,
+    isService,
+    url,
+    countryName,
+    platforms,
+    packageDeliverables,
+  } = parsed.data;
 
   if (!isAIConfigured()) {
     return NextResponse.json({
-      ...MOCK_BRIEF,
+      keys: "เน้นจุดเด่นของสินค้า — คุณภาพสูง รสชาติอร่อย เหมาะกับทุกโอกาส",
+      dos: "DO: แสดงประสบการณ์จริงของคุณกับสินค้า/บริการ\nDO: โชว์จุดเด่นที่น่าสนใจและทำให้ดูน่าใช้\n\nDON'T: เปรียบเทียบกับคู่แข่งโดยตรง\nDON'T: อ้างสรรพคุณเกินจริงหรือสิ่งที่ไม่เป็นความจริง",
+      deliverables: buildMockDeliverables(packageDeliverables),
       disclosure: `#ad #sponsored #KOLLABGlobal #${(brandName ?? "Brand").replace(/\s/g, "")}`,
     });
   }
 
   const entityType = isService ? "บริการ" : "สินค้า";
-  const prompt = `คุณเป็น AI ผู้เชี่ยวชาญด้านการตลาดอินฟลูเอนเซอร์ ช่วยสร้าง Campaign Brief สำหรับแคมเปญนี้:
+  const contextLines = [
+    countryName ? `ตลาดเป้าหมาย: ${countryName}` : "",
+    platforms?.length ? `แพลตฟอร์ม: ${platforms.join(", ")}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
+  const prompt = `คุณคือผู้เชี่ยวชาญด้าน Influencer Marketing ช่วยเขียน Campaign Brief สำหรับ:
 แบรนด์: ${brandName}
 ${entityType}: ${productName}
 หมวดหมู่: ${category}
 รายละเอียด: ${description}
 จุดเด่น: ${sellingPoints}
 ${url ? `URL: ${url}` : ""}
+${contextLines ? `\n${contextLines}` : ""}
+${packageDeliverables?.length ? `\nข้อกำหนด Deliverables: ต้องครอบคลุมรายการเหล่านี้ [${packageDeliverables.join(", ")}] โดยเพิ่มไอเดียการนำเสนอเข้าไปด้วย` : ""}
 
-สร้าง Brief เป็นภาษาไทย ในรูปแบบ JSON ที่มี 4 keys เท่านั้น ทุก value ต้องเป็น string ธรรมดา (ไม่ใช่ object หรือ array):
-{
-  "keys": "ข้อความ Key Messages เขียนติดกันเป็น paragraph หรือใช้ขึ้นบรรทัดใหม่แทน bullet",
-  "dos": "Do's และ Don'ts เขียนเป็น string เดียว ใช้ขึ้นบรรทัดใหม่คั่นแต่ละข้อ เช่น DO: ... \\nDO: ... \\n\\nDON'T: ...",
-  "deliverables": "รายการ deliverables เขียนเป็น string เดียว ใช้ • และขึ้นบรรทัดใหม่คั่น",
-  "disclosure": "#hashtags #ที่ต้องใส่"
-}
+สำคัญมาก: ห้ามใช้ Markdown ทุกชนิด (**bold**, # heading, - bullet, 1. numbered list) ใช้ข้อความธรรมดาเท่านั้น deliverables แต่ละรายการต้องอยู่บรรทัดเดียว เริ่มต้นด้วย •`;
 
-กฎสำคัญ: ห้ามใช้ nested object หรือ array ใน value ทุก value ต้องเป็น string เท่านั้น ตอบเป็น JSON เท่านั้น ไม่ต้องมีข้อความอื่น`;
+  const briefSchema = z.object({
+    keys: z
+      .string()
+      .describe("ข้อความ Key Messages ที่อยากให้ครีเอเตอร์สื่อสาร ไม่ใช้ Markdown ใช้ข้อความธรรมดาเท่านั้น"),
+    dos: z
+      .string()
+      .describe(
+        "Do's และ Don'ts แต่ละข้อขึ้นต้นด้วย 'DO:' หรือ 'DON\\'T:' คั่นด้วย \\n ไม่ใช้ Markdown ไม่ใช้ ** หรือ -"
+      ),
+    deliverables: z
+      .string()
+      .describe(
+        "แต่ละรายการขึ้นต้นด้วย • และตามด้วยรายละเอียดในบรรทัดเดียว เช่น '• TikTok 1 วิดีโอ (15-60 วิ) — ไอเดีย: รีวิว/แนะนำสินค้า โชว์การใช้งานจริง' คั่นด้วย \\n ไม่ใช้ Markdown ไม่ใช้ ** หรือ # หรือ - หรือเลขลำดับ"
+      ),
+    disclosure: z.string().describe("แฮชแท็กบังคับที่ต้องใส่ ไม่ใช้ Markdown"),
+  });
 
-  const { text } = await generateText({ model: getAIModel(), prompt });
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
-  }
-
-  let raw2: Record<string, unknown>;
   try {
-    raw2 = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json({ error: "Failed to parse AI JSON" }, { status: 500 });
+    const { output } = await generateText({
+      model: getAIModel(),
+      output: Output.object({ schema: briefSchema }),
+      prompt,
+    });
+
+    return NextResponse.json(output);
+  } catch (error) {
+    if (NoObjectGeneratedError.isInstance(error)) {
+      console.error("AI brief generation failed — model did not return valid object:", error.text);
+      return NextResponse.json({ error: "Failed to generate brief" }, { status: 500 });
+    }
+    console.error("AI generation error:", error);
+    return NextResponse.json({ error: "Failed to generate brief" }, { status: 500 });
   }
-
-  // Normalize: flatten any nested objects/arrays to plain strings
-  const result = Object.fromEntries(
-    Object.entries(raw2).map(([k, v]) => [
-      k,
-      typeof v === "string" ? v : JSON.stringify(v),
-    ])
-  );
-
-  return NextResponse.json(result);
 }

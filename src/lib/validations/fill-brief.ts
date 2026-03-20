@@ -8,6 +8,9 @@ export const fillBriefSchema = z.object({
   sellingPoints: z.string().min(1),
   isService: z.boolean(),
   url: z.string().optional(),
+  countryName: z.string().optional(),
+  platforms: z.array(z.string()).optional(),
+  packageDeliverables: z.array(z.string()).optional(),
 });
 
 export type FillBriefInput = z.infer<typeof fillBriefSchema>;

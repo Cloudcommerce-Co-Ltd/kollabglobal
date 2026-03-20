@@ -118,7 +118,11 @@ export default function CreateBriefPage({
     setAiLoading(true);
     setAiError(null);
     try {
-      const data = await fillBriefAI(campaign.product);
+      const data = await fillBriefAI(campaign.product, {
+        countryName: campaign.country?.name,
+        platforms,
+        packageDeliverables: campaignDeliverables,
+      });
       setForm(f => ({
         ...f,
         keys: data.keys ?? f.keys,
@@ -614,7 +618,9 @@ export default function CreateBriefPage({
                   </div>
                   {[
                     ['Key Messages', translated.keys],
-                    ['Guidelines', translated.dos],
+                    ["Do's and Don'ts", translated.dos],
+                    ['Deliverables', translated.deliverables],
+                    ['Legal Disclosure', translated.disclosure],
                   ]
                     .filter(([, v]) => v)
                     .map(([label, val]) => (
@@ -625,8 +631,8 @@ export default function CreateBriefPage({
                         <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-green-600">
                           {label}
                         </div>
-                        <div className="text-[13px] leading-relaxed text-[#4A4A4A]">
-                          {val.length > 120 ? val.slice(0, 120) + '…' : val}
+                        <div className="whitespace-pre-wrap text-[13px] leading-relaxed text-[#4A4A4A]">
+                          {val.length > 150 ? val.slice(0, 150) + '…' : val}
                         </div>
                       </div>
                     ))}

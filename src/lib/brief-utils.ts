@@ -53,8 +53,17 @@ export function canPublishBrief(
   return contentFilled && deadlineFilled && translateDone;
 }
 
+export interface FillBriefContext {
+  countryName?: string;
+  platforms?: string[];
+  packageDeliverables?: string[];
+}
+
 /** Builds the payload for the fill-brief AI API call. */
-export function buildFillBriefPayload(product: ProductData): FillBriefInput {
+export function buildFillBriefPayload(
+  product: ProductData,
+  context?: FillBriefContext
+): FillBriefInput {
   return {
     brandName: product.brandName,
     productName: product.productName,
@@ -63,6 +72,11 @@ export function buildFillBriefPayload(product: ProductData): FillBriefInput {
     sellingPoints: product.sellingPoints,
     isService: product.isService,
     url: product.url || undefined,
+    ...(context?.countryName ? { countryName: context.countryName } : {}),
+    ...(context?.platforms?.length ? { platforms: context.platforms } : {}),
+    ...(context?.packageDeliverables?.length
+      ? { packageDeliverables: context.packageDeliverables }
+      : {}),
   };
 }
 
