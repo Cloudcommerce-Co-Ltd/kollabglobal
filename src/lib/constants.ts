@@ -76,3 +76,14 @@ export const SAMPLE_CREATOR_AVATARS = [
   { avatar: "👨🏻", name: "Kevin Nguyen", niche: "Tech & Life", eng: "6.9%", reach: "165K", flag: "🇻🇳" },
   { avatar: "👩🏽‍🦱", name: "Zara Ahmed", niche: "Beauty", eng: "7.7%", reach: "205K", flag: "🇲🇾" },
 ];
+
+export const STATIC_CHECKOUT_DATA = {
+  packageName: "Popular",
+  numCreators: 10,
+  numPosts: 20,
+  duration: "30 วัน",
+  campaignType: "สินค้า",
+  basePrice: 33250,
+  vatRate: 0.07,
+  serviceFeeRate: 0.03,
+};
