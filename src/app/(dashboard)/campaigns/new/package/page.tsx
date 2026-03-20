@@ -223,7 +223,7 @@ export default function SelectPackagePage() {
                               {cr.avatar}
                             </div>
                             {hover === `${pkg.id}-${i}` && (
-                              <div className="absolute bottom-9 left-1/2 z-50 min-w-37.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-[#4A4A4A] px-[11px] py-2 text-white">
+                              <div className="absolute bottom-9 left-1/2 z-50 min-w-37.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-[#4A4A4A] px-2.75 py-2 text-white">
                                 <div className="mb-0.75 flex items-center gap-1.25">
                                   <span className="text-base">{cr.avatar}</span>
                                   <span className="text-xs">{cr.flag}</span>

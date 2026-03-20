@@ -82,7 +82,7 @@ export default function CreateBriefPage({
     name: string;
     flag: string;
   } | null>(null);
-  const [briefScrolled, setBriefScrolled] = useState(false);
+  const briefScrolledRef = useRef(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -132,8 +132,8 @@ export default function CreateBriefPage({
   const canPublish = isContentFilled && isDeadlineFilled && isTranslateDone;
 
   useEffect(() => {
-    if (isContentFilled && !briefScrolled) {
-      setBriefScrolled(true);
+    if (isContentFilled && !briefScrolledRef.current) {
+      briefScrolledRef.current = true;
       setTimeout(
         () =>
           deadlineRef.current?.scrollIntoView({
@@ -143,7 +143,7 @@ export default function CreateBriefPage({
         300,
       );
     }
-  }, [isContentFilled, briefScrolled]);
+  }, [isContentFilled]);
 
   useEffect(() => {
     if (
