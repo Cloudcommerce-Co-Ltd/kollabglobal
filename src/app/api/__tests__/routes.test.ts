@@ -77,18 +77,19 @@ describe('GET /api/creators', () => {
     expect(res.status).toBe(200);
   });
 
-  it('returns exactly 10 creators', async () => {
+  it('returns at least 15 creators (10 main + 5 backup)', async () => {
     const res = await getCreators();
     const data = await res.json();
-    expect(data).toHaveLength(10);
+    expect(data.length).toBeGreaterThanOrEqual(15);
   });
 
-  it('every creator has isBackup=false', async () => {
+  it('includes both main and backup creators', async () => {
     const res = await getCreators();
     const data = await res.json();
-    for (const creator of data) {
-      expect(creator.isBackup).toBe(false);
-    }
+    const hasMain = data.some((c: { isBackup: boolean }) => !c.isBackup);
+    const hasBackup = data.some((c: { isBackup: boolean }) => c.isBackup);
+    expect(hasMain).toBe(true);
+    expect(hasBackup).toBe(true);
   });
 
   it('each creator has required fields', async () => {

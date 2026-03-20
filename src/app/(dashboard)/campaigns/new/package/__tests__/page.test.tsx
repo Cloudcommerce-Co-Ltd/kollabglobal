@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import SelectPackagePage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
+import type { Country, Package } from "@/types";
 
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
@@ -11,7 +12,13 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-const SAMPLE_PACKAGES = [
+const mkCountry = (id: string): Country => ({
+  id, name: id, flag: '🏳️', creatorsAvail: 0,
+  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+});
+
+const SAMPLE_PACKAGES: Package[] = [
   {
     id: "starter",
     name: "Starter",
@@ -46,8 +53,8 @@ const SAMPLE_PACKAGES = [
 
 beforeEach(() => {
   useCampaignStore.getState().reset();
-  // Set a countryId so the guard passes
-  useCampaignStore.getState().setCountry("thailand");
+  // Set a countryData so the guard passes
+  useCampaignStore.getState().setCountry(mkCountry("thailand"));
   mockPush.mockClear();
   mockReplace.mockClear();
 
@@ -72,14 +79,14 @@ describe("SelectPackagePage", () => {
   it("auto-selects Popular package (has badge)", async () => {
     render(<SelectPackagePage />);
     await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
-    expect(useCampaignStore.getState().packageId).toBe("popular");
+    expect(useCampaignStore.getState().packageData?.id).toBe("popular");
   });
 
   it("clicking a different card updates the store", async () => {
     render(<SelectPackagePage />);
     await waitFor(() => expect(screen.getByText("Starter")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Starter"));
-    expect(useCampaignStore.getState().packageId).toBe("starter");
+    expect(useCampaignStore.getState().packageData?.id).toBe("starter");
   });
 
   it("shows discount savings badge for packages with discount", async () => {
@@ -89,8 +96,8 @@ describe("SelectPackagePage", () => {
     expect(screen.getByText("ประหยัด 10%")).toBeInTheDocument();
   });
 
-  it("redirects to country page if no countryId in store", async () => {
-    useCampaignStore.getState().reset(); // clears countryId
+  it("redirects to country page if no countryData in store", async () => {
+    useCampaignStore.getState().reset(); // clears countryData
     render(<SelectPackagePage />);
     await waitFor(() =>
       expect(mockReplace).toHaveBeenCalledWith("/campaigns/new/country")

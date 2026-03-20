@@ -29,11 +29,11 @@ type CampaignStore = CampaignCreationState & CampaignCreationActions;
 
 const initialState: CampaignCreationState = {
   step: 1,
-  countryId: null,
+  countryData: null,
   promotionType: null,
   productData: null,
-  packageId: null,
-  selectedCreatorIds: [],
+  packageData: null,
+  selectedCreatorsData: [],
 };
 
 export const useCampaignStore = create<CampaignStore>((set) => ({

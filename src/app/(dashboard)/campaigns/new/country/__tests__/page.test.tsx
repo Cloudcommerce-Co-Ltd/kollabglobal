@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import SelectCountryPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
+import type { Country } from "@/types";
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -12,11 +13,17 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-const SAMPLE_COUNTRIES = [
-  { id: "thailand", name: "Thailand", flag: "🇹🇭", creatorsAvail: 1500, isActive: true },
-  { id: "vietnam", name: "Vietnam", flag: "🇻🇳", creatorsAvail: 840, isActive: true },
-  { id: "usa", name: "United States", flag: "🇺🇸", creatorsAvail: 1200, isActive: true },
-  { id: "uk", name: "United Kingdom", flag: "🇬🇧", creatorsAvail: 650, isActive: true },
+const mkCountry = (id: string, name: string, flag: string, creatorsAvail: number): Country => ({
+  id, name, flag, creatorsAvail,
+  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+});
+
+const SAMPLE_COUNTRIES: Country[] = [
+  mkCountry("thailand", "Thailand", "🇹🇭", 1500),
+  mkCountry("vietnam", "Vietnam", "🇻🇳", 840),
+  mkCountry("usa", "United States", "🇺🇸", 1200),
+  mkCountry("uk", "United Kingdom", "🇬🇧", 650),
 ];
 
 beforeEach(() => {
@@ -59,7 +66,7 @@ describe("SelectCountryPage", () => {
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Thailand")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Thailand").closest("button")!);
-    expect(useCampaignStore.getState().countryId).toBe("thailand");
+    expect(useCampaignStore.getState().countryData?.id).toBe("thailand");
   });
 
   it("CTA is disabled when no country selected", async () => {
@@ -86,7 +93,7 @@ describe("SelectCountryPage", () => {
   });
 
   it("pre-selects country from store on mount", async () => {
-    useCampaignStore.getState().setCountry("vietnam");
+    useCampaignStore.getState().setCountry(mkCountry("vietnam", "Vietnam", "🇻🇳", 840));
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());
     const cta = screen.getByText("ถัดไป — เพิ่มสินค้า / บริการ");

@@ -1,5 +1,40 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useCampaignStore } from '../campaign-store';
+import type { Country, Package, Creator } from '@/types';
+
+const COUNTRY_TH: Country = {
+  id: 'th', name: 'Thailand', flag: '🇹🇭', creatorsAvail: 1500,
+  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+};
+
+const COUNTRY_SG: Country = {
+  id: 'sg', name: 'Singapore', flag: '🇸🇬', creatorsAvail: 800,
+  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+};
+
+const PKG_STARTER: Package = {
+  id: 'pkg-starter', name: 'Starter', badge: null,
+  numCreators: 5, pricePerCreator: 2500, discountPct: 0,
+  estReach: null, estEngagement: null,
+};
+
+const PKG_POPULAR: Package = {
+  id: 'pkg-popular', name: 'Popular', badge: 'แนะนำ',
+  numCreators: 10, pricePerCreator: 3500, discountPct: 5,
+  estReach: null, estEngagement: null,
+};
+
+const CREATOR_1: Creator = {
+  id: 'creator-1', name: 'Creator 1', niche: 'Food', engagement: '5%',
+  reach: '100K', avatar: '👩', countryFlag: '🇹🇭', isBackup: false,
+};
+
+const CREATOR_2: Creator = {
+  id: 'creator-2', name: 'Creator 2', niche: 'Beauty', engagement: '7%',
+  reach: '200K', avatar: '👨', countryFlag: '🇻🇳', isBackup: false,
+};
 
 describe('campaign-store', () => {
   beforeEach(() => {
@@ -9,16 +44,16 @@ describe('campaign-store', () => {
   it('has correct initial state', () => {
     const state = useCampaignStore.getState();
     expect(state.step).toBe(1);
-    expect(state.countryId).toBeNull();
+    expect(state.countryData).toBeNull();
     expect(state.promotionType).toBeNull();
     expect(state.productData).toBeNull();
-    expect(state.packageId).toBeNull();
-    expect(state.selectedCreatorIds).toEqual([]);
+    expect(state.packageData).toBeNull();
+    expect(state.selectedCreatorsData).toEqual([]);
   });
 
-  it('setCountry sets countryId', () => {
-    useCampaignStore.getState().setCountry('th');
-    expect(useCampaignStore.getState().countryId).toBe('th');
+  it('setCountry sets countryData', () => {
+    useCampaignStore.getState().setCountry(COUNTRY_TH);
+    expect(useCampaignStore.getState().countryData).toEqual(COUNTRY_TH);
   });
 
   it('setPromotionType sets PRODUCT', () => {
@@ -46,14 +81,14 @@ describe('campaign-store', () => {
     expect(useCampaignStore.getState().productData).toEqual(product);
   });
 
-  it('setPackage sets packageId', () => {
-    useCampaignStore.getState().setPackage('pkg-starter');
-    expect(useCampaignStore.getState().packageId).toBe('pkg-starter');
+  it('setPackage sets packageData', () => {
+    useCampaignStore.getState().setPackage(PKG_STARTER);
+    expect(useCampaignStore.getState().packageData).toEqual(PKG_STARTER);
   });
 
-  it('setCreators sets selectedCreatorIds array', () => {
-    useCampaignStore.getState().setCreators(['creator-1', 'creator-2']);
-    expect(useCampaignStore.getState().selectedCreatorIds).toEqual(['creator-1', 'creator-2']);
+  it('setCreators sets selectedCreatorsData array', () => {
+    useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
+    expect(useCampaignStore.getState().selectedCreatorsData).toEqual([CREATOR_1, CREATOR_2]);
   });
 
   it('nextStep increments step', () => {
@@ -78,9 +113,9 @@ describe('campaign-store', () => {
   });
 
   it('reset returns to initial state after mutations', () => {
-    useCampaignStore.getState().setCountry('sg');
-    useCampaignStore.getState().setPackage('pkg-popular');
-    useCampaignStore.getState().setCreators(['c-1', 'c-2', 'c-3']);
+    useCampaignStore.getState().setCountry(COUNTRY_SG);
+    useCampaignStore.getState().setPackage(PKG_POPULAR);
+    useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
     useCampaignStore.getState().nextStep();
     useCampaignStore.getState().nextStep();
 
@@ -88,10 +123,10 @@ describe('campaign-store', () => {
 
     const state = useCampaignStore.getState();
     expect(state.step).toBe(1);
-    expect(state.countryId).toBeNull();
+    expect(state.countryData).toBeNull();
     expect(state.promotionType).toBeNull();
     expect(state.productData).toBeNull();
-    expect(state.packageId).toBeNull();
-    expect(state.selectedCreatorIds).toEqual([]);
+    expect(state.packageData).toBeNull();
+    expect(state.selectedCreatorsData).toEqual([]);
   });
 });
