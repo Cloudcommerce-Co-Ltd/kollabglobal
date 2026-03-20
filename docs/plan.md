@@ -1,7 +1,7 @@
 ### Wait to P’Guide:
 - [x] S3 presigned upload module (env-guarded)
-- [x] Gemini client module (env-guarded)
-- [x] Omise SDK install + client module (omise-node, env-guarded)
+- [] Gemini client module (env-guarded)
+- [] Omise SDK install + client module (omise-node, env-guarded)
 
 ### Day 1 — Foundation
 - [x] Prisma schema + migrate dev
@@ -16,11 +16,14 @@ NOTED: เพิ่ม Vitest setup + unit/integration tests ไว้เพร�
 - [x] Port + wire SelectCountry page
 - [x] Port + wire SelectPackage page
 - [x] Store selection in Zustand
+- [x] Update the user interface to make it responsive.
+- [x] POC Omise payment (QRcode only)
+- [x] S3 presigned upload module setup
 
 ### Day 3 — AddProduct / Service
-- [] POST /api/upload/presign (S3)
-- [] Port + wire AddProduct page — real S3 image upload
-- [] Store product data in Zustand
+- [x] POST /api/upload/presign (S3)
+- [x] Port + wire AddProduct page — real S3 image upload
+- [x] Store product data in Zustand
 
 ### Day 4 — SelectCreators + Checkout + Omise Charge
 - [] GET /api/creators

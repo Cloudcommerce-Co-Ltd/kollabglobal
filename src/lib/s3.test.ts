@@ -15,8 +15,8 @@ import { isS3Configured, generatePresignedUpload } from '@/lib/s3'
 const ALL_VARS = {
   AWS_ACCESS_KEY_ID: 'AKIATEST123',
   AWS_SECRET_ACCESS_KEY: 'secrettest456',
-  AWS_S3_BUCKET: 'kollabglobal-uploads',
-  AWS_S3_REGION: 'ap-southeast-7',
+  AWS_S3_BUCKET: 'kollab-global',
+  AWS_S3_REGION: 'ap-southeast-1',
 }
 
 afterEach(() => {
@@ -94,7 +94,7 @@ describe('generatePresignedUpload', () => {
   it('objectUrl is the correct permanent S3 URL', async () => {
     const result = await generatePresignedUpload({ folder: 'products', contentType: 'image/jpeg' })
     expect(result.objectUrl).toBe(
-      `https://kollabglobal-uploads.s3.ap-southeast-7.amazonaws.com/${result.key}`
+      `https://kollab-global.s3.ap-southeast-1.amazonaws.com/${result.key}`
     )
   })
 

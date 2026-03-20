@@ -1,3 +1,495 @@
-export default function SelectProductPage() {
-  return <div className="p-4 sm:p-6 lg:p-8">Step 2 — Add Product / Service</div>;
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, FileText, Link, Package, Target, Truck, Upload } from "lucide-react";
+import { useCampaignStore } from "@/stores/campaign-store";
+import { useImageUpload } from "@/hooks/use-image-upload";
+import { PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "@/lib/constants";
+
+function typeEmoji(cat: string, isService: boolean): string {
+  if (!isService) {
+    if (cat.includes("Food") || cat.includes("Snack")) return "🥭";
+    if (cat.includes("Beauty") || cat.includes("Skincare")) return "✨";
+    if (cat.includes("Health")) return "🌿";
+    if (cat.includes("Fashion")) return "👕";
+    if (cat.includes("Beverage")) return "🧋";
+    if (cat.includes("Electronics")) return "📱";
+    if (cat.includes("Home")) return "🏠";
+    return "📦";
+  } else {
+    if (cat.includes("ร้านอาหาร") || cat.includes("คาเฟ่")) return "🍽️";
+    if (cat.includes("ท่องเที่ยว") || cat.includes("โรงแรม")) return "✈️";
+    if (cat.includes("ความงาม") || cat.includes("สปา")) return "💆";
+    if (cat.includes("ฟิตเนส") || cat.includes("สุขภาพ")) return "💪";
+    if (cat.includes("การศึกษา") || cat.includes("คอร์ส")) return "📚";
+    if (cat.includes("แอป") || cat.includes("Software")) return "💻";
+    if (cat.includes("อสังหา")) return "🏢";
+    return "🔧";
+  }
+}
+
+export default function AddProductPage() {
+  const router = useRouter();
+  const { countryId, promotionType, productData, setPromotionType, setProduct, nextStep, goToStep } =
+    useCampaignStore();
+
+  const [type, setType] = useState<"product" | "service" | null>(
+    promotionType === "PRODUCT" ? "product" : promotionType === "SERVICE" ? "service" : null
+  );
+  const [brandName, setBrandName] = useState(productData?.brandName ?? "");
+  const [name, setName] = useState(productData?.productName ?? "");
+  const [category, setCategory] = useState(productData?.category ?? "");
+  const [description, setDescription] = useState(productData?.description ?? "");
+  const [sellingPoints, setSellingPoints] = useState(productData?.sellingPoints ?? "");
+  const [url, setUrl] = useState(productData?.url ?? "");
+  const [weight, setWeight] = useState(productData?.weight?.toString() ?? "");
+  const [length, setLength] = useState(productData?.length?.toString() ?? "");
+  const [width, setWidth] = useState(productData?.width?.toString() ?? "");
+  const [height, setHeight] = useState(productData?.height?.toString() ?? "");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { imageUrl, uploading, handleFileSelect } = useImageUpload();
+
+  useEffect(() => {
+    goToStep(2);
+  }, [goToStep]);
+
+  useEffect(() => {
+    if (!countryId) {
+      router.replace("/campaigns/new/country");
+    }
+  }, [countryId, router]);
+
+  const isService = type === "service";
+  const categories = isService ? SERVICE_CATEGORIES : PRODUCT_CATEGORIES;
+  const isValid = !!(type && brandName.trim() && name.trim() && category);
+
+  function handleTypeChange(t: "product" | "service") {
+    setType(t);
+    setCategory("");
+  }
+
+  function handleSubmit() {
+    if (!isValid || !type) return;
+    setPromotionType(type === "product" ? "PRODUCT" : "SERVICE");
+    setProduct({
+      brandName: brandName.trim(),
+      productName: name.trim(),
+      category,
+      description: description.trim(),
+      sellingPoints: sellingPoints.trim(),
+      url: url.trim(),
+      imageUrl: imageUrl ?? "",
+      isService,
+      weight: weight ? parseFloat(weight) : undefined,
+      length: length ? parseFloat(length) : undefined,
+      width: width ? parseFloat(width) : undefined,
+      height: height ? parseFloat(height) : undefined,
+    });
+    nextStep();
+    router.push("/campaigns/new/package");
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f5f7fa]">
+      {/* Gradient header */}
+      <div className="bg-gradient-to-br from-[#4ECDC4] to-[#4A90D9] px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1060px]">
+          <button
+            onClick={() => router.push("/campaigns/new/country")}
+            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-white/80"
+          >
+            <ArrowLeft size={16} />
+            กลับไปเลือกตลาด
+          </button>
+          <h1 className="m-0 text-xl font-bold text-white sm:text-2xl">
+            เพิ่มสินค้าหรือบริการที่จะโปรโมท
+          </h1>
+          <p className="m-0 mt-0.5 text-sm text-white/75">
+            กรอกข้อมูลให้ครีเอเตอร์เข้าใจสิ่งที่ต้องโปรโมท
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1060px] px-4 py-7 sm:px-6 lg:px-8">
+        {/* Promotion type selector */}
+        <div className="mb-5 rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+          <div className="mb-3.5 text-[15px] font-bold text-[#4A4A4A]">
+            คุณต้องการโปรโมทอะไร? <span className="text-red-500">*</span>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {[
+              {
+                id: "product" as const,
+                label: "สินค้า",
+                desc: "โปรโมทสินค้าที่จับต้องได้ และจัดส่งให้ครีเอเตอร์รีวิว",
+                icon: "📦",
+              },
+              {
+                id: "service" as const,
+                label: "บริการ",
+                desc: "โปรโมทบริการ ร้านค้า แอป หรือประสบการณ์ต่างๆ",
+                icon: "🎯",
+              },
+            ].map((t) => {
+              const active = type === t.id;
+              const isProduct = t.id === "product";
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => handleTypeChange(t.id)}
+                  className={`flex cursor-pointer items-start gap-3.5 rounded-xl border-2 p-4 text-left transition-all ${
+                    active
+                      ? isProduct
+                        ? "border-[#4ECDC4] bg-[#e8f8f7]"
+                        : "border-[#4A90D9] bg-[#e8f0fa]"
+                      : "border-[#e8ecf0] bg-white"
+                  }`}
+                >
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-[22px] transition-all ${
+                      active
+                        ? isProduct
+                          ? "bg-[#4ECDC4]"
+                          : "bg-[#4A90D9]"
+                        : isProduct
+                          ? "bg-[#4ECDC4]/10"
+                          : "bg-[#4A90D9]/10"
+                    }`}
+                  >
+                    {t.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div
+                      className={`mb-1 text-[15px] font-bold ${
+                        active ? (isProduct ? "text-[#4ECDC4]" : "text-[#4A90D9]") : "text-[#4A4A4A]"
+                      }`}
+                    >
+                      {t.label}
+                    </div>
+                    <div className="text-[13px] leading-relaxed text-[#8a90a3]">{t.desc}</div>
+                  </div>
+                  <div
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                      active
+                        ? isProduct
+                          ? "border-[#4ECDC4] bg-[#4ECDC4]"
+                          : "border-[#4A90D9] bg-[#4A90D9]"
+                        : "border-[#ccc] bg-transparent"
+                    }`}
+                  >
+                    {active && (
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                        <polyline
+                          points="20 6 9 17 4 12"
+                          stroke="white"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Form grid (shown after type selected) */}
+        {type && (
+          <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {/* Left column */}
+            <div className="flex flex-col gap-5">
+              {/* Image upload card */}
+              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+                <div className="mb-3.5 flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f8f7]">
+                    <Upload size={16} color="#4ECDC4" />
+                  </div>
+                  <span className="text-[15px] font-bold text-[#4A4A4A]">
+                    รูป{isService ? "บริการ" : "สินค้า"}
+                  </span>
+                  <span className="text-xs text-[#8a90a3]">(ไม่บังคับ)</span>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                />
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex h-[110px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed transition-all ${
+                    imageUrl ? "border-[#4ECDC4] bg-[#e8f8f7]" : "border-[#e8ecf0] bg-[#fafbfc]"
+                  }`}
+                >
+                  {imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imageUrl}
+                      alt="preview"
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  ) : uploading ? (
+                    <span className="text-sm text-[#8a90a3]">กำลังอัปโหลด...</span>
+                  ) : (
+                    <>
+                      <Upload size={20} color="#8a90a3" />
+                      <span className="text-[13px] text-[#8a90a3]">คลิกเพื่ออัปโหลดรูป</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Product / Service info card */}
+              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+                <div className="mb-4 flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f0fa]">
+                    {isService ? (
+                      <Target size={16} color="#4A90D9" />
+                    ) : (
+                      <Package size={16} color="#4A90D9" />
+                    )}
+                  </div>
+                  <span className="text-[15px] font-bold text-[#4A4A4A]">
+                    ข้อมูล{isService ? "บริการ" : "สินค้า"}
+                  </span>
+                  <span className="text-xs text-red-500">*</span>
+                </div>
+
+                <div className="mb-3.5">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    ชื่อแบรนด์ <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={brandName}
+                    onChange={(e) => setBrandName(e.target.value)}
+                    placeholder="เช่น KOLLAB, FitLife, The Table"
+                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-[11px] text-sm outline-none transition-colors ${
+                      brandName ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
+                    }`}
+                  />
+                </div>
+
+                <div className="mb-3.5">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    ชื่อ{isService ? "บริการ" : "สินค้า"}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={
+                      isService
+                        ? "เช่น คอร์สเรียนโยคะออนไลน์, ร้านอาหารไทย The Table"
+                        : "เช่น มะม่วงอบแห้ง Premium"
+                    }
+                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-[11px] text-sm outline-none transition-colors ${
+                      name ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    หมวดหมู่ <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {categories.map((cat) => {
+                      const active = category === cat;
+                      return (
+                        <button
+                          key={cat}
+                          onClick={() => setCategory(cat)}
+                          className={`flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-[7px] text-xs font-semibold transition-all ${
+                            active
+                              ? "border-[#4ECDC4] bg-[#e8f8f7] text-[#4ECDC4]"
+                              : "border-[#e8ecf0] bg-white text-[#4A4A4A]"
+                          }`}
+                        >
+                          <span className="text-sm">{typeEmoji(cat, isService)}</span>
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right column */}
+            <div className="flex flex-col gap-5">
+              {/* Creator details card */}
+              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+                <div className="mb-4 flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0f4ff]">
+                    <FileText size={16} color="#7c6ef7" />
+                  </div>
+                  <span className="text-[15px] font-bold text-[#4A4A4A]">
+                    รายละเอียดสำหรับครีเอเตอร์
+                  </span>
+                </div>
+
+                <div className="mb-3.5">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    URL {isService ? "บริการ" : "สินค้า"}{" "}
+                    <span className="text-[11px] font-normal text-[#8a90a3]">(ไม่บังคับ)</span>
+                  </label>
+                  <div className="relative">
+                    <Link
+                      size={14}
+                      color="#8a90a3"
+                      className="absolute left-3 top-1/2 -translate-y-1/2"
+                    />
+                    <input
+                      type="url"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder={
+                        isService
+                          ? "https://www.yourservice.com"
+                          : "https://www.yourshop.com/product"
+                      }
+                      className={`w-full rounded-[10px] border-[1.5px] py-[10px] pl-8 pr-3.5 text-sm outline-none transition-colors ${
+                        url ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
+                      }`}
+                    />
+                  </div>
+                  <p className="mt-1 text-[11px] text-[#8a90a3]">
+                    ใส่ลิงก์เพื่อให้ AI ดึงข้อมูลมาช่วยสร้าง Brief ได้อัตโนมัติ
+                  </p>
+                </div>
+
+                <div className="mb-3.5">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    รายละเอียด{" "}
+                    <span className="text-[11px] font-normal text-[#8a90a3]">สั้นๆ</span>
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder={
+                      isService
+                        ? "เช่น คอร์สโยคะสำหรับผู้เริ่มต้น เรียนออนไลน์ได้ทุกที่ทุกเวลา"
+                        : "เช่น ผลไม้อบแห้งจากสวนจันทบุรี ไม่ใส่สารกันบูด"
+                    }
+                    rows={3}
+                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-[11px] text-sm outline-none"
+                    style={{ minHeight: 72 }}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    จุดเด่น / Selling Points
+                  </label>
+                  <textarea
+                    value={sellingPoints}
+                    onChange={(e) => setSellingPoints(e.target.value)}
+                    placeholder={
+                      isService
+                        ? "เช่น มีใบประกาศนียบัตร, ครูผู้สอนระดับสากล"
+                        : "เช่น ได้รับรางวัล OTOP 5 ดาว"
+                    }
+                    rows={2}
+                    className="w-full resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-[11px] text-sm outline-none"
+                    style={{ minHeight: 56 }}
+                  />
+                </div>
+              </div>
+
+              {/* Shipping card (product only) */}
+              {!isService && (
+                <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-[22px]">
+                  <div className="mb-1 flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
+                      <Truck size={16} color="#d97706" />
+                    </div>
+                    <span className="text-[15px] font-bold text-[#4A4A4A]">ข้อมูลจัดส่ง</span>
+                    <span className="text-xs text-[#8a90a3]">(ไม่บังคับ)</span>
+                  </div>
+                  <p className="mb-3.5 ml-[42px] text-xs text-[#8a90a3]">
+                    กรอกเพื่อประเมินค่าจัดส่งสินค้าให้ครีเอเตอร์
+                  </p>
+
+                  <div className="mb-3">
+                    <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                      น้ำหนัก (กรัม)
+                    </label>
+                    <input
+                      type="number"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      placeholder="เช่น 250"
+                      className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-[10px] text-sm outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                      ขนาด (ซม.)
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(
+                        [
+                          [length, setLength, "กว้าง"],
+                          [width, setWidth, "ยาว"],
+                          [height, setHeight, "สูง"],
+                        ] as [string, (v: string) => void, string][]
+                      ).map(([val, setter, placeholder]) => (
+                        <input
+                          key={placeholder}
+                          type="number"
+                          value={val}
+                          onChange={(e) => setter(e.target.value)}
+                          placeholder={placeholder}
+                          className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3 py-[10px] text-sm outline-none"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* No-shipping banner (service only) */}
+              {isService && (
+                <div className="flex items-center gap-2.5 rounded-xl border border-[#4A90D9]/20 bg-[#e8f0fa] px-[18px] py-3.5">
+                  <span className="shrink-0 text-xl">✅</span>
+                  <div>
+                    <div className="mb-0.5 text-[13px] font-semibold text-[#4A90D9]">
+                      ไม่ต้องจัดส่งสินค้า
+                    </div>
+                    <div className="text-xs leading-relaxed text-[#8a90a3]">
+                      แคมเปญบริการไม่มีขั้นตอนส่งของ — ครีเอเตอร์จะรับ Brief และเริ่มสร้างคอนเทนต์ได้เลย
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="flex justify-center pb-10">
+          <button
+            disabled={!isValid}
+            onClick={handleSubmit}
+            className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
+              isValid ? "cursor-pointer bg-[#4ECDC4]" : "cursor-not-allowed bg-[#ccc]"
+            }`}
+          >
+            ยืนยัน — ถัดไป
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -59,6 +59,17 @@ export function filterCountriesByRegion<T extends { id: string }>(
   return countries.filter((c) => !ASIA_COUNTRY_IDS.has(c.id));
 }
 
+export const PRODUCT_CATEGORIES = [
+  "Food & Snack", "Beauty & Skincare", "Health & Wellness", "Fashion",
+  "Lifestyle", "Beverage", "Electronics", "Home & Living",
+];
+
+export const SERVICE_CATEGORIES = [
+  "ร้านอาหาร / คาเฟ่", "ท่องเที่ยว / โรงแรม", "ความงาม / สปา",
+  "ฟิตเนส / สุขภาพ", "การศึกษา / คอร์สเรียน", "แอปพลิเคชัน / Software",
+  "อสังหาริมทรัพย์", "บริการอื่นๆ",
+];
+
 export const SAMPLE_CREATOR_AVATARS = [
   { avatar: "👩🏻", name: "Linh Tran", niche: "Food Review", eng: "8.5%", reach: "250K", flag: "🇻🇳" },
   { avatar: "👩🏽", name: "Salwa Ahmad", niche: "Lifestyle", eng: "7.2%", reach: "180K", flag: "🇲🇾" },
