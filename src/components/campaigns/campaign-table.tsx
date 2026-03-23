@@ -1,0 +1,185 @@
+'use client';
+
+import Link from 'next/link';
+import Image from 'next/image';
+import { ChevronRight, Plus } from 'lucide-react';
+import { CAMPAIGN_STATUS_CONFIG } from '@/lib/constants';
+import { PlatformIcon } from '@/components/icons/platform-icons';
+import type { CampaignListItem } from '@/types/campaign';
+
+interface CampaignTableProps {
+  campaigns: CampaignListItem[];
+}
+
+function CampaignIcon({ product }: { product: CampaignListItem['product'] }) {
+  if (product?.imageUrl) {
+    return (
+      <div className="relative size-11 shrink-0 overflow-hidden rounded-[10px]">
+        <Image
+          src={product.imageUrl}
+          alt={product.productName}
+          fill
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+  const letter = product?.productName?.[0]?.toUpperCase() ?? '?';
+  return (
+    <div className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[#e8f8f7] text-lg font-bold text-[#4ECDC4]">
+      {letter}
+    </div>
+  );
+}
+
+function getCreatorCounts(creators: CampaignListItem['creators']) {
+  const total = creators.length;
+  const accepted = creators.filter(
+    (c) => c.status === 'ACCEPTED' || c.status === 'COMPLETED'
+  ).length;
+  const pending = creators.filter((c) => c.status === 'PENDING').length;
+  return { accepted, total, pending };
+}
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-[#e8f8f7]">
+        <Plus size={24} className="text-[#4ECDC4]" />
+      </div>
+      <p className="mb-1 text-[16px] font-semibold text-[#4a4a4a]">ยังไม่มีแคมเปญ</p>
+      <p className="mb-5 text-[13px] text-[#8a90a3]">สร้างแคมเปญแรกของคุณเพื่อเริ่มต้น</p>
+      <Link
+        href="/campaigns/new/country"
+        className="rounded-[10px] bg-[#4ECDC4] px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-90"
+      >
+        สร้างแคมเปญใหม่
+      </Link>
+    </div>
+  );
+}
+
+export function CampaignTable({ campaigns }: CampaignTableProps) {
+  if (campaigns.length === 0) {
+    return (
+      <div className="rounded-[14px] border border-[#e8ecf0] bg-white">
+        <EmptyState />
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-[14px] border border-[#e8ecf0] bg-white">
+      {/* Desktop header row */}
+      <div className="hidden grid-cols-[2.5fr_1.2fr_0.9fr_1.2fr] gap-3 border-b border-[#e8ecf0] bg-[#fafbfc] px-5 py-2.5 sm:grid">
+        <div className="text-[12px] font-semibold uppercase tracking-wide text-[#8a90a3]">แคมเปญ</div>
+        <div className="text-center text-[12px] font-semibold uppercase tracking-wide text-[#8a90a3]">สถานะ</div>
+        <div className="text-center text-[12px] font-semibold uppercase tracking-wide text-[#8a90a3]">ครีเอเตอร์</div>
+        <div />
+      </div>
+
+      {campaigns.map((c) => {
+        const statusCfg = CAMPAIGN_STATUS_CONFIG[c.status];
+        const { accepted, total, pending } = getCreatorCounts(c.creators);
+        const platforms = c.package?.platforms ?? [];
+        const displayName = c.product?.productName ?? `แคมเปญ #${c.id.slice(-4)}`;
+
+        return (
+          <Link
+            key={c.id}
+            href={`/campaigns/${c.id}`}
+            className="block border-b border-[#e8ecf0] last:border-b-0 transition-colors hover:bg-[#fafbfc]"
+          >
+            {/* Desktop row */}
+            <div className="hidden grid-cols-[2.5fr_1.2fr_0.9fr_1.2fr] items-center gap-3 px-5 py-3.5 sm:grid">
+              {/* Column 1: Campaign info */}
+              <div className="flex items-center gap-3">
+                <CampaignIcon product={c.product} />
+                <div>
+                  <div className="flex items-center gap-1.5 text-[15px] font-semibold text-[#4a4a4a]">
+                    {displayName}
+                    {(c.status === 'PENDING' || c.status === 'ACCEPTING') && (
+                      <span className="rounded bg-[#4ECDC4] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                        NEW
+                      </span>
+                    )}
+                    {c.promotionType === 'SERVICE' && (
+                      <span className="rounded bg-[#e8f0fa] px-1.5 py-0.5 text-[11px] font-semibold text-[#4A90D9]">
+                        บริการ
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-2 text-[13px] text-[#8a90a3]">
+                    <span>{c.package?.numCreators ?? total} ครีเอเตอร์</span>
+                    {platforms.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        {platforms.map((p) => (
+                          <PlatformIcon key={p} platform={p} size={13} />
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 2: Status pill */}
+              <div className="text-center">
+                <span className={`rounded-full px-3 py-1 text-[12px] font-semibold ${statusCfg.pillClass}`}>
+                  {statusCfg.label}
+                </span>
+              </div>
+
+              {/* Column 3: Creator count */}
+              <div className="text-center text-[15px] font-semibold text-[#4a4a4a]">
+                {accepted}/{total}
+              </div>
+
+              {/* Column 4: Actions */}
+              <div className="flex items-center justify-end gap-2">
+                {pending > 0 && (
+                  <span className="flex size-5.5 items-center justify-center rounded-full bg-[#e74c6c] text-[12px] font-bold text-white">
+                    {pending}
+                  </span>
+                )}
+                <ChevronRight size={16} color="#8a90a3" />
+              </div>
+            </div>
+
+            {/* Mobile card */}
+            <div className="flex items-start gap-3 px-4 py-3.5 sm:hidden">
+              <CampaignIcon product={c.product} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-1 text-[14px] font-semibold text-[#4a4a4a]">
+                      {displayName}
+                      {(c.status === 'PENDING' || c.status === 'ACCEPTING') && (
+                        <span className="rounded bg-[#4ECDC4] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          NEW
+                        </span>
+                      )}
+                      {c.promotionType === 'SERVICE' && (
+                        <span className="rounded bg-[#e8f0fa] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A90D9]">
+                          บริการ
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 text-[12px] text-[#8a90a3]">
+                      {c.package?.numCreators ?? total} ครีเอเตอร์ • {accepted}/{total} ตอบรับ
+                    </div>
+                  </div>
+                  <ChevronRight size={16} color="#8a90a3" className="mt-0.5 shrink-0" />
+                </div>
+                <div className="mt-1.5">
+                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${statusCfg.pillClass}`}>
+                    {statusCfg.label}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}

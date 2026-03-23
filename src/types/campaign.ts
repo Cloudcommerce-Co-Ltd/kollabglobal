@@ -1,3 +1,5 @@
+import type { CampaignStatus, CreatorStatus, PromotionType } from "@/types/index";
+
 export interface ProductData {
   brandName: string;
   productName: string;
@@ -11,6 +13,22 @@ export interface ProductData {
   length?: number;
   width?: number;
   height?: number;
+}
+
+export interface CampaignListItem {
+  id: string;
+  promotionType: PromotionType;
+  status: CampaignStatus;
+  createdAt: string;
+  country: { id: number; name: string; flag: string } | null;
+  package: { id: number; name: string; numCreators: number; platforms: string[] } | null;
+  product: {
+    brandName: string;
+    productName: string;
+    isService: boolean;
+    imageUrl: string | null;
+  } | null;
+  creators: Array<{ status: CreatorStatus }>;
 }
 
 export interface CampaignWithRelations {
