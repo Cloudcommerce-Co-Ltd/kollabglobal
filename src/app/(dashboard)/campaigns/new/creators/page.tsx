@@ -62,7 +62,7 @@ export default function SelectCreatorsPage() {
         </div>
       </div>
     );
-}
+  }
 
   useEffect(() => {
     fetch("/api/creators")
@@ -71,8 +71,7 @@ export default function SelectCreatorsPage() {
         setDisplayCreators(data);
         setSelectedIds(data.slice(0, maxCreators).map((c) => c.id));
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [maxCreators]);
 
   function toggleCreator(id: string) {
     const next = selectedIds.includes(id)
@@ -133,7 +132,7 @@ export default function SelectCreatorsPage() {
             <span className="text-sm font-semibold text-[#4A4A4A]">Top Picks</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {displayCreators.slice(0, 10).map((creator, i) => {
+            {displayCreators.slice(0, maxCreators).map((creator, i) => {
               const isSelected = selectedIds.includes(creator.id);
               const isDisabled = !isSelected && selectedIds.length >= maxCreators;
               return (
@@ -149,45 +148,47 @@ export default function SelectCreatorsPage() {
         </div>
 
         {/* Backup Section */}
-        <div>
-          <div className="flex justify-between">
-            <div className="mb-3 flex gap-2">
-              <span className="h-fit rounded-[8px] bg-[#e8ecf0] px-2.5 py-0.5 text-xs font-bold text-[#8a90a3]">สำรอง</span>
-              <span className="text-sm font-semibold text-[#4A4A4A]">ตัวเลือกอื่น</span>
+        {displayCreators.length > maxCreators && (
+          <div>
+            <div className="flex justify-between">
+              <div className="mb-3 flex gap-2">
+                <span className="h-fit rounded-[8px] bg-[#e8ecf0] px-2.5 py-0.5 text-xs font-bold text-[#8a90a3]">สำรอง</span>
+                <span className="text-sm font-semibold text-[#4A4A4A]">ตัวเลือกอื่น</span>
+              </div>
+  
+              {/* Yellow tip box */}
+              <div className="mb-3 rounded-lg border border-[#fde68a] bg-[#fffbeb] px-4 py-2.5 text-xs text-[#92400e]">
+                ครีเอเตอร์สำรองจะถูกเรียกใช้งานโดยอัตโนมัติ หากครีเอเตอร์หลักไม่ตอบรับงาน
+              </div>
             </div>
-
-            {/* Yellow tip box */}
-            <div className="mb-3 rounded-lg border border-[#fde68a] bg-[#fffbeb] px-4 py-2.5 text-xs text-[#92400e]">
-              ครีเอเตอร์สำรองจะถูกเรียกใช้งานโดยอัตโนมัติ หากครีเอเตอร์หลักไม่ตอบรับงาน
+  
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {displayCreators.slice(maxCreators, displayCreators.length).map((creator, offset) => {
+                const i = 10 + offset;
+                const isSelected = selectedIds.includes(creator.id);
+                const isDisabled = !isSelected && selectedIds.length >= maxCreators;
+                return (
+                  <CreatorCard
+                    key={i}
+                    creator={creator}
+                    isSelected={isSelected}
+                    isDisabled={isDisabled}
+                  />
+                );
+              })}
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {displayCreators.slice(10, 15).map((creator, offset) => {
-              const i = 10 + offset;
-              const isSelected = selectedIds.includes(creator.id);
-              const isDisabled = !isSelected && selectedIds.length >= maxCreators;
-              return (
-                <CreatorCard
-                  key={i}
-                  creator={creator}
-                  isSelected={isSelected}
-                  isDisabled={isDisabled}
-                />
-              );
-            })}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Sticky Footer */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ecf0] bg-white px-4 py-3 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-265 items-center justify-between">
+        <div className="mx-auto flex max-w-265 items-center justify-end gap-5">
           <div className="text-sm font-semibold text-[#8a90a3]">
             {isComplete ? (
               <span className="text-[#4ECDC4]">✓ เลือกครบจำนวนแล้ว</span>
             ) : (
-              `เลือกได้อีก ${maxCreators - selectedIds.length} คน`
+              <p>จำนวนครีเอเตอร์  {selectedIds.length}/{maxCreators} คน</p>
             )}
           </div>
           <button

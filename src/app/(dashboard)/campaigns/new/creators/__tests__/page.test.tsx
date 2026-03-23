@@ -25,21 +25,21 @@ const MOCK_CREATORS: Creator[] = SAMPLE_CREATOR_AVATARS.map((c, i) => ({
   isBackup: i >= 10,
 }));
 
-const mkCountry = (id: string): Country => ({
-  id, name: id, flag: '🏳️', creatorsAvail: 0,
+const mkCountry = (id: number): Country => ({
+  id, name: String(id), flag: '🏳️', creatorsAvail: 0,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const mkPackage = (numCreators = 10): Package => ({
-  id: 'popular', name: 'Popular', badge: null,
+  id: 2, name: 'Popular', badge: null,
   numCreators, pricePerCreator: 3500, discountPct: 5,
   estReach: '500K', estEngagement: '3%',
 });
 
 beforeEach(() => {
   useCampaignStore.getState().reset();
-  useCampaignStore.getState().setCountry(mkCountry('thailand'));
+  useCampaignStore.getState().setCountry(mkCountry(1));
   useCampaignStore.getState().setProduct({
     brandName: 'Brand', productName: 'Product', category: 'Food',
     description: '', sellingPoints: '', url: '', imageUrl: '', isService: false,
@@ -111,11 +111,13 @@ describe("SelectCreatorsPage", () => {
     expect(screen.getByText("ถัดไป — สรุปรายการ")).toBeInTheDocument();
   });
 
-  it("shows yellow tip box for backup creators", () => {
+  it("shows yellow tip box for backup creators", async () => {
     render(<SelectCreatorsPage />);
-    expect(
-      screen.getByText("ครีเอเตอร์สำรองจะถูกเรียกใช้งานโดยอัตโนมัติ หากครีเอเตอร์หลักไม่ตอบรับงาน")
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByText("ครีเอเตอร์สำรองจะถูกเรียกใช้งานโดยอัตโนมัติ หากครีเอเตอร์หลักไม่ตอบรับงาน")
+      ).toBeInTheDocument()
+    );
   });
 
   it("handleNext syncs selected creators to store", async () => {

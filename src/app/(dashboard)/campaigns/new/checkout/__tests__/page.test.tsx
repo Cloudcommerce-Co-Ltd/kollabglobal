@@ -1,9 +1,14 @@
 // @vitest-environment jsdom
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CheckoutPage from "../page";
 import { SAMPLE_CREATOR_AVATARS } from "@/lib/constants";
+
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
 
 describe("CheckoutPage", () => {
   it("renders title สรุปรายการ & ชำระเงิน", () => {
