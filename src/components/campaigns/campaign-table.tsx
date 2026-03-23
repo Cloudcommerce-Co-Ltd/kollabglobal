@@ -131,7 +131,7 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
 
               {/* Column 3: Creator count */}
               <div className="text-center text-[15px] font-semibold text-[#4a4a4a]">
-                {accepted}/{total}
+                {accepted}/{c.package?.numCreators ?? total}
               </div>
 
               {/* Column 4: Actions */}
@@ -165,7 +165,7 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
                       )}
                     </div>
                     <div className="mt-0.5 text-[12px] text-[#8a90a3]">
-                      {c.package?.numCreators ?? total} ครีเอเตอร์ • {accepted}/{total} ตอบรับ
+                      {c.package?.numCreators ?? total} ครีเอเตอร์ • {accepted}/{c.package?.numCreators ?? total} ตอบรับ
                     </div>
                   </div>
                   <ChevronRight size={16} color="#8a90a3" className="mt-0.5 shrink-0" />
