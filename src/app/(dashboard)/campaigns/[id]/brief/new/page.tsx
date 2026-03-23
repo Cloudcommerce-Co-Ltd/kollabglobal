@@ -14,10 +14,6 @@ import {
   Target,
   Package,
 } from 'lucide-react';
-import {
-  getPackagePlatforms,
-  getPackageDeliverables,
-} from '@/lib/package-utils';
 import { isBriefContentFilled, canPublishBrief } from '@/lib/brief-utils';
 import {
   fetchCampaign,
@@ -90,8 +86,8 @@ export default function CreateBriefPage({
   }, [id, router]);
 
   const isService = campaign?.product?.isService ?? false;
-  const platforms = getPackagePlatforms(campaign?.package);
-  const campaignDeliverables = getPackageDeliverables(campaign?.package);
+  const platforms = campaign?.package?.platforms ?? [];
+  const campaignDeliverables = campaign?.package?.deliverables ?? [];
 
   const isContentFilled = isBriefContentFilled(form);
   const isDeadlineFilled = !!form.deadline;

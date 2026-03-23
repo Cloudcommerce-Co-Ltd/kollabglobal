@@ -1,4 +1,7 @@
-/** Calculates the total package price. */
+export const VAT_RATE = 0.07;
+export const SERVICE_FEE_RATE = 0.03;
+
+/** Calculates the total package price (base, before fees). */
 export function calculatePackageTotal(pkg: {
   numCreators: number;
   price: number;
@@ -6,15 +9,17 @@ export function calculatePackageTotal(pkg: {
   return pkg.numCreators * pkg.price;
 }
 
-/** Returns the platforms for a given package. */
-export function getPackagePlatforms(pkg: { platforms: string[] } | null | undefined): string[] {
-  return pkg?.platforms ?? ['tiktok', 'instagram'];
-}
-
-/** Returns the deliverables for a given package. */
-export function getPackageDeliverables(pkg: { deliverables: string[] } | null | undefined): string[] {
-  return pkg?.deliverables ?? [
-    'TikTok 1 วิดีโอ (30–60 วิ)',
-    'IG 1 Reel + 3 Stories',
-  ];
+/** Calculates the full price breakdown including VAT and service fee. */
+export function calculateTotalWithFees(pkg: { numCreators: number; price: number }): {
+  basePrice: number;
+  vat: number;
+  serviceFee: number;
+  total: number;
+  totalSatang: number;
+} {
+  const basePrice = calculatePackageTotal(pkg);
+  const vat = Math.round(basePrice * VAT_RATE);
+  const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
+  const total = basePrice + vat + serviceFee;
+  return { basePrice, vat, serviceFee, total, totalSatang: Math.round(total * 100) };
 }

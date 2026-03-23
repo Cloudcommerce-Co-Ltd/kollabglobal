@@ -46,6 +46,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   campaigns     Campaign[]
+  payments      Payment[]
 
   @@map("users")
 }
@@ -236,6 +237,7 @@ model CampaignCreator {
 
 model Payment {
   id            String        @id @default(cuid())
+  userId        String        @map("user_id")
   campaignId    String        @unique @map("campaign_id")
   amount        Int
   currency      String        @default("THB")
@@ -246,6 +248,7 @@ model Payment {
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }

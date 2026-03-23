@@ -1,21 +1,26 @@
 'use client';
 
-import { useState } from "react";
-import { ArrowLeft, CreditCard, Building2, Lock } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, CreditCard, Building2, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCampaignStore } from "@/stores/campaign-store";
-import { calculatePackageTotal } from "@/lib/package-utils";
+import { calculatePackageTotal, VAT_RATE, SERVICE_FEE_RATE } from "@/lib/package-utils";
 
-const VAT_RATE = 0.07;
-const SERVICE_FEE_RATE = 0.03;
+type PaymentStatus = "idle" | "creating" | "pending" | "completed" | "failed";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { packageData, selectedCreatorsData, productData } = useCampaignStore();
+  const { packageData, selectedCreatorsData, productData, countryData, promotionType } =
+    useCampaignStore();
 
   const [showAltPayment, setShowAltPayment] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
+  const [chargeId, setChargeId] = useState<string | null>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [campaignId, setCampaignId] = useState<string | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const packageName = packageData?.name ?? '—';
   const numCreators = packageData?.numCreators ?? 0;
@@ -29,9 +34,101 @@ export default function CheckoutPage() {
   const campaignType = productData?.isService ? 'บริการ' : 'สินค้า';
   const duration = '30 วัน';
 
-  function handleNext() {
-    router.push('/campaigns');
-  }
+  // Auto-create charge on mount
+  useEffect(() => {
+    if (!packageData || !countryData || !productData || !promotionType || selectedCreatorsData.length === 0) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function createCharge() {
+      setPaymentStatus("creating");
+      try {
+        const res = await fetch("/api/payments/create-charge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({
+            countryId: countryData!.id,
+            packageId: packageData!.id,
+            promotionType: promotionType!,
+            creatorIds: selectedCreatorsData.map((c) => c.id),
+            productData: {
+              brandName: productData!.brandName,
+              productName: productData!.productName,
+              category: productData!.category,
+              description: productData!.description,
+              sellingPoints: productData!.sellingPoints,
+              url: productData!.url ?? undefined,
+              imageUrl: productData!.imageUrl ?? undefined,
+              isService: productData!.isService,
+              weight: productData!.weight ?? undefined,
+              length: productData!.length ?? undefined,
+              width: productData!.width ?? undefined,
+              height: productData!.height ?? undefined,
+            },
+          }),
+        });
+
+        if (!res.ok) {
+          setPaymentStatus("failed");
+          return;
+        }
+
+        const data = await res.json();
+        setChargeId(data.chargeId);
+        setQrCodeUrl(data.qrCodeUrl);
+        setCampaignId(data.campaignId);
+        setPaymentStatus("pending");
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
+        setPaymentStatus("failed");
+      }
+    }
+
+    createCharge();
+
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Poll status when pending
+  useEffect(() => {
+    if (paymentStatus !== "pending" || !chargeId) return;
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/payments/${chargeId}/status`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status === "successful") {
+          setPaymentStatus("completed");
+        } else if (data.status === "failed" || data.status === "expired") {
+          setPaymentStatus("failed");
+        }
+      } catch {
+        // continue polling on network errors
+      }
+    }, 3000);
+
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [paymentStatus, chargeId]);
+
+  // Auto-redirect on success
+  useEffect(() => {
+    if (paymentStatus !== "completed") return;
+    if (pollingRef.current) clearInterval(pollingRef.current);
+
+    const timer = setTimeout(() => {
+      router.push("/campaigns");
+    }, 1500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentStatus]);
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -205,16 +302,44 @@ export default function CheckoutPage() {
                     ใช้แอปธนาคารสแกน QR Code
                   </div>
 
-                  {/* QR placeholder */}
+                  {/* QR Code */}
                   <div
                     aria-label="QR Code"
-                    className="mx-auto mb-4 flex size-45 items-center justify-center rounded-xl bg-white"
+                    className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
                   >
-                    <Lock size={48} color="#4A4A4A" />
+                    {paymentStatus === "creating" && (
+                      <Loader2 size={48} color="#4A4A4A" className="animate-spin" />
+                    )}
+                    {(paymentStatus === "pending" || paymentStatus === "completed") && qrCodeUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={qrCodeUrl}
+                        alt="PromptPay QR Code"
+                        className="size-full rounded-xl object-contain"
+                      />
+                    )}
+                    {paymentStatus === "failed" && (
+                      <XCircle size={48} color="#ef4444" />
+                    )}
                   </div>
 
                   <div className="mb-5 text-center text-[13px] text-[#bbb]">
-                    รหัส: #KG-2026-7842
+                    {paymentStatus === "creating" && "กำลังสร้าง QR Code..."}
+                    {paymentStatus === "pending" && (
+                      <span className="flex items-center justify-center gap-1.5">
+                        <Loader2 size={13} className="animate-spin" />
+                        รอการชำระเงิน
+                      </span>
+                    )}
+                    {paymentStatus === "completed" && (
+                      <span className="flex items-center justify-center gap-1.5 text-[#4ECDC4]">
+                        <CheckCircle2 size={13} />
+                        ชำระเงินสำเร็จ — กำลังนำทาง...
+                      </span>
+                    )}
+                    {paymentStatus === "failed" && (
+                      <span className="text-red-400">การชำระเงินล้มเหลว กรุณาลองใหม่</span>
+                    )}
                   </div>
 
                   {/* Escrow notice */}
@@ -232,17 +357,9 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* Confirm Button */}
-            <button
-              onClick={handleNext}
-              className="w-full cursor-pointer rounded-xl border-none bg-linear-to-r from-[#4ECDC4] to-[#4A90D9] py-4 text-base font-bold text-white"
-            >
-              ✓ ยืนยันการชำระเงิน
-            </button>
-
             {/* Terms */}
             <p className="m-0 text-center text-[12px] text-[#8a90a3]">
-              เมื่อกดยืนยัน ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ
+              เมื่อสแกนและชำระเงินสำเร็จ ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ
             </p>
           </div>
         </div>

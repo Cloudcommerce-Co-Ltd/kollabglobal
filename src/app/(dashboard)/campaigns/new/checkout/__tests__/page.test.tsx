@@ -1,15 +1,32 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CheckoutPage from "../page";
-import { useCampaignStore } from "@/stores/campaign-store";
-import type { Creator, Package } from "@/types";
 
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
+import { useCampaignStore } from "@/stores/campaign-store";
+import type { Creator, Country, Package } from "@/types";
+
+const MOCK_COUNTRY: Country = {
+  id: 1,
+  name: "Thailand",
+  flag: "🇹🇭",
+  creatorsAvail: 100,
+  avgEyeball: null,
+  avgCPE: null,
+  foodBevEng: null,
+  beautyEng: null,
+  snackTrend: null,
+  platforms: ["tiktok", "instagram"],
+  cats: ["food"],
+  estReach: null,
+  estOrders: null,
+  isActive: true,
+};
 
 const MOCK_PACKAGE: Package = {
   id: 2,
@@ -43,15 +60,33 @@ const MOCK_CREATORS: Creator[] = Array.from({ length: 10 }, (_, i) => ({
   platform: null, socialHandle: null, portfolioUrl: null,
 }));
 
+const mockFetchPending = vi.fn().mockResolvedValue({
+  ok: true,
+  json: async () => ({
+    chargeId: "chrg_test_123",
+    qrCodeUrl: "https://example.com/qr.png",
+    paymentId: "payment_1",
+    campaignId: "campaign_1",
+  }),
+});
+
 beforeEach(() => {
   useCampaignStore.getState().reset();
+  useCampaignStore.getState().setCountry(MOCK_COUNTRY);
   useCampaignStore.getState().setPackage(MOCK_PACKAGE);
   useCampaignStore.getState().setCreators(MOCK_CREATORS);
+  useCampaignStore.getState().setPromotionType("PRODUCT");
   useCampaignStore.getState().setProduct({
     brandName: "Brand", productName: "Product", category: "Food",
     description: "", sellingPoints: "", url: "", imageUrl: "", isService: false,
   });
+  vi.stubGlobal("fetch", mockFetchPending);
   mockPush.mockClear();
+  mockFetchPending.mockClear();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("CheckoutPage", () => {
@@ -89,9 +124,20 @@ describe("CheckoutPage", () => {
     expect(screen.getByLabelText("QR Code")).toBeInTheDocument();
   });
 
-  it("shows reference code", () => {
+  it("shows QR code image after charge creation succeeds", async () => {
     render(<CheckoutPage />);
-    expect(screen.getByText("รหัส: #KG-2026-7842")).toBeInTheDocument();
+    await waitFor(() => {
+      const img = screen.getByAltText("PromptPay QR Code") as HTMLImageElement;
+      expect(img).toBeInTheDocument();
+      expect(img.src).toBe("https://example.com/qr.png");
+    });
+  });
+
+  it("shows waiting for payment status text after charge is created", async () => {
+    render(<CheckoutPage />);
+    await waitFor(() => {
+      expect(screen.getByText("รอการชำระเงิน")).toBeInTheDocument();
+    });
   });
 
   it("payment method toggle works visually", () => {
@@ -104,13 +150,32 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("เปลี่ยนวิธีชำระเงิน")).toBeInTheDocument();
   });
 
-  it("confirm button contains ยืนยันการชำระเงิน", () => {
+  it("shows updated terms disclaimer", () => {
     render(<CheckoutPage />);
-    expect(screen.getByText("✓ ยืนยันการชำระเงิน")).toBeInTheDocument();
+    expect(screen.getByText("เมื่อสแกนและชำระเงินสำเร็จ ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ")).toBeInTheDocument();
   });
 
-  it("shows terms disclaimer", () => {
+  it("calls create-charge API on mount with correct data (no amount field)", async () => {
     render(<CheckoutPage />);
-    expect(screen.getByText("เมื่อกดยืนยัน ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockFetchPending).toHaveBeenCalledWith(
+        "/api/payments/create-charge",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining('"countryId":1'),
+        })
+      );
+      // Amount must NOT be sent — server computes it from packageId
+      const callBody = JSON.parse(mockFetchPending.mock.calls[0][1].body as string);
+      expect(callBody).not.toHaveProperty("amount");
+    });
+  });
+
+  it("shows failure state when charge creation fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
+    render(<CheckoutPage />);
+    await waitFor(() => {
+      expect(screen.getByText("การชำระเงินล้มเหลว กรุณาลองใหม่")).toBeInTheDocument();
+    });
   });
 });

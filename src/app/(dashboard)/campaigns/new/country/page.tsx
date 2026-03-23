@@ -10,12 +10,17 @@ type Tab = 'asia' | 'global';
 
 export default function SelectCountryPage() {
   const router = useRouter();
-  const { countryData, setCountry } = useCampaignStore();
+  const { setCountry, reset } = useCampaignStore();
 
   const [tab, setTab] = useState<Tab>('asia');
-  const [selected, setSelected] = useState<number | null>(countryData?.id ?? null);
+  const [selected, setSelected] = useState<number | null>(null);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    reset();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     fetch('/api/countries')

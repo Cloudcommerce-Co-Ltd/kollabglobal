@@ -92,12 +92,12 @@ describe("SelectCountryPage", () => {
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/product");
   });
 
-  it("pre-selects country from store on mount", async () => {
+  it("resets store on mount so CTA starts disabled", async () => {
     useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"));
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());
     const cta = screen.getByText("ถัดไป — เพิ่มสินค้า / บริการ");
-    expect(cta).not.toBeDisabled();
+    expect(cta).toBeDisabled();
   });
 
 });
