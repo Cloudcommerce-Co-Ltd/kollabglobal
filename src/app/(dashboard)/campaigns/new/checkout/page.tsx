@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowLeft, CreditCard, Building2, Lock } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCampaignStore } from '@/stores/campaign-store';
-import { calculatePackageTotal } from '@/lib/package-utils';
+import { useState } from "react";
+import { ArrowLeft, CreditCard, Building2, Lock } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCampaignStore } from "@/stores/campaign-store";
+import { calculatePackageTotal } from "@/lib/package-utils";
 
 const VAT_RATE = 0.07;
 const SERVICE_FEE_RATE = 0.03;
@@ -24,7 +24,7 @@ export default function CheckoutPage() {
   const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
   const total = basePrice + vat + serviceFee;
   const numPosts = packageData
-    ? (packageData.deliverables?.length ?? 1) * packageData.numCreators
+    ? (packageData.deliverables.length ?? 1) * packageData.numCreators
     : 0;
   const campaignType = productData?.isService ? 'บริการ' : 'สินค้า';
   const duration = '30 วัน';
