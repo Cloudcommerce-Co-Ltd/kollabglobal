@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useCampaignStore } from '@/stores/campaign-store';
-import { PACKAGE_EXTRAS } from '@/lib/constants';
+import { SAMPLE_CREATOR_AVATARS } from '@/lib/constants';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import { calculatePackageTotal } from '@/lib/package-utils';
 import type { Creator, Package } from '@/types';
@@ -84,117 +84,132 @@ export default function SelectPackagePage() {
           <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
             {packages.map(pkg => {
               const isSelected = selected === pkg.id;
-              const extras = PACKAGE_EXTRAS[pkg.id] ?? {
-                platforms: [],
-                deliverables: [],
-              };
               const total = calculatePackageTotal(pkg);
               const avatarCount = Math.min(pkg.numCreators, 8);
+              const creatorDesc = pkg.id === 1
+                ? `${pkg.numCreators} ครีเอเตอร์`
+                : `${pkg.numCreators} ครีเอเตอร์ · ไทย+ต่างชาติ`;
 
               return (
                 <div
                   key={pkg.id}
                   onClick={() => handleSelect(pkg)}
-                  className={`relative flex cursor-pointer flex-col rounded-2xl border-2 px-5 pb-4.5 pt-5.5 transition-all ${
+                  className={`relative flex cursor-pointer flex-col overflow-hidden rounded-[18px] border-2 transition-all ${
                     isSelected
                       ? 'border-[#4ECDC4] shadow-[0_4px_24px_#4ECDC420]'
                       : 'border-[#e8ecf0]'
                   } bg-white`}
                 >
-                  {/* Popular badge */}
+                  {/* Recommended badge — flat-top tab */}
                   {pkg.badge && (
-                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-[#4ECDC4] px-3.5 py-0.75 text-xs font-bold text-white">
+                    <div className="absolute -top-px left-1/2 -translate-x-1/2 whitespace-nowrap rounded-b-[12px] rounded-t-none bg-[#4ECDC4] px-4.5 py-1 text-[11px] font-bold text-white">
                       {pkg.badge}
                     </div>
                   )}
 
-                  {/* Name + radio */}
-                  <div className="mb-4 flex items-center justify-between">
+                  {/* Radio indicator */}
+                  <div
+                    className={`absolute right-4 top-4 flex size-5 items-center justify-center rounded-full border-2 ${
+                      isSelected
+                        ? 'border-[#4ECDC4] bg-[#4ECDC4]'
+                        : 'border-[#e8ecf0] bg-transparent'
+                    }`}
+                  >
+                    {isSelected && <Check size={11} color="#fff" />}
+                  </div>
+
+                  {/* Plan name + tagline */}
+                  <div
+                    className={`border-b border-[#e8ecf0] px-4.5 pb-4.5 pt-6`}
+                  >
                     <div
-                      className={`text-xl font-extrabold ${isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'}`}
+                      className={`pr-7 text-lg font-extrabold ${
+                        isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'
+                      }`}
                     >
                       {pkg.name}
                     </div>
+                    <div className="mt-0.5 text-xs text-[#8a90a3]">
+                      {pkg.tagline}
+                    </div>
+                  </div>
+
+                  {/* Price — total price prominent */}
+                  <div className="border-b border-[#e8ecf0] px-4.5 py-4.5">
                     <div
-                      className={`flex size-5 items-center justify-center rounded-full border-2 ${
-                        isSelected
-                          ? 'border-[#4ECDC4] bg-[#4ECDC4]'
-                          : 'border-[#e8ecf0] bg-transparent'
+                      className={`text-[28px] font-extrabold leading-none sm:text-[34px] ${
+                        isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'
                       }`}
                     >
-                      {isSelected && <Check size={11} color="#fff" />}
+                      ฿{total.toLocaleString()}
+                    </div>
+                    <div className="mt-1 text-[13px] text-[#8a90a3]">
+                      {creatorDesc}
                     </div>
                   </div>
 
-                  {/* Price */}
-                  <div className="mb-4.5">
-                    <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8a90a3]">
-                      ราคา / ครีเอเตอร์
-                    </div>
-                    <div className="mb-1.5 flex items-baseline gap-1">
-                      <span
-                        className={`text-[24px] font-extrabold sm:text-[32px] ${isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'}`}
+                  {/* CPM strip */}
+                  <div
+                    className={`flex items-center justify-between border-b px-4.5 py-2 ${
+                      isSelected
+                        ? 'border-[#4ECDC430] bg-[#4ECDC412]'
+                        : 'border-[#e8ecf0] bg-[#f8fffe]'
+                    }`}
+                  >
+                    <div>
+                      <div
+                        className={`text-xs font-semibold ${
+                          isSelected ? 'text-[#4ECDC4]' : 'text-[#0a7a62]'
+                        }`}
                       >
-                        ฿{pkg.pricePerCreator.toLocaleString()}
-                      </span>
-                      <span className="text-[13px] text-[#8a90a3]">/คน</span>
+                        CPM ถูกกว่า Google
+                      </div>
+                      <div className="mt-px text-[11px] text-[#8a90a3]">
+                        {pkg.cpmLabel}
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#8a90a3]">
-                        {pkg.numCreators} ครีเอเตอร์ รวม{' '}
-                        <b
-                          className={
-                            isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'
-                          }
-                        >
-                          ฿{total.toLocaleString()}
-                        </b>
-                      </span>
-                      {pkg.discountPct > 0 && (
-                        <span className="rounded-[6px] bg-[#dcfce7] px-1.75 py-0.5 text-xs font-bold text-[#16a34a]">
-                          ประหยัด {pkg.discountPct}%
-                        </span>
-                      )}
+                    <div
+                      className={`text-lg font-extrabold ${
+                        isSelected ? 'text-[#4ECDC4]' : 'text-[#0a7a62]'
+                      }`}
+                    >
+                      {pkg.cpmSavings}
                     </div>
                   </div>
 
-                  <div className="mb-4 h-px bg-[#e8ecf0]" />
-
-                  {/* Platforms */}
-                  <div className="mb-3.5">
-                    <div className="mb-2.5 text-xs font-semibold text-[#8a90a3]">
+                  {/* Platforms + deliverables */}
+                  <div className="h-full border-b border-[#e8ecf0] px-4.5 py-4.5">
+                    <div className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#8a90a3]">
                       โพสต์ใน
                     </div>
-                    <div className="flex items-center gap-2">
-                      {extras.platforms.map((pid, pi) => (
+                    <div className="mb-2.5 flex items-center gap-1.5">
+                      {pkg.platforms.map((pid, pi) => (
                         <div key={pid} className="flex items-center gap-1.5">
                           <div className="flex size-8 items-center justify-center rounded-lg bg-[#f3f4f6]">
                             <PlatformIcon platform={pid} size={18} />
                           </div>
-                          {pi < extras.platforms.length - 1 && (
-                            <span className="text-[15px] text-[#e8ecf0]">
-                              +
-                            </span>
+                          {pi < pkg.platforms.length - 1 && (
+                            <span className="text-[15px] text-[#e8ecf0]">+</span>
                           )}
                         </div>
                       ))}
                     </div>
-                    <div className="mt-2.5 flex flex-col gap-0.75">
-                      {extras.deliverables.map((d, di) => (
+                    <div className="flex flex-col gap-1">
+                      {pkg.deliverables.map((d, di) => (
                         <div
                           key={di}
-                          className="flex items-center gap-1.25 text-xs text-[#8a90a3]"
+                          className="flex items-center gap-1.25 text-[13px] text-[#5a5e72]"
                         >
-                          <div className="size-0.75 shrink-0 rounded-full bg-[#8a90a3]" />
+                          <span className="font-bold text-[#4ECDC4]">·</span>
                           {d}
                         </div>
                       ))}
                     </div>
                   </div>
-
+                  
                   {/* Creator avatars */}
-                  <div className="mb-3.5">
-                    <div className="mb-1.75 text-xs text-[#8a90a3]">
+                  <div className="border-b border-[#e8ecf0] px-4.5 py-4.5">
+                    <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#8a90a3]">
                       ครีเอเตอร์ตัวอย่าง
                     </div>
                     <div className="flex flex-wrap gap-0.5">
@@ -255,35 +270,41 @@ export default function SelectPackagePage() {
                         ),
                       )}
                       {pkg.numCreators > 8 && (
-                        <div className="flex size-7.5 items-center justify-center rounded-full border-2 border-white bg-[#e8ecf0] text-[11px] font-bold text-[#8a90a3]">
+                        <div className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-[#e8ecf0] text-[11px] font-bold text-[#8a90a3]">
                           +{pkg.numCreators - 8}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex-1" />
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-1.5 border-t border-[#e8ecf0] pt-3">
-                    {[
-                      ['Reach', pkg.estReach, 'text-[#4A90D9]'],
-                      ['Engagement', pkg.estEngagement, 'text-[#4ECDC4]'],
-                    ].map(([label, value, color]) => (
-                      <div key={label} className="text-center">
-                        <div className="mb-0.5 text-[9px] font-semibold uppercase text-[#8a90a3]">
-                          {label}
-                        </div>
-                        <div className={`text-xs font-bold ${color}`}>
-                          {value}
-                        </div>
+                  {/* Stats footer */}
+                  <div className="grid grid-cols-2 bg-[#f8fffe]">
+                    <div className="border-r border-[#e8ecf0] px-4.5 py-3.5 text-center">
+                      <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.07em] text-[#8a90a3]">
+                        Reach
                       </div>
-                    ))}
+                      <div className="text-[15px] font-extrabold text-[#4A4A4A]">
+                        {pkg.estReach}
+                      </div>
+                    </div>
+                    <div className="px-4.5 py-3.5 text-center">
+                      <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.07em] text-[#8a90a3]">
+                        Engagement
+                      </div>
+                      <div className="text-[15px] font-extrabold text-[#4ECDC4]">
+                        {pkg.estEngagement}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          {/* Disclaimer */}
+          <p className="mb-5 text-center text-[11px] text-[#8a90a3]">
+            * CPM คำนวณจาก reach กลาง (midpoint) | ราคา Google Ads อ้างอิงค่าเฉลี่ยตลาดไทย ใช้เพื่อการเปรียบเทียบ
+          </p>
 
           {/* CTA */}
           <div className="flex justify-end">

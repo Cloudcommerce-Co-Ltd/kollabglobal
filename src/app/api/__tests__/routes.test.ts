@@ -66,7 +66,7 @@ describe('GET /api/packages', () => {
       expect(pkg).toHaveProperty('id');
       expect(pkg).toHaveProperty('name');
       expect(pkg).toHaveProperty('numCreators');
-      expect(pkg).toHaveProperty('pricePerCreator');
+      expect(pkg).toHaveProperty('price');
     }
   });
 });

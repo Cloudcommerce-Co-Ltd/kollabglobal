@@ -21,31 +21,43 @@ const mkCountry = (id: number): Country => ({
 const SAMPLE_PACKAGES: Package[] = [
   {
     id: 1,
-    name: "Starter",
+    name: "The Passport",
+    tagline: "เริ่มต้นออกสู่ตลาดโลก",
     badge: null,
     numCreators: 5,
-    pricePerCreator: 2500,
-    discountPct: 0,
+    price: 2500,
+    platforms: ["tiktok"],
+    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)"],
+    cpmLabel: "฿41 / 1K reach",
+    cpmSavings: "76%",
     estReach: "150K–400K",
     estEngagement: "2.5–4.0%",
   },
   {
     id: 2,
-    name: "Popular",
+    name: "The Global Bridge",
+    tagline: "ขยายฐานข้ามแพลตฟอร์ม",
     badge: "แนะนำ",
     numCreators: 10,
-    pricePerCreator: 3500,
-    discountPct: 5,
+    price: 3500,
+    platforms: ["tiktok", "instagram"],
+    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories"],
+    cpmLabel: "฿39 / 1K reach",
+    cpmSavings: "77%",
     estReach: "500K–1.2M",
     estEngagement: "3.5–5.5%",
   },
   {
     id: 3,
-    name: "Value",
+    name: "The World Dominator",
+    tagline: "ครองทุกแพลตฟอร์มพร้อมกัน",
     badge: null,
     numCreators: 15,
-    pricePerCreator: 4800,
-    discountPct: 10,
+    price: 4800,
+    platforms: ["tiktok", "instagram", "facebook"],
+    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories", "Facebook 2 โพสต์"],
+    cpmLabel: "฿30 / 1K reach",
+    cpmSavings: "82%",
     estReach: "1.2M–3M",
     estEngagement: "4.0–6.0%",
   },
@@ -69,52 +81,69 @@ describe("SelectPackagePage", () => {
     expect(screen.getByText("กำลังโหลด...")).toBeInTheDocument();
   });
 
-  it("renders 3 package cards after fetch", async () => {
+  it("renders 3 package cards with display names after fetch", async () => {
     render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Starter")).toBeInTheDocument());
-    expect(screen.getByText("Popular")).toBeInTheDocument();
-    expect(screen.getByText("Value")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
+    expect(screen.getByText("The Global Bridge")).toBeInTheDocument();
+    expect(screen.getByText("The World Dominator")).toBeInTheDocument();
   });
 
   it("auto-selects Popular package (has badge)", async () => {
     render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("The Global Bridge")).toBeInTheDocument());
     expect(useCampaignStore.getState().packageData?.id).toBe(2);
   });
 
   it("clicking a different card updates the store", async () => {
     render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Starter")).toBeInTheDocument());
-    fireEvent.click(screen.getByText("Starter"));
+    await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
+    fireEvent.click(screen.getByText("The Passport"));
     expect(useCampaignStore.getState().packageData?.id).toBe(1);
   });
 
-  it("shows discount savings badge for packages with discount", async () => {
+  it("renders taglines for each package", async () => {
     render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
-    expect(screen.getByText("ประหยัด 5%")).toBeInTheDocument();
-    expect(screen.getByText("ประหยัด 10%")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
+    expect(screen.getByText("เริ่มต้นออกสู่ตลาดโลก")).toBeInTheDocument();
+    expect(screen.getByText("ขยายฐานข้ามแพลตฟอร์ม")).toBeInTheDocument();
+    expect(screen.getByText("ครองทุกแพลตฟอร์มพร้อมกัน")).toBeInTheDocument();
+  });
+
+  it("shows total prices prominently", async () => {
+    render(<SelectPackagePage />);
+    await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
+    // totals = numCreators * price: 5*2500=12500, 10*3500=35000, 15*4800=72000
+    expect(screen.getByText("฿12,500")).toBeInTheDocument();
+    expect(screen.getByText("฿35,000")).toBeInTheDocument();
+    expect(screen.getByText("฿72,000")).toBeInTheDocument();
+  });
+
+  it("renders CPM strip with savings data", async () => {
+    render(<SelectPackagePage />);
+    await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
+    expect(screen.getAllByText("CPM ถูกกว่า Google")).toHaveLength(3);
+    expect(screen.getByText("76%")).toBeInTheDocument();
+    expect(screen.getByText("77%")).toBeInTheDocument();
+    expect(screen.getByText("82%")).toBeInTheDocument();
+  });
+
+  it("renders footer CPM disclaimer", async () => {
+    render(<SelectPackagePage />);
+    await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
+    expect(screen.getByText(/CPM คำนวณจาก reach กลาง/)).toBeInTheDocument();
   });
 
   it("CTA navigates to creators page", async () => {
     render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("The Global Bridge")).toBeInTheDocument());
     fireEvent.click(screen.getByText("ยืนยัน — เลือกครีเอเตอร์"));
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/creators");
   });
 
   it("back button navigates to product page", async () => {
     render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("The Global Bridge")).toBeInTheDocument());
     fireEvent.click(screen.getByText("กลับไปเพิ่มสินค้า / บริการ"));
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/product");
-  });
-
-  it("shows price per creator correctly", async () => {
-    render(<SelectPackagePage />);
-    await waitFor(() => expect(screen.getByText("Starter")).toBeInTheDocument());
-    expect(screen.getByText("฿2,500")).toBeInTheDocument();
-    expect(screen.getByText("฿3,500")).toBeInTheDocument();
-    expect(screen.getByText("฿4,800")).toBeInTheDocument();
   });
 });

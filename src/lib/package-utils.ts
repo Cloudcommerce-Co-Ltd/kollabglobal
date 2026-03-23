@@ -1,14 +1,11 @@
 import { PACKAGE_EXTRAS } from "@/lib/constants";
 
-/** Calculates the total package price after discount. */
+/** Calculates the total package price. */
 export function calculatePackageTotal(pkg: {
   numCreators: number;
-  pricePerCreator: number;
-  discountPct: number;
+  price: number;
 }): number {
-  return Math.round(
-    pkg.numCreators * pkg.pricePerCreator * (1 - pkg.discountPct / 100)
-  );
+  return pkg.numCreators * pkg.price;
 }
 
 /** Returns the platforms for a given package ID. */

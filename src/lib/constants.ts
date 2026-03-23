@@ -21,18 +21,28 @@ export const ASIA_COUNTRY_IDS = new Set([1, 2, 3, 4, 5, 6]);
 export interface PackageExtra {
   platforms: string[];
   deliverables: string[];
+  displayName: string;
+  tagline: string;
+  cpmLabel: string;
+  cpmSavings: string;
 }
 
 export const PACKAGE_EXTRAS: Record<number, PackageExtra> = {
-  1: {
-    // Starter
-    platforms: ['tiktok'],
-    deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)'],
+  1: {  // Starter
+    platforms: ["tiktok"],
+    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)"],
+    displayName: "The Passport",
+    tagline: "เริ่มต้นออกสู่ตลาดโลก",
+    cpmLabel: "฿41 / 1K reach",
+    cpmSavings: "76%",
   },
-  2: {
-    // Popular
-    platforms: ['tiktok', 'instagram'],
-    deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)', 'IG 1 Reel + 3 Stories'],
+  2: {  // Popular
+    platforms: ["tiktok", "instagram"],
+    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories"],
+    displayName: "The Global Bridge",
+    tagline: "ขยายฐานข้ามแพลตฟอร์ม",
+    cpmLabel: "฿39 / 1K reach",
+    cpmSavings: "77%",
   },
   3: {
     // Value
@@ -42,6 +52,10 @@ export const PACKAGE_EXTRAS: Record<number, PackageExtra> = {
       'IG 1 Reel + 3 Stories',
       'Facebook 2 โพสต์',
     ],
+    displayName: "The World Dominator",
+    tagline: "ครองทุกแพลตฟอร์มพร้อมกัน",
+    cpmLabel: "฿30 / 1K reach",
+    cpmSavings: "82%",
   },
 };
 

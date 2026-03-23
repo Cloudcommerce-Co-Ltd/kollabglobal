@@ -6,32 +6,19 @@ import {
 } from "@/lib/package-utils";
 
 describe("calculatePackageTotal", () => {
-  it("calculates total with no discount", () => {
-    const result = calculatePackageTotal({
-      numCreators: 5,
-      pricePerCreator: 2000,
-      discountPct: 0,
-    });
+  it("calculates total as numCreators * price", () => {
+    const result = calculatePackageTotal({ numCreators: 5, price: 2000 });
     expect(result).toBe(10000);
   });
 
-  it("calculates total with 10% discount", () => {
-    const result = calculatePackageTotal({
-      numCreators: 5,
-      pricePerCreator: 2000,
-      discountPct: 10,
-    });
-    expect(result).toBe(9000);
+  it("calculates total for larger package", () => {
+    const result = calculatePackageTotal({ numCreators: 10, price: 3500 });
+    expect(result).toBe(35000);
   });
 
-  it("rounds to nearest integer", () => {
-    const result = calculatePackageTotal({
-      numCreators: 3,
-      pricePerCreator: 1000,
-      discountPct: 33,
-    });
-    // 3 * 1000 * (1 - 0.33) = 3000 * 0.67 = 2010
-    expect(result).toBe(2010);
+  it("calculates total for value package", () => {
+    const result = calculatePackageTotal({ numCreators: 15, price: 4800 });
+    expect(result).toBe(72000);
   });
 });
 

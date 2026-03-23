@@ -119,10 +119,14 @@ model Country {
 model Package {
   id              Int        @id @default(autoincrement())
   name            String
+  tagline         String
   badge           String?
   numCreators     Int        @map("num_creators")
-  pricePerCreator Int        @map("price_per_creator")
-  discountPct     Int        @default(0) @map("discount_pct")
+  price           Int        @map("price")
+  platforms       String[]
+  deliverables    String[]
+  cpmLabel        String     @map("cpm_label")
+  cpmSavings      String     @map("cpm_savings")
   estReach        String?    @map("est_reach")
   estEngagement   String?    @map("est_engagement")
   campaigns       Campaign[]
