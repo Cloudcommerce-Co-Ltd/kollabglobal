@@ -1,23 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, CreditCard, Building2, Lock } from "lucide-react";
-import { SAMPLE_CREATOR_AVATARS, STATIC_CHECKOUT_DATA } from "@/lib/constants";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCampaignStore } from "@/stores/campaign-store";
+import { PACKAGE_EXTRAS } from "@/lib/constants";
+import { calculatePackageTotal } from "@/lib/package-utils";
 
-const { packageName, numCreators, numPosts, duration, campaignType, basePrice, vatRate, serviceFeeRate } =
-  STATIC_CHECKOUT_DATA;
-
-const vat = Math.round(basePrice * vatRate);
-const serviceFee = Math.round(basePrice * serviceFeeRate);
-const total = basePrice + vat + serviceFee;
+const VAT_RATE = 0.07;
+const SERVICE_FEE_RATE = 0.03;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  
+  const { packageData, selectedCreatorsData, productData } = useCampaignStore();
+
   const [showAltPayment, setShowAltPayment] = useState(false);
-  
+
+  const packageName = packageData?.name ?? "—";
+  const numCreators = packageData?.numCreators ?? 0;
+  const basePrice = packageData ? calculatePackageTotal(packageData) : 0;
+  const vat = Math.round(basePrice * VAT_RATE);
+  const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
+  const total = basePrice + vat + serviceFee;
+  const numPosts = packageData
+    ? (PACKAGE_EXTRAS[packageData.id]?.deliverables.length ?? 1) * packageData.numCreators
+    : 0;
+  const campaignType = productData?.isService ? "บริการ" : "สินค้า";
+  const duration = "30 วัน";
+
   function handleNext() {
     router.push("/campaigns");
   }
@@ -66,17 +78,25 @@ export default function CheckoutPage() {
               <div className="mb-4 flex items-center gap-2">
                 <span className="text-base font-bold text-[#4A4A4A]">ครีเอเตอร์ที่เลือก</span>
                 <span className="rounded-full bg-[#e8f8f7] px-2.5 py-0.5 text-xs font-bold text-[#4ECDC4]">
-                  {numCreators} คน
+                  {selectedCreatorsData?.length ?? numCreators} คน
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {SAMPLE_CREATOR_AVATARS.slice(0, numCreators).map((cr, i) => (
+                {(selectedCreatorsData ?? []).map((cr) => (
                   <div
-                    key={i}
+                    key={cr.id}
                     title={cr.name}
-                    className="flex size-10 items-center justify-center rounded-full border-2 border-[#4ECDC440] bg-[#e8f8f7] text-xl"
+                    className="relative flex size-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#4ECDC440] bg-[#e8f8f7]"
                   >
-                    {cr.avatar}
+                    <span className="text-sm font-bold text-[#4ECDC4]">{cr.name.charAt(0)}</span>
+                    <Image
+                      src={cr.avatar}
+                      alt={cr.name}
+                      fill
+                      className="object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      unoptimized
+                    />
                   </div>
                 ))}
               </div>

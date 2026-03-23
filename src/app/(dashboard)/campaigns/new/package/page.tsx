@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
+import Image from 'next/image';
 import { useCampaignStore } from '@/stores/campaign-store';
-import { PACKAGE_EXTRAS, SAMPLE_CREATOR_AVATARS } from '@/lib/constants';
+import { PACKAGE_EXTRAS } from '@/lib/constants';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import { calculatePackageTotal } from '@/lib/package-utils';
-import type { Package } from '@/types';
+import type { Creator, Package } from '@/types';
 
 export default function SelectPackagePage() {
   const router = useRouter();
@@ -15,25 +16,28 @@ export default function SelectPackagePage() {
     useCampaignStore();
 
   const [packages, setPackages] = useState<Package[]>([]);
+  const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<number | null>(packageData?.id ?? null);
   const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
     if (!countryData) return;
-    fetch('/api/packages')
-      .then(r => r.json())
-      .then((data: Package[]) => {
-        setPackages(data);
-        if (!packageData) {
-          const popular = data.find(p => p.badge !== null);
-          if (popular) {
-            setSelected(popular.id);
-            setPackage(popular);
-          }
+    Promise.all([
+      fetch('/api/packages').then(r => r.json()),
+      fetch('/api/creators').then(r => r.json()),
+    ]).then(([pkgData, crData]: [Package[], Creator[]]) => {
+      setPackages(pkgData);
+      setCreators(crData.filter(c => !c.isBackup));
+      if (!packageData) {
+        const popular = pkgData.find(p => p.badge !== null);
+        if (popular) {
+          setSelected(popular.id);
+          setPackage(popular);
         }
-        setLoading(false);
-      });
+      }
+      setLoading(false);
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryData, setPackage]);
 
@@ -194,28 +198,39 @@ export default function SelectPackagePage() {
                       ครีเอเตอร์ตัวอย่าง
                     </div>
                     <div className="flex flex-wrap gap-0.5">
-                      {SAMPLE_CREATOR_AVATARS.slice(0, avatarCount).map(
+                      {creators.slice(0, avatarCount).map(
                         (cr, i) => (
                           <div
-                            key={i}
+                            key={cr.id}
                             className="relative"
                             onMouseEnter={() => setHover(`${pkg.id}-${i}`)}
                             onMouseLeave={() => setHover(null)}
                           >
                             <div
-                              className={`flex size-7.5 items-center justify-center rounded-full border-2 border-white bg-[#e8f8f7] text-base transition-transform ${
+                              className={`relative flex size-7.5 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#e8f8f7] transition-transform ${
                                 hover === `${pkg.id}-${i}`
                                   ? 'scale-[1.18]'
                                   : 'scale-100'
                               }`}
                             >
-                              {cr.avatar}
+                              <span className="text-[10px] font-bold text-[#4ECDC4]">{cr.name.charAt(0)}</span>
+                              <Image
+                                src={cr.avatar}
+                                alt={cr.name}
+                                fill
+                                className="object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                unoptimized
+                              />
                             </div>
                             {hover === `${pkg.id}-${i}` && (
                               <div className="absolute bottom-9 left-1/2 z-50 min-w-37.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-[#4A4A4A] px-2.75 py-2 text-white">
                                 <div className="mb-0.75 flex items-center gap-1.25">
-                                  <span className="text-base">{cr.avatar}</span>
-                                  <span className="text-xs">{cr.flag}</span>
+                                  <div className="relative flex size-4 items-center justify-center overflow-hidden rounded-full bg-[#e8f8f7]">
+                                    <span className="text-[8px] font-bold text-[#4ECDC4]">{cr.name.charAt(0)}</span>
+                                    <Image src={cr.avatar} alt={cr.name} fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} unoptimized />
+                                  </div>
+                                  <span className="text-xs">{cr.countryFlag}</span>
                                   <span className="text-xs font-semibold">
                                     {cr.name}
                                   </span>
@@ -226,7 +241,7 @@ export default function SelectPackagePage() {
                                 <div className="flex gap-2 text-[11px]">
                                   <span>
                                     Eng:{' '}
-                                    <b className="text-[#4ECDC4]">{cr.eng}</b>
+                                    <b className="text-[#4ECDC4]">{cr.engagement}</b>
                                   </span>
                                   <span>
                                     Reach:{' '}
