@@ -65,7 +65,7 @@ export async function POST(
 
   await prisma.campaign.update({
     where: { id },
-    data: { status: "ACTIVE" },
+    data: { status: "ACCEPTING" },
   });
 
   return NextResponse.json(brief, { status: 201 });

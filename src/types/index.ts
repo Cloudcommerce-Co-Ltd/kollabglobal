@@ -17,7 +17,10 @@ export type {
 export type PromotionType = "PRODUCT" | "SERVICE";
 export type CampaignStatus =
   | "DRAFT"
-  | "PENDING_PAYMENT"
+  | "AWAITING_PAYMENT"
+  | "PENDING"
+  | "ACCEPTING"
+  | "AWAITING_SHIPMENT"
   | "ACTIVE"
   | "COMPLETED"
   | "CANCELLED";

@@ -109,11 +109,11 @@ describe("POST /api/campaigns/[id]/brief", () => {
     expect(res.status).toBe(400);
   });
 
-  it("saves brief and updates campaign to ACTIVE", async () => {
+  it("saves brief and updates campaign to ACCEPTING", async () => {
     mockAuth.mockResolvedValue(mockSession);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign);
     vi.mocked(prisma.campaignBrief.upsert).mockResolvedValue(mockBrief);
-    vi.mocked(prisma.campaign.update).mockResolvedValue({ ...mockCampaign, status: "ACTIVE" });
+    vi.mocked(prisma.campaign.update).mockResolvedValue({ ...mockCampaign, status: "ACCEPTING" });
 
     const content = { keys: "k", dos: "d", deliverables: "del", disclosure: "#", deadline: "2026-04-01", name: "n" };
     const res = await POST(makeRequest("POST", { content }), makeParams());
@@ -121,7 +121,7 @@ describe("POST /api/campaigns/[id]/brief", () => {
     expect(res.status).toBe(201);
     expect(vi.mocked(prisma.campaign.update)).toHaveBeenCalledWith({
       where: { id: "campaign-123" },
-      data: { status: "ACTIVE" },
+      data: { status: "ACCEPTING" },
     });
   });
 });
