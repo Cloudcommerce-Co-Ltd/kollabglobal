@@ -96,10 +96,22 @@ enum PaymentStatus {
 
 // ─── Business Models ─────────────────────────────────────────────────────────
 
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String
+  type     String  // "product" | "service"
+  isActive Boolean @default(true) @map("is_active")
+
+  @@map("categories")
+}
+
 model Country {
   id            Int        @id @default(autoincrement())
   name          String
   flag          String
+  region        String     @default("global")
+  languageCode  String     @default("en") @map("language_code")
+  languageName  String     @default("English") @map("language_name")
   creatorsAvail Int        @default(0) @map("creators_avail")
   avgEyeball    String?    @map("avg_eyeball")
   avgCPE        String?    @map("avg_cpe")

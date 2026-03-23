@@ -17,11 +17,14 @@ async function main() {
   // 11 Countries — 8 active, 3 inactive
   await prisma.country.upsert({
     where: { id: 1 },
-    update: {},
+    update: { region: 'asia', languageCode: 'th', languageName: 'Thai' },
     create: {
       id: 1,
       name: 'Thailand',
       flag: '🇹🇭',
+      region: 'asia',
+      languageCode: 'th',
+      languageName: 'Thai',
       creatorsAvail: 1500,
       avgEyeball: '200K-500K',
       avgCPE: '฿0.5-1.2',
@@ -38,11 +41,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 2 },
-    update: {},
+    update: { region: 'asia', languageCode: 'vi', languageName: 'Vietnamese' },
     create: {
       id: 2,
       name: 'Vietnam',
       flag: '🇻🇳',
+      region: 'asia',
+      languageCode: 'vi',
+      languageName: 'Vietnamese',
       creatorsAvail: 840,
       avgEyeball: '180K-450K',
       avgCPE: '฿0.8-1.5',
@@ -59,11 +65,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 3 },
-    update: {},
+    update: { region: 'asia', languageCode: 'ms', languageName: 'Malay' },
     create: {
       id: 3,
       name: 'Malaysia',
       flag: '🇲🇾',
+      region: 'asia',
+      languageCode: 'ms',
+      languageName: 'Malay',
       creatorsAvail: 520,
       avgEyeball: '120K-300K',
       avgCPE: '฿1.0-2.0',
@@ -80,11 +89,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 4 },
-    update: {},
+    update: { region: 'asia', languageCode: 'lo', languageName: 'Lao' },
     create: {
       id: 4,
       name: 'Laos',
       flag: '🇱🇦',
+      region: 'asia',
+      languageCode: 'lo',
+      languageName: 'Lao',
       creatorsAvail: 120,
       avgEyeball: '50K-150K',
       avgCPE: '฿0.5-1.0',
@@ -101,11 +113,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 5 },
-    update: {},
+    update: { region: 'asia', languageCode: 'ja', languageName: 'Japanese' },
     create: {
       id: 5,
       name: 'Japan',
       flag: '🇯🇵',
+      region: 'asia',
+      languageCode: 'ja',
+      languageName: 'Japanese',
       creatorsAvail: 380,
       avgEyeball: '200K-600K',
       avgCPE: '฿2.5-4.0',
@@ -122,11 +137,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 6 },
-    update: {},
+    update: { region: 'asia', languageCode: 'ko', languageName: 'Korean' },
     create: {
       id: 6,
       name: 'South Korea',
       flag: '🇰🇷',
+      region: 'asia',
+      languageCode: 'ko',
+      languageName: 'Korean',
       creatorsAvail: 290,
       avgEyeball: '250K-700K',
       avgCPE: '฿2.0-3.5',
@@ -143,11 +161,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 7 },
-    update: {},
+    update: { region: 'global', languageCode: 'en', languageName: 'English' },
     create: {
       id: 7,
       name: 'United States',
       flag: '🇺🇸',
+      region: 'global',
+      languageCode: 'en',
+      languageName: 'English',
       creatorsAvail: 1200,
       avgEyeball: '300K-900K',
       avgCPE: '฿3.0-5.0',
@@ -164,11 +185,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 8 },
-    update: {},
+    update: { region: 'global', languageCode: 'en', languageName: 'English' },
     create: {
       id: 8,
       name: 'United Kingdom',
       flag: '🇬🇧',
+      region: 'global',
+      languageCode: 'en',
+      languageName: 'English',
       creatorsAvail: 650,
       avgEyeball: '200K-550K',
       avgCPE: '฿2.5-4.0',
@@ -186,11 +210,14 @@ async function main() {
   // Inactive countries (coming soon)
   await prisma.country.upsert({
     where: { id: 9 },
-    update: {},
+    update: { region: 'global', languageCode: 'en', languageName: 'English' },
     create: {
       id: 9,
       name: 'CLMV Region',
       flag: '🌏',
+      region: 'global',
+      languageCode: 'en',
+      languageName: 'English',
       creatorsAvail: 0,
       platforms: [],
       cats: [],
@@ -200,11 +227,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 10 },
-    update: {},
+    update: { region: 'global', languageCode: 'en', languageName: 'English' },
     create: {
       id: 10,
       name: 'Australia',
       flag: '🇦🇺',
+      region: 'global',
+      languageCode: 'en',
+      languageName: 'English',
       creatorsAvail: 0,
       platforms: [],
       cats: [],
@@ -214,11 +244,14 @@ async function main() {
 
   await prisma.country.upsert({
     where: { id: 11 },
-    update: {},
+    update: { region: 'global', languageCode: 'en', languageName: 'English' },
     create: {
       id: 11,
       name: 'EU Region',
       flag: '🇪🇺',
+      region: 'global',
+      languageCode: 'en',
+      languageName: 'English',
       creatorsAvail: 0,
       platforms: [],
       cats: [],
@@ -711,6 +744,31 @@ async function main() {
       },
     });
   }
+
+  // ── Categories ─────────────────────────────────────────────────────────────
+  console.log('Seeding categories...');
+
+  await prisma.category.deleteMany();
+  await prisma.category.createMany({
+    data: [
+      { name: 'Food & Snack', type: 'product' },
+      { name: 'Beauty & Skincare', type: 'product' },
+      { name: 'Health & Wellness', type: 'product' },
+      { name: 'Fashion', type: 'product' },
+      { name: 'Lifestyle', type: 'product' },
+      { name: 'Beverage', type: 'product' },
+      { name: 'Electronics', type: 'product' },
+      { name: 'Home & Living', type: 'product' },
+      { name: 'ร้านอาหาร / คาเฟ่', type: 'service' },
+      { name: 'ท่องเที่ยว / โรงแรม', type: 'service' },
+      { name: 'ความงาม / สปา', type: 'service' },
+      { name: 'ฟิตเนส / สุขภาพ', type: 'service' },
+      { name: 'การศึกษา / คอร์สเรียน', type: 'service' },
+      { name: 'แอปพลิเคชัน / Software', type: 'service' },
+      { name: 'อสังหาริมทรัพย์', type: 'service' },
+      { name: 'บริการอื่นๆ', type: 'service' },
+    ],
+  });
 
   // ── Dev test data ──────────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {

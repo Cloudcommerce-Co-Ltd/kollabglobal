@@ -10,9 +10,14 @@
 
 */
 -- AlterTable
-ALTER TABLE "packages" DROP COLUMN "discount_pct",
-DROP COLUMN "price_per_creator",
-ADD COLUMN     "cpm_label" TEXT NOT NULL,
-ADD COLUMN     "cpm_savings" TEXT NOT NULL,
-ADD COLUMN     "price" INTEGER NOT NULL,
-ADD COLUMN     "tagline" TEXT NOT NULL;
+ALTER TABLE "packages" DROP COLUMN IF EXISTS "discount_pct",
+DROP COLUMN IF EXISTS "price_per_creator",
+ADD COLUMN IF NOT EXISTS "cpm_label" TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS "cpm_savings" TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS "price" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS "tagline" TEXT NOT NULL DEFAULT '';
+-- Remove the temporary defaults after backfill (seed will populate real values)
+ALTER TABLE "packages" ALTER COLUMN "cpm_label" DROP DEFAULT,
+ALTER COLUMN "cpm_savings" DROP DEFAULT,
+ALTER COLUMN "price" DROP DEFAULT,
+ALTER COLUMN "tagline" DROP DEFAULT;
