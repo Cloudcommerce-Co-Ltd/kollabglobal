@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useCampaignStore } from "@/stores/campaign-store";
 import { useImageUpload } from "@/hooks/use-image-upload";
-import { PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "@/lib/constants";
 
 function typeEmoji(cat: string, isService: boolean): string {
   if (!isService) {
@@ -69,12 +68,19 @@ export default function AddProductPage() {
   const [height, setHeight] = useState(productData?.height?.toString() ?? "");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [productCats, setProductCats] = useState<string[]>([]);
+  const [serviceCats, setServiceCats] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch('/api/categories?type=product').then(r => r.json()).then((d: { name: string }[]) => setProductCats(d.map(c => c.name)));
+    fetch('/api/categories?type=service').then(r => r.json()).then((d: { name: string }[]) => setServiceCats(d.map(c => c.name)));
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload(productData?.imageUrl ?? undefined);
 
   const isService = type === "service";
-  const categories = isService ? SERVICE_CATEGORIES : PRODUCT_CATEGORIES;
+  const categories = isService ? serviceCats : productCats;
   const isValid = !!(type && brandName.trim() && name.trim() && category);
 
   function handleTypeChange(t: "product" | "service") {

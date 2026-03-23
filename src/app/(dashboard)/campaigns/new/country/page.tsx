@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useCampaignStore } from '@/stores/campaign-store';
-import { ASIA_COUNTRY_IDS } from '@/lib/constants';
 import type { Country } from '@/types';
 
 type Tab = 'asia' | 'global';
@@ -27,8 +26,8 @@ export default function SelectCountryPage() {
       });
   }, []);
 
-  const asiaCountries = countries.filter(c => ASIA_COUNTRY_IDS.has(c.id));
-  const globalCountries = countries.filter(c => !ASIA_COUNTRY_IDS.has(c.id));
+  const asiaCountries = countries.filter(c => c.region === 'asia');
+  const globalCountries = countries.filter(c => c.region === 'global');
   const list = tab === 'asia' ? asiaCountries : globalCountries;
 
   function handleSelect(data: Country) {

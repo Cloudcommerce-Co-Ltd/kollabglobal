@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useCampaignStore } from '@/stores/campaign-store';
-import { SAMPLE_CREATOR_AVATARS } from '@/lib/constants';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import { calculatePackageTotal } from '@/lib/package-utils';
 import type { Creator, Package } from '@/types';

@@ -14,7 +14,6 @@ import {
   Target,
   Package,
 } from 'lucide-react';
-import { CREATOR_LANG_BY_COUNTRY } from '@/lib/constants';
 import {
   getPackagePlatforms,
   getPackageDeliverables,
@@ -79,11 +78,9 @@ export default function CreateBriefPage({
           ...f,
           name: data.product?.productName ?? '',
         }));
-        const lang = CREATOR_LANG_BY_COUNTRY[data.countryId] ?? {
-          code: 'en',
-          name: 'English',
-          flag: '🇺🇸',
-        };
+        const lang = data.country
+          ? { code: data.country.languageCode, name: data.country.languageName, flag: data.country.flag }
+          : { code: 'en', name: 'English', flag: '🇺🇸' };
         setTargetLang(lang);
         setLoading(false);
       })
@@ -93,8 +90,8 @@ export default function CreateBriefPage({
   }, [id, router]);
 
   const isService = campaign?.product?.isService ?? false;
-  const platforms = getPackagePlatforms(campaign?.packageId);
-  const campaignDeliverables = getPackageDeliverables(campaign?.packageId);
+  const platforms = getPackagePlatforms(campaign?.package);
+  const campaignDeliverables = getPackageDeliverables(campaign?.package);
 
   const isContentFilled = isBriefContentFilled(form);
   const isDeadlineFilled = !!form.deadline;

@@ -19,8 +19,8 @@ export interface CampaignWithRelations {
   packageId: number;
   status: string;
   product: ProductData | null;
-  country?: { id: number; name: string; flag: string } | null;
-  package?: { id: number; name: string } | null;
+  country?: { id: number; name: string; flag: string; languageCode: string; languageName: string } | null;
+  package?: { id: number; name: string; platforms: string[]; deliverables: string[] } | null;
   brief?: {
     id: string;
     content: string;
