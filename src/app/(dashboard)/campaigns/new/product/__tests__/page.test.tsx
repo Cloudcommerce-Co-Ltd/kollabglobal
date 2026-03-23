@@ -1,9 +1,19 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen, fireEvent } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import AddProductPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
+
+const PRODUCT_CATS = [
+  { id: 1, name: "Food & Snack", type: "product" },
+  { id: 2, name: "Beauty & Skincare", type: "product" },
+  { id: 3, name: "Fashion", type: "product" },
+];
+const SERVICE_CATS = [
+  { id: 10, name: "ร้านอาหาร / คาเฟ่", type: "service" },
+  { id: 11, name: "สุขภาพ & ความงาม", type: "service" },
+];
 
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
@@ -30,6 +40,11 @@ beforeEach(() => {
   mockReplace.mockClear();
   mockUpload.mockClear();
   mockUpload.mockResolvedValue(null);
+
+  global.fetch = vi.fn().mockImplementation((url: string) => {
+    const data = String(url).includes("type=service") ? SERVICE_CATS : PRODUCT_CATS;
+    return Promise.resolve({ json: () => Promise.resolve(data) } as unknown as Response);
+  });
 });
 
 describe("AddProductPage", () => {
@@ -39,23 +54,24 @@ describe("AddProductPage", () => {
     expect(screen.getByText("บริการ")).toBeInTheDocument();
   });
 
-  it("shows product categories after clicking สินค้า", () => {
+  it("shows product categories after clicking สินค้า", async () => {
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("สินค้า").closest("button")!);
-    expect(screen.getByText("Food & Snack")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
     expect(screen.getByText("Beauty & Skincare")).toBeInTheDocument();
   });
 
-  it("shows service categories and no-shipping banner after clicking บริการ", () => {
+  it("shows service categories and no-shipping banner after clicking บริการ", async () => {
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("บริการ").closest("button")!);
-    expect(screen.getByText("ร้านอาหาร / คาเฟ่")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("ร้านอาหาร / คาเฟ่")).toBeInTheDocument());
     expect(screen.getByText("ไม่ต้องจัดส่งสินค้า")).toBeInTheDocument();
   });
 
-  it("switching from product to service resets category", () => {
+  it("switching from product to service resets category", async () => {
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Food & Snack"));
 
     fireEvent.click(screen.getByText("บริการ").closest("button")!);
@@ -67,9 +83,10 @@ describe("AddProductPage", () => {
     expect(screen.getByText("ยืนยัน — ถัดไป")).toBeDisabled();
   });
 
-  it("CTA is enabled when all required fields filled", () => {
+  it("CTA is enabled when all required fields filled", async () => {
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
 
     fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
       target: { value: "My Brand" },
@@ -85,6 +102,7 @@ describe("AddProductPage", () => {
   it("submit calls store actions and navigates to package page", async () => {
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
 
     fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
       target: { value: "My Brand" },
@@ -121,11 +139,12 @@ describe("AddProductPage", () => {
     expect(screen.queryByText("ข้อมูลจัดส่ง")).not.toBeInTheDocument();
   });
 
-  it("CTA is disabled during upload", () => {
+  it("CTA is disabled during upload", async () => {
     mockUpload.mockReturnValueOnce(new Promise(() => {})); // never resolves
 
     render(<AddProductPage />);
     fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
     fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
       target: { value: "My Brand" },
     });

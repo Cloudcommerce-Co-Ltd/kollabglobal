@@ -23,26 +23,26 @@ describe("calculatePackageTotal", () => {
 });
 
 describe("getPackagePlatforms", () => {
-  it("returns platforms for known package", () => {
-    expect(getPackagePlatforms(1)).toEqual(["tiktok"]);
-    expect(getPackagePlatforms(2)).toEqual(["tiktok", "instagram"]);
-    expect(getPackagePlatforms(3)).toEqual(["tiktok", "instagram", "facebook"]);
+  it("returns platforms from package object", () => {
+    expect(getPackagePlatforms({ platforms: ["tiktok"] })).toEqual(["tiktok"]);
+    expect(getPackagePlatforms({ platforms: ["tiktok", "instagram"] })).toEqual(["tiktok", "instagram"]);
+    expect(getPackagePlatforms({ platforms: ["tiktok", "instagram", "facebook"] })).toEqual(["tiktok", "instagram", "facebook"]);
   });
 
-  it("returns default platforms for unknown package", () => {
-    expect(getPackagePlatforms(999)).toEqual(["tiktok", "instagram"]);
+  it("returns default platforms for null/undefined package", () => {
+    expect(getPackagePlatforms(null)).toEqual(["tiktok", "instagram"]);
     expect(getPackagePlatforms(undefined)).toEqual(["tiktok", "instagram"]);
   });
 });
 
 describe("getPackageDeliverables", () => {
-  it("returns deliverables for known package", () => {
-    const deliverables = getPackageDeliverables(1);
+  it("returns deliverables from package object", () => {
+    const deliverables = getPackageDeliverables({ deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)"] });
     expect(deliverables).toHaveLength(1);
     expect(deliverables[0]).toContain("TikTok");
   });
 
-  it("returns default deliverables for unknown package", () => {
+  it("returns default deliverables for null/undefined package", () => {
     const deliverables = getPackageDeliverables(undefined);
     expect(deliverables.length).toBeGreaterThan(0);
   });

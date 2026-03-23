@@ -6,8 +6,8 @@ import type { ProductData } from "@/types/campaign";
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
 const country: Country = {
-  id: "th", name: "Thailand", flag: "🇹🇭", creatorsAvail: 1500,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  id: 1, name: "Thailand", flag: "🇹🇭", region: "asia", languageCode: "th", languageName: "Thai",
+  creatorsAvail: 1500, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
@@ -17,14 +17,15 @@ const product: ProductData = {
 };
 
 const pkg: Package = {
-  id: "popular", name: "Popular", badge: null,
-  numCreators: 10, pricePerCreator: 3500, discountPct: 0,
+  id: 1, name: "Popular", tagline: "", badge: null,
+  numCreators: 10, price: 3500, platforms: [], deliverables: [], cpmLabel: "", cpmSavings: "",
   estReach: null, estEngagement: null,
 };
 
 const creator: Creator = {
   id: "c1", name: "Creator", niche: "Food", engagement: "5%",
   reach: "100K", avatar: "👩", countryFlag: "🇹🇭", isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
 };
 
 const empty = { countryData: null, productData: null, packageData: null, selectedCreatorsData: [] };

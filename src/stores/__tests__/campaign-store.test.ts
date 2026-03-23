@@ -3,37 +3,39 @@ import { useCampaignStore } from '../campaign-store';
 import type { Country, Package, Creator } from '@/types';
 
 const COUNTRY_TH: Country = {
-  id: 1, name: 'Thailand', flag: '🇹🇭', creatorsAvail: 1500,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  id: 1, name: 'Thailand', flag: '🇹🇭', region: 'asia', languageCode: 'th', languageName: 'Thai',
+  creatorsAvail: 1500, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
 const COUNTRY_SG: Country = {
-  id: 99, name: 'Singapore', flag: '🇸🇬', creatorsAvail: 800,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  id: 99, name: 'Singapore', flag: '🇸🇬', region: 'global', languageCode: 'en', languageName: 'English',
+  creatorsAvail: 800, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
 const PKG_STARTER: Package = {
-  id: 1, name: 'Starter', badge: null,
-  numCreators: 5, pricePerCreator: 2500, discountPct: 0,
+  id: 1, name: 'Starter', tagline: 'Starter package', badge: null,
+  numCreators: 5, price: 2500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: null, estEngagement: null,
 };
 
 const PKG_POPULAR: Package = {
-  id: 2, name: 'Popular', badge: 'แนะนำ',
-  numCreators: 10, pricePerCreator: 3500, discountPct: 5,
+  id: 2, name: 'Popular', tagline: 'Popular package', badge: 'แนะนำ',
+  numCreators: 10, price: 3500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: null, estEngagement: null,
 };
 
 const CREATOR_1: Creator = {
   id: 'creator-1', name: 'Creator 1', niche: 'Food', engagement: '5%',
   reach: '100K', avatar: '👩', countryFlag: '🇹🇭', isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
 };
 
 const CREATOR_2: Creator = {
   id: 'creator-2', name: 'Creator 2', niche: 'Beauty', engagement: '7%',
   reach: '200K', avatar: '👨', countryFlag: '🇻🇳', isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
 };
 
 describe('campaign-store', () => {

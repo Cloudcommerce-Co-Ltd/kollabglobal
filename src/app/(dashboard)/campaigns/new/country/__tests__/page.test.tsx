@@ -13,17 +13,17 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-const mkCountry = (id: number, name: string, flag: string, creatorsAvail: number): Country => ({
-  id, name, flag, creatorsAvail,
+const mkCountry = (id: number, name: string, flag: string, creatorsAvail: number, region: string): Country => ({
+  id, name, flag, region, languageCode: 'en', languageName: 'English', creatorsAvail,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const SAMPLE_COUNTRIES: Country[] = [
-  mkCountry(1, "Thailand", "🇹🇭", 1500),
-  mkCountry(2, "Vietnam", "🇻🇳", 840),
-  mkCountry(7, "United States", "🇺🇸", 1200),
-  mkCountry(8, "United Kingdom", "🇬🇧", 650),
+  mkCountry(1, "Thailand", "🇹🇭", 1500, "asia"),
+  mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"),
+  mkCountry(7, "United States", "🇺🇸", 1200, "global"),
+  mkCountry(8, "United Kingdom", "🇬🇧", 650, "global"),
 ];
 
 beforeEach(() => {
@@ -93,7 +93,7 @@ describe("SelectCountryPage", () => {
   });
 
   it("pre-selects country from store on mount", async () => {
-    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840));
+    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"));
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());
     const cta = screen.getByText("ถัดไป — เพิ่มสินค้า / บริการ");

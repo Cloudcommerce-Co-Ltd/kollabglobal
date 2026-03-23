@@ -4,20 +4,21 @@ import { validateStep } from "@/lib/campaign-steps";
 import type { Country, Package, Creator } from "@/types";
 
 const mkCountry = (id: number): Country => ({
-  id, name: String(id), flag: '🏳️', creatorsAvail: 0,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  id, name: String(id), flag: '🏳️', region: 'global', languageCode: 'en', languageName: 'English',
+  creatorsAvail: 0, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const mkPackage = (id: number): Package => ({
-  id, name: String(id), badge: null,
-  numCreators: 10, pricePerCreator: 3500, discountPct: 0,
+  id, name: String(id), tagline: '', badge: null,
+  numCreators: 10, price: 3500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: null, estEngagement: null,
 });
 
 const mkCreator = (id: string): Creator => ({
   id, name: id, niche: 'Food', engagement: '5%',
   reach: '100K', avatar: '👩', countryFlag: '🇹🇭', isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
 });
 
 const product = {

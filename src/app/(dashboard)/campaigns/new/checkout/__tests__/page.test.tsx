@@ -40,6 +40,7 @@ const MOCK_CREATORS: Creator[] = Array.from({ length: 10 }, (_, i) => ({
   avatar: `https://example.com/avatar-${i}.jpg`,
   countryFlag: "🇹🇭",
   isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
 }));
 
 beforeEach(() => {

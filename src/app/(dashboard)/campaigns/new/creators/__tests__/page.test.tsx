@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import SelectCreatorsPage from "../page";
-import { SAMPLE_CREATOR_AVATARS } from "@/lib/constants";
 import { useCampaignStore } from "@/stores/campaign-store";
 import type { Country, Creator, Package } from "@/types";
 
@@ -13,27 +12,41 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-// Build Creator fixtures matching SAMPLE_CREATOR_AVATARS (28 main + 5 backup)
-const MOCK_CREATORS: Creator[] = SAMPLE_CREATOR_AVATARS.map((c, i) => ({
-  id: `creator-${i}`,
-  name: c.name,
-  niche: c.niche,
-  engagement: c.eng,
-  reach: c.reach,
-  avatar: c.avatar,
-  countryFlag: c.flag,
-  isBackup: i >= 28,
-}));
+// 28 main creators + 5 backup creators
+const MOCK_CREATORS: Creator[] = [
+  ...Array.from({ length: 28 }, (_, i): Creator => ({
+    id: `creator-${i}`,
+    name: `Creator${i}`,
+    niche: 'The Passport',
+    engagement: 'N/A',
+    reach: 'N/A',
+    avatar: '',
+    countryFlag: '🇹🇭',
+    isBackup: false,
+    platform: null, socialHandle: null, portfolioUrl: null,
+  })),
+  ...Array.from({ length: 5 }, (_, i): Creator => ({
+    id: `creator-backup-${i}`,
+    name: `BackupCreator${i}`,
+    niche: 'ตัวสำรอง',
+    engagement: 'N/A',
+    reach: 'N/A',
+    avatar: '',
+    countryFlag: '🇹🇭',
+    isBackup: true,
+    platform: null, socialHandle: null, portfolioUrl: null,
+  })),
+];
 
 const mkCountry = (id: number): Country => ({
-  id, name: String(id), flag: '🏳️', creatorsAvail: 0,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  id, name: String(id), flag: '🏳️', region: 'global', languageCode: 'en', languageName: 'English',
+  creatorsAvail: 0, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const mkPackage = (numCreators = 10): Package => ({
-  id: 2, name: 'Popular', badge: null,
-  numCreators, pricePerCreator: 3500, discountPct: 5,
+  id: 2, name: 'Popular', tagline: '', badge: null,
+  numCreators, price: 3500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: '500K', estEngagement: '3%',
 });
 
@@ -60,7 +73,7 @@ describe("SelectCreatorsPage", () => {
 
   it("renders all 10 recommended creator names", async () => {
     render(<SelectCreatorsPage />);
-    for (const creator of SAMPLE_CREATOR_AVATARS.slice(0, 10)) {
+    for (const creator of MOCK_CREATORS.slice(0, 10)) {
       await waitFor(() =>
         expect(screen.getAllByText(creator.name).length).toBeGreaterThan(0)
       );
@@ -69,7 +82,7 @@ describe("SelectCreatorsPage", () => {
 
   it("renders all 5 backup creator names", async () => {
     render(<SelectCreatorsPage />);
-    for (const creator of SAMPLE_CREATOR_AVATARS.slice(28, 33)) {
+    for (const creator of MOCK_CREATORS.slice(28, 33)) {
       await waitFor(() =>
         expect(screen.getAllByText(creator.name).length).toBeGreaterThan(0)
       );
@@ -85,7 +98,7 @@ describe("SelectCreatorsPage", () => {
 
   it("clicking selected creator deselects it", async () => {
     render(<SelectCreatorsPage />);
-    const firstCreatorName = SAMPLE_CREATOR_AVATARS[0].name;
+    const firstCreatorName = MOCK_CREATORS[0].name;
     await waitFor(() => expect(screen.getAllByText(firstCreatorName).length).toBeGreaterThan(0));
     const card = screen.getByText(firstCreatorName).closest("div[class*='rounded-xl']") as HTMLElement;
     fireEvent.click(card);
@@ -134,7 +147,7 @@ describe("SelectCreatorsPage", () => {
 
   it("toggle updates store immediately", async () => {
     render(<SelectCreatorsPage />);
-    const firstCreatorName = SAMPLE_CREATOR_AVATARS[0].name;
+    const firstCreatorName = MOCK_CREATORS[0].name;
     await waitFor(() => expect(screen.getAllByText(firstCreatorName).length).toBeGreaterThan(0));
     const card = screen.getByText(firstCreatorName).closest("div[class*='rounded-xl']") as HTMLElement;
     fireEvent.click(card);

@@ -13,8 +13,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mkCountry = (id: number): Country => ({
-  id, name: String(id), flag: '🏳️', creatorsAvail: 0,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  id, name: String(id), flag: '🏳️', region: 'global', languageCode: 'en', languageName: 'English',
+  creatorsAvail: 0, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
