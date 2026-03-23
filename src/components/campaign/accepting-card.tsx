@@ -188,7 +188,7 @@ export function AcceptingCard({
                   {cc.creator.name}
                 </div>
                 <div className="text-xs text-[#8a90a3]">
-                  Lifestyle & Content
+                  {cc.creator.niche}
                 </div>
               </div>
               {i < accepted ? (

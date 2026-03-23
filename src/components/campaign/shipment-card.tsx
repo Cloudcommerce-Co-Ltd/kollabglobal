@@ -120,7 +120,7 @@ export function ShipmentCard({ creators, creatorsCount, isDomestic, onShipped }:
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-[15px] text-[#4A4A4A]">{cc.creator.name}</div>
-                <div className="text-[13px] text-[#8a90a3]">Food & Lifestyle</div>
+                <div className="text-[13px] text-[#8a90a3]">{cc.creator.niche}</div>
               </div>
               {confirmed ? (
                 <div

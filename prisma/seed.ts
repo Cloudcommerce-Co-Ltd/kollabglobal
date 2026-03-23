@@ -829,7 +829,7 @@ async function main() {
         userId: devUser.id,
         countryId: 1, // Thailand
         packageId: 2,
-        promotionType: 'PRODUCT',
+        promotionType: 'SERVICE',
         status: 'DRAFT',
       },
     });

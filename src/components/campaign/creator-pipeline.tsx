@@ -179,7 +179,7 @@ export function CreatorPipeline({ creators, isService, isLive = false, displaySt
             {/* Name */}
             <div className="min-w-0">
               <div className="font-semibold text-sm text-[#4A4A4A] truncate">{cc.creator.name}</div>
-              <div className="text-xs text-[#8a90a3]">Food & Lifestyle</div>
+              <div className="text-xs text-[#8a90a3]">{cc.creator.niche}</div>
             </div>
 
             {/* Step indicators with connectors */}
