@@ -229,21 +229,23 @@ export default function SelectPackagePage() {
                               }`}
                             >
                               <span className="text-[10px] font-bold text-[#4ECDC4]">{cr.name.charAt(0)}</span>
-                              <Image
-                                src={cr.avatar}
-                                alt={cr.name}
-                                fill
-                                className="object-cover"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                unoptimized
-                              />
+                              {cr.avatar && (
+                                <Image
+                                  src={cr.avatar}
+                                  alt={cr.name}
+                                  fill
+                                  className="object-cover"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                  unoptimized
+                                />
+                              )}
                             </div>
                             {hover === `${pkg.id}-${i}` && (
                               <div className="absolute bottom-9 left-1/2 z-50 min-w-37.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-[#4A4A4A] px-2.75 py-2 text-white">
                                 <div className="mb-0.75 flex items-center gap-1.25">
                                   <div className="relative flex size-4 items-center justify-center overflow-hidden rounded-full bg-[#e8f8f7]">
                                     <span className="text-[8px] font-bold text-[#4ECDC4]">{cr.name.charAt(0)}</span>
-                                    <Image src={cr.avatar} alt={cr.name} fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} unoptimized />
+                                    {cr.avatar && <Image src={cr.avatar} alt={cr.name} fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} unoptimized />}
                                   </div>
                                   <span className="text-xs">{cr.countryFlag}</span>
                                   <span className="text-xs font-semibold">

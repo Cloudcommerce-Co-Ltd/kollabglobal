@@ -52,14 +52,16 @@ export default function SelectCreatorsPage() {
         <div className="relative mb-2 inline-block">
           <div className="relative m-1.5 size-11 overflow-hidden rounded-full bg-[#e8f8f7] flex items-center justify-center">
             <span className="text-sm font-bold text-[#4ECDC4]">{creator.name.charAt(0)}</span>
-            <Image
-              src={creator.avatar}
-              alt={creator.name}
-              fill
-              className="rounded-full object-cover"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              unoptimized
-            />
+            {creator.avatar && (
+              <Image
+                src={creator.avatar}
+                alt={creator.name}
+                fill
+                className="rounded-full object-cover"
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                unoptimized
+              />
+            )}
           </div>
           <span className="absolute bottom-0 right-0 flex size-4.25 items-center justify-center rounded-full text-[18px]">
             {creator.countryFlag}
