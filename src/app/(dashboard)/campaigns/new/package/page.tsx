@@ -85,7 +85,7 @@ export default function SelectPackagePage() {
             {packages.map(pkg => {
               const isSelected = selected === pkg.id;
               const total = calculatePackageTotal(pkg);
-              const avatarCount = Math.min(pkg.numCreators, 8);
+              const avatarCount = Math.min(pkg.numCreators, 7);
               const creatorDesc = pkg.id === 1
                 ? `${pkg.numCreators} ครีเอเตอร์`
                 : `${pkg.numCreators} ครีเอเตอร์ · ไทย+ต่างชาติ`;
@@ -271,7 +271,7 @@ export default function SelectPackagePage() {
                       )}
                       {pkg.numCreators > 8 && (
                         <div className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-[#e8ecf0] text-[11px] font-bold text-[#8a90a3]">
-                          +{pkg.numCreators - 8}
+                          +{pkg.numCreators - 7}
                         </div>
                       )}
                     </div>
