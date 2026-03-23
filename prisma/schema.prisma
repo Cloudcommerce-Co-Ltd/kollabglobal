@@ -131,15 +131,18 @@ model Package {
 }
 
 model Creator {
-  id          String            @id @default(cuid())
-  name        String
-  niche       String
-  engagement  String
-  reach       String
-  avatar      String
-  countryFlag String            @map("country_flag")
-  isBackup    Boolean           @default(false) @map("is_backup")
-  campaigns   CampaignCreator[]
+  id            String            @id @default(cuid())
+  name          String
+  niche         String
+  engagement    String
+  reach         String
+  avatar        String
+  countryFlag   String            @map("country_flag")
+  isBackup      Boolean           @default(false) @map("is_backup")
+  platform      String?
+  socialHandle  String?           @map("social_handle")
+  portfolioUrl  String?           @map("portfolio_url")
+  campaigns     CampaignCreator[]
 
   @@map("creators")
 }
