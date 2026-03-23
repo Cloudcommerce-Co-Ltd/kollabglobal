@@ -13,17 +13,17 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-const mkCountry = (id: string, name: string, flag: string, creatorsAvail: number): Country => ({
+const mkCountry = (id: number, name: string, flag: string, creatorsAvail: number): Country => ({
   id, name, flag, creatorsAvail,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const SAMPLE_COUNTRIES: Country[] = [
-  mkCountry("thailand", "Thailand", "🇹🇭", 1500),
-  mkCountry("vietnam", "Vietnam", "🇻🇳", 840),
-  mkCountry("usa", "United States", "🇺🇸", 1200),
-  mkCountry("uk", "United Kingdom", "🇬🇧", 650),
+  mkCountry(1, "Thailand", "🇹🇭", 1500),
+  mkCountry(2, "Vietnam", "🇻🇳", 840),
+  mkCountry(7, "United States", "🇺🇸", 1200),
+  mkCountry(8, "United Kingdom", "🇬🇧", 650),
 ];
 
 beforeEach(() => {
@@ -66,7 +66,7 @@ describe("SelectCountryPage", () => {
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Thailand")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Thailand").closest("button")!);
-    expect(useCampaignStore.getState().countryData?.id).toBe("thailand");
+    expect(useCampaignStore.getState().countryData?.id).toBe(1);
   });
 
   it("CTA is disabled when no country selected", async () => {
@@ -93,7 +93,7 @@ describe("SelectCountryPage", () => {
   });
 
   it("pre-selects country from store on mount", async () => {
-    useCampaignStore.getState().setCountry(mkCountry("vietnam", "Vietnam", "🇻🇳", 840));
+    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840));
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());
     const cta = screen.getByText("ถัดไป — เพิ่มสินค้า / บริการ");

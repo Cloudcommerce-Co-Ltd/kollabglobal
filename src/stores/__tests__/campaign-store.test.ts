@@ -3,25 +3,25 @@ import { useCampaignStore } from '../campaign-store';
 import type { Country, Package, Creator } from '@/types';
 
 const COUNTRY_TH: Country = {
-  id: 'th', name: 'Thailand', flag: '🇹🇭', creatorsAvail: 1500,
+  id: 1, name: 'Thailand', flag: '🇹🇭', creatorsAvail: 1500,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
 const COUNTRY_SG: Country = {
-  id: 'sg', name: 'Singapore', flag: '🇸🇬', creatorsAvail: 800,
+  id: 99, name: 'Singapore', flag: '🇸🇬', creatorsAvail: 800,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
 const PKG_STARTER: Package = {
-  id: 'pkg-starter', name: 'Starter', badge: null,
+  id: 1, name: 'Starter', badge: null,
   numCreators: 5, pricePerCreator: 2500, discountPct: 0,
   estReach: null, estEngagement: null,
 };
 
 const PKG_POPULAR: Package = {
-  id: 'pkg-popular', name: 'Popular', badge: 'แนะนำ',
+  id: 2, name: 'Popular', badge: 'แนะนำ',
   numCreators: 10, pricePerCreator: 3500, discountPct: 5,
   estReach: null, estEngagement: null,
 };

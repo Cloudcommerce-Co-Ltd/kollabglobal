@@ -14,7 +14,7 @@ export default function SelectCountryPage() {
   const { countryData, setCountry } = useCampaignStore();
 
   const [tab, setTab] = useState<Tab>('asia');
-  const [selected, setSelected] = useState<string | null>(countryData?.id || null);
+  const [selected, setSelected] = useState<number | null>(countryData?.id ?? null);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
 

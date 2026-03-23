@@ -15,12 +15,12 @@ export interface ProductData {
 
 export interface CampaignWithRelations {
   id: string;
-  countryId: string;
-  packageId: string;
+  countryId: number;
+  packageId: number;
   status: string;
   product: ProductData | null;
-  country?: { id: string; name: string; flag: string } | null;
-  package?: { id: string; name: string } | null;
+  country?: { id: number; name: string; flag: string } | null;
+  package?: { id: number; name: string } | null;
   brief?: {
     id: string;
     content: string;

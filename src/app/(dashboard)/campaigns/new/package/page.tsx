@@ -16,7 +16,7 @@ export default function SelectPackagePage() {
 
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<string | null>(packageData?.id || null);
+  const [selected, setSelected] = useState<number | null>(packageData?.id ?? null);
   const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {

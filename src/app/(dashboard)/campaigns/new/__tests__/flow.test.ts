@@ -3,14 +3,14 @@ import { useCampaignStore } from "@/stores/campaign-store";
 import { validateStep } from "@/lib/campaign-steps";
 import type { Country, Package, Creator } from "@/types";
 
-const mkCountry = (id: string): Country => ({
-  id, name: id, flag: '🏳️', creatorsAvail: 0,
+const mkCountry = (id: number): Country => ({
+  id, name: String(id), flag: '🏳️', creatorsAvail: 0,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
-const mkPackage = (id: string): Package => ({
-  id, name: id, badge: null,
+const mkPackage = (id: number): Package => ({
+  id, name: String(id), badge: null,
   numCreators: 10, pricePerCreator: 3500, discountPct: 0,
   estReach: null, estEngagement: null,
 });
@@ -41,59 +41,59 @@ describe("Campaign creation flow — validateStep", () => {
   });
 
   it("step 2 allowed after setCountry", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     const state = useCampaignStore.getState();
     expect(validateStep(2, state)).toEqual({ allowed: true });
   });
 
   it("step 3 blocked when only countryData, redirects to product", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     const state = useCampaignStore.getState();
     expect(validateStep(3, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/product" });
   });
 
   it("step 3 allowed after country + product", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     useCampaignStore.getState().setProduct(product);
     const state = useCampaignStore.getState();
     expect(validateStep(3, state)).toEqual({ allowed: true });
   });
 
   it("step 4 blocked when packageData missing, redirects to package", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     useCampaignStore.getState().setProduct(product);
     const state = useCampaignStore.getState();
     expect(validateStep(4, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/package" });
   });
 
   it("step 4 allowed after country + product + package", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     useCampaignStore.getState().setProduct(product);
-    useCampaignStore.getState().setPackage(mkPackage("popular"));
+    useCampaignStore.getState().setPackage(mkPackage(2));
     const state = useCampaignStore.getState();
     expect(validateStep(4, state)).toEqual({ allowed: true });
   });
 
   it("step 5 blocked when no creators, redirects to creators", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     useCampaignStore.getState().setProduct(product);
-    useCampaignStore.getState().setPackage(mkPackage("popular"));
+    useCampaignStore.getState().setPackage(mkPackage(2));
     const state = useCampaignStore.getState();
     expect(validateStep(5, state)).toEqual({ allowed: false, redirectTo: "/campaigns/new/creators" });
   });
 
   it("step 5 allowed after all data including creators", () => {
-    useCampaignStore.getState().setCountry(mkCountry("thailand"));
+    useCampaignStore.getState().setCountry(mkCountry(1));
     useCampaignStore.getState().setProduct(product);
-    useCampaignStore.getState().setPackage(mkPackage("popular"));
+    useCampaignStore.getState().setPackage(mkPackage(2));
     useCampaignStore.getState().setCreators([mkCreator("c1")]);
     const state = useCampaignStore.getState();
     expect(validateStep(5, state)).toEqual({ allowed: true });
   });
 
   it("countryData persists after setting other data", () => {
-    useCampaignStore.getState().setCountry(mkCountry("malaysia"));
+    useCampaignStore.getState().setCountry(mkCountry(3));
     useCampaignStore.getState().setProduct(product);
-    expect(useCampaignStore.getState().countryData?.id).toBe("malaysia");
+    expect(useCampaignStore.getState().countryData?.id).toBe(3);
   });
 });

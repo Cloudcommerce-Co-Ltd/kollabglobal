@@ -1,44 +1,38 @@
 export const CREATOR_LANG_BY_COUNTRY: Record<
-  string,
+  number,
   { code: string; name: string; flag: string }
 > = {
-  thailand: { code: "th", name: "Thai", flag: "🇹🇭" },
-  vietnam: { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
-  malaysia: { code: "ms", name: "Malay", flag: "🇲🇾" },
-  laos: { code: "lo", name: "Lao", flag: "🇱🇦" },
-  japan: { code: "ja", name: "Japanese", flag: "🇯🇵" },
-  korea: { code: "ko", name: "Korean", flag: "🇰🇷" },
-  usa: { code: "en", name: "English", flag: "🇺🇸" },
-  uk: { code: "en", name: "English", flag: "🇬🇧" },
-  australia: { code: "en", name: "English", flag: "🇦🇺" },
-  eu: { code: "en", name: "English", flag: "🇪🇺" },
-  clmv: { code: "en", name: "English", flag: "🌏" },
+  1: { code: "th", name: "Thai", flag: "🇹🇭" },       // Thailand
+  2: { code: "vi", name: "Vietnamese", flag: "🇻🇳" },  // Vietnam
+  3: { code: "ms", name: "Malay", flag: "🇲🇾" },       // Malaysia
+  4: { code: "lo", name: "Lao", flag: "🇱🇦" },         // Laos
+  5: { code: "ja", name: "Japanese", flag: "🇯🇵" },    // Japan
+  6: { code: "ko", name: "Korean", flag: "🇰🇷" },      // South Korea
+  7: { code: "en", name: "English", flag: "🇺🇸" },     // United States
+  8: { code: "en", name: "English", flag: "🇬🇧" },     // United Kingdom
+  10: { code: "en", name: "English", flag: "🇦🇺" },    // Australia
+  11: { code: "en", name: "English", flag: "🇪🇺" },    // EU Region
+  9: { code: "en", name: "English", flag: "🌏" },      // CLMV Region
 };
 
-export const ASIA_COUNTRY_IDS = new Set([
-  "thailand",
-  "vietnam",
-  "malaysia",
-  "laos",
-  "japan",
-  "korea",
-]);
+// IDs 1–6 are Asia countries per seed data
+export const ASIA_COUNTRY_IDS = new Set([1, 2, 3, 4, 5, 6]);
 
 export interface PackageExtra {
   platforms: string[];
   deliverables: string[];
 }
 
-export const PACKAGE_EXTRAS: Record<string, PackageExtra> = {
-  starter: {
+export const PACKAGE_EXTRAS: Record<number, PackageExtra> = {
+  1: {  // Starter
     platforms: ["tiktok"],
     deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)"],
   },
-  popular: {
+  2: {  // Popular
     platforms: ["tiktok", "instagram"],
     deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories"],
   },
-  value: {
+  3: {  // Value
     platforms: ["tiktok", "instagram", "facebook"],
     deliverables: [
       "TikTok 1 วิดีโอ (15–60 วิ)",
@@ -49,7 +43,7 @@ export const PACKAGE_EXTRAS: Record<string, PackageExtra> = {
 };
 
 /** Filters countries by region tab. */
-export function filterCountriesByRegion<T extends { id: string }>(
+export function filterCountriesByRegion<T extends { id: number }>(
   countries: T[],
   region: "asia" | "global"
 ): T[] {

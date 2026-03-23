@@ -64,8 +64,8 @@ const mockBrief = {
 const mockCampaign = {
   id: "campaign-123",
   userId: "user-1",
-  countryId: "thailand",
-  packageId: "starter",
+  countryId: 1,
+  packageId: 1,
   promotionType: "PRODUCT" as const,
   status: "DRAFT" as const,
   createdAt: new Date(),

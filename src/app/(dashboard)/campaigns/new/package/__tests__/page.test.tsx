@@ -12,15 +12,15 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-const mkCountry = (id: string): Country => ({
-  id, name: id, flag: '🏳️', creatorsAvail: 0,
+const mkCountry = (id: number): Country => ({
+  id, name: String(id), flag: '🏳️', creatorsAvail: 0,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const SAMPLE_PACKAGES: Package[] = [
   {
-    id: "starter",
+    id: 1,
     name: "Starter",
     badge: null,
     numCreators: 5,
@@ -30,7 +30,7 @@ const SAMPLE_PACKAGES: Package[] = [
     estEngagement: "2.5–4.0%",
   },
   {
-    id: "popular",
+    id: 2,
     name: "Popular",
     badge: "แนะนำ",
     numCreators: 10,
@@ -40,7 +40,7 @@ const SAMPLE_PACKAGES: Package[] = [
     estEngagement: "3.5–5.5%",
   },
   {
-    id: "value",
+    id: 3,
     name: "Value",
     badge: null,
     numCreators: 15,
@@ -54,7 +54,7 @@ const SAMPLE_PACKAGES: Package[] = [
 beforeEach(() => {
   useCampaignStore.getState().reset();
   // Set a countryData so the guard passes
-  useCampaignStore.getState().setCountry(mkCountry("thailand"));
+  useCampaignStore.getState().setCountry(mkCountry(1));
   mockPush.mockClear();
   mockReplace.mockClear();
 
@@ -79,14 +79,14 @@ describe("SelectPackagePage", () => {
   it("auto-selects Popular package (has badge)", async () => {
     render(<SelectPackagePage />);
     await waitFor(() => expect(screen.getByText("Popular")).toBeInTheDocument());
-    expect(useCampaignStore.getState().packageData?.id).toBe("popular");
+    expect(useCampaignStore.getState().packageData?.id).toBe(2);
   });
 
   it("clicking a different card updates the store", async () => {
     render(<SelectPackagePage />);
     await waitFor(() => expect(screen.getByText("Starter")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Starter"));
-    expect(useCampaignStore.getState().packageData?.id).toBe("starter");
+    expect(useCampaignStore.getState().packageData?.id).toBe(1);
   });
 
   it("shows discount savings badge for packages with discount", async () => {

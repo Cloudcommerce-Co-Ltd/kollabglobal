@@ -37,20 +37,20 @@ describe("calculatePackageTotal", () => {
 
 describe("getPackagePlatforms", () => {
   it("returns platforms for known package", () => {
-    expect(getPackagePlatforms("starter")).toEqual(["tiktok"]);
-    expect(getPackagePlatforms("popular")).toEqual(["tiktok", "instagram"]);
-    expect(getPackagePlatforms("value")).toEqual(["tiktok", "instagram", "facebook"]);
+    expect(getPackagePlatforms(1)).toEqual(["tiktok"]);
+    expect(getPackagePlatforms(2)).toEqual(["tiktok", "instagram"]);
+    expect(getPackagePlatforms(3)).toEqual(["tiktok", "instagram", "facebook"]);
   });
 
   it("returns default platforms for unknown package", () => {
-    expect(getPackagePlatforms("unknown")).toEqual(["tiktok", "instagram"]);
+    expect(getPackagePlatforms(999)).toEqual(["tiktok", "instagram"]);
     expect(getPackagePlatforms(undefined)).toEqual(["tiktok", "instagram"]);
   });
 });
 
 describe("getPackageDeliverables", () => {
   it("returns deliverables for known package", () => {
-    const deliverables = getPackageDeliverables("starter");
+    const deliverables = getPackageDeliverables(1);
     expect(deliverables).toHaveLength(1);
     expect(deliverables[0]).toContain("TikTok");
   });

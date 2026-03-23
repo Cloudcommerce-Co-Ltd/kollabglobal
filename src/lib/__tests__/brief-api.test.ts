@@ -42,7 +42,7 @@ describe("fetchCampaign", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("returns campaign data on success", async () => {
-    const campaign = { id: "abc", countryId: "vietnam", packageId: "popular", status: "DRAFT", product: null };
+    const campaign = { id: "abc", countryId: 2, packageId: 2, status: "DRAFT", product: null };
     mockFetch.mockReturnValue(mockResponse(campaign));
 
     const result = await fetchCampaign("abc");

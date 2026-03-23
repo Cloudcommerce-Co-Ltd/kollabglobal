@@ -16,10 +16,10 @@ async function main() {
 
   // 11 Countries — 8 active, 3 inactive
   await prisma.country.upsert({
-    where: { id: 'thailand' },
+    where: { id: 1 },
     update: {},
     create: {
-      id: 'thailand',
+      id: 1,
       name: 'Thailand',
       flag: '🇹🇭',
       creatorsAvail: 1500,
@@ -37,10 +37,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'vietnam' },
+    where: { id: 2 },
     update: {},
     create: {
-      id: 'vietnam',
+      id: 2,
       name: 'Vietnam',
       flag: '🇻🇳',
       creatorsAvail: 840,
@@ -58,10 +58,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'malaysia' },
+    where: { id: 3 },
     update: {},
     create: {
-      id: 'malaysia',
+      id: 3,
       name: 'Malaysia',
       flag: '🇲🇾',
       creatorsAvail: 520,
@@ -79,10 +79,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'laos' },
+    where: { id: 4 },
     update: {},
     create: {
-      id: 'laos',
+      id: 4,
       name: 'Laos',
       flag: '🇱🇦',
       creatorsAvail: 120,
@@ -100,10 +100,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'japan' },
+    where: { id: 5 },
     update: {},
     create: {
-      id: 'japan',
+      id: 5,
       name: 'Japan',
       flag: '🇯🇵',
       creatorsAvail: 380,
@@ -121,10 +121,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'korea' },
+    where: { id: 6 },
     update: {},
     create: {
-      id: 'korea',
+      id: 6,
       name: 'South Korea',
       flag: '🇰🇷',
       creatorsAvail: 290,
@@ -142,10 +142,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'usa' },
+    where: { id: 7 },
     update: {},
     create: {
-      id: 'usa',
+      id: 7,
       name: 'United States',
       flag: '🇺🇸',
       creatorsAvail: 1200,
@@ -163,10 +163,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'uk' },
+    where: { id: 8 },
     update: {},
     create: {
-      id: 'uk',
+      id: 8,
       name: 'United Kingdom',
       flag: '🇬🇧',
       creatorsAvail: 650,
@@ -185,10 +185,10 @@ async function main() {
 
   // Inactive countries (coming soon)
   await prisma.country.upsert({
-    where: { id: 'clmv' },
+    where: { id: 9 },
     update: {},
     create: {
-      id: 'clmv',
+      id: 9,
       name: 'CLMV Region',
       flag: '🌏',
       creatorsAvail: 0,
@@ -199,10 +199,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'australia' },
+    where: { id: 10 },
     update: {},
     create: {
-      id: 'australia',
+      id: 10,
       name: 'Australia',
       flag: '🇦🇺',
       creatorsAvail: 0,
@@ -213,10 +213,10 @@ async function main() {
   });
 
   await prisma.country.upsert({
-    where: { id: 'eu' },
+    where: { id: 11 },
     update: {},
     create: {
-      id: 'eu',
+      id: 11,
       name: 'EU Region',
       flag: '🇪🇺',
       creatorsAvail: 0,
@@ -229,10 +229,10 @@ async function main() {
   console.log('Seeding packages...');
 
   await prisma.package.upsert({
-    where: { id: 'starter' },
+    where: { id: 1 },
     update: {},
     create: {
-      id: 'starter',
+      id: 1,
       name: 'Starter',
       badge: null,
       numCreators: 5,
@@ -244,10 +244,10 @@ async function main() {
   });
 
   await prisma.package.upsert({
-    where: { id: 'popular' },
+    where: { id: 2 },
     update: {},
     create: {
-      id: 'popular',
+      id: 2,
       name: 'Popular',
       badge: 'แนะนำ',
       numCreators: 10,
@@ -259,10 +259,10 @@ async function main() {
   });
 
   await prisma.package.upsert({
-    where: { id: 'value' },
+    where: { id: 3 },
     update: {},
     create: {
-      id: 'value',
+      id: 3,
       name: 'Value',
       badge: null,
       numCreators: 15,
@@ -342,8 +342,8 @@ async function main() {
       create: {
         id: 'dev-campaign-1',
         userId: devUser.id,
-        countryId: 'vietnam',
-        packageId: 'popular',
+        countryId: 2,
+        packageId: 2,
         promotionType: 'PRODUCT',
         status: 'DRAFT',
       },

@@ -38,10 +38,10 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String?    @unique
+  emailVerified DateTime?  @map("email_verified")
   image         String?
   accounts      Account[]
   sessions      Session[]
@@ -97,7 +97,7 @@ enum PaymentStatus {
 // ─── Business Models ─────────────────────────────────────────────────────────
 
 model Country {
-  id            String     @id
+  id            Int        @id @default(autoincrement())
   name          String
   flag          String
   creatorsAvail Int        @default(0) @map("creators_avail")
@@ -117,27 +117,27 @@ model Country {
 }
 
 model Package {
-  id              String  @id
+  id              Int        @id @default(autoincrement())
   name            String
   badge           String?
-  numCreators     Int     @map("num_creators")
-  pricePerCreator Int     @map("price_per_creator")
-  discountPct     Int     @default(0) @map("discount_pct")
-  estReach        String? @map("est_reach")
-  estEngagement   String? @map("est_engagement")
+  numCreators     Int        @map("num_creators")
+  pricePerCreator Int        @map("price_per_creator")
+  discountPct     Int        @default(0) @map("discount_pct")
+  estReach        String?    @map("est_reach")
+  estEngagement   String?    @map("est_engagement")
   campaigns       Campaign[]
 
   @@map("packages")
 }
 
 model Creator {
-  id          String  @id @default(cuid())
+  id          String            @id @default(cuid())
   name        String
   niche       String
   engagement  String
   reach       String
   avatar      String
-  countryFlag String  @map("country_flag")
+  countryFlag String            @map("country_flag")
   isBackup    Boolean           @default(false) @map("is_backup")
   campaigns   CampaignCreator[]
 
@@ -147,35 +147,35 @@ model Creator {
 model Campaign {
   id            String         @id @default(cuid())
   userId        String         @map("user_id")
-  countryId     String         @map("country_id")
-  packageId     String         @map("package_id")
+  countryId     Int            @map("country_id")
+  packageId     Int            @map("package_id")
   promotionType PromotionType  @map("promotion_type")
   status        CampaignStatus @default(DRAFT)
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  country Country @relation(fields: [countryId], references: [id])
-  package Package @relation(fields: [packageId], references: [id])
-  product   CampaignProduct?
-  brief     CampaignBrief?
-  creators  CampaignCreator[]
-  payment   Payment?
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country  Country           @relation(fields: [countryId], references: [id])
+  package  Package           @relation(fields: [packageId], references: [id])
+  product  CampaignProduct?
+  brief    CampaignBrief?
+  creators CampaignCreator[]
+  payment  Payment?
 
   @@map("campaigns")
 }
 
 model CampaignProduct {
-  id            String   @id @default(cuid())
-  campaignId    String   @unique @map("campaign_id")
-  brandName     String   @map("brand_name")
-  productName   String   @map("product_name")
+  id            String  @id @default(cuid())
+  campaignId    String  @unique @map("campaign_id")
+  brandName     String  @map("brand_name")
+  productName   String  @map("product_name")
   category      String
-  description   String   @db.Text
-  sellingPoints String   @map("selling_points") @db.Text
+  description   String  @db.Text
+  sellingPoints String  @map("selling_points") @db.Text
   url           String?
-  imageUrl      String?  @map("image_url")
-  isService     Boolean  @default(false) @map("is_service")
+  imageUrl      String? @map("image_url")
+  isService     Boolean @default(false) @map("is_service")
   weight        Float?
   length        Float?
   width         Float?
