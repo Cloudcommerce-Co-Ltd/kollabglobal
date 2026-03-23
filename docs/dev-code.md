@@ -68,9 +68,22 @@ pnpm exec tsx prisma/seed.ts
 
 ---
 
+## 3. Creator Avatars — `unoptimized` on `next/Image`
+
+### `src/app/(dashboard)/campaigns/new/creators/page.tsx`, `package/page.tsx`, `checkout/page.tsx`
+
+All `<Image>` components rendering creator avatars use `unoptimized` as a temporary workaround because the current `avatar` values in the seed are social profile page URLs (e.g. `https://www.tiktok.com/@handle`), not direct image URLs. Next.js Image would reject them otherwise.
+
+**What to do before production:**
+1. Replace all `avatar` values in the seed with real image URLs (S3 after credentials arrive, or direct CDN links to profile photos).
+2. Remove `unoptimized` from all three `<Image>` components — Next.js will then optimize via the `*.s3.*.amazonaws.com` pattern already in `next.config.ts`.
+
+---
+
 ## Checklist before production
 
 - [ ] Remove or gate `src/app/api/dev/` directory
 - [ ] Remove the Dev Only block from the login page
 - [ ] Confirm `api/dev` is not accessible (returns 404 — already handled by the route guard)
 - [ ] Ensure dev seed data (`dev-user-1`, `dev-campaign-1`) is not present in the production database
+- [ ] Replace creator `avatar` seed values with real image URLs and remove `unoptimized` from `<Image>` components in creators, package, and checkout pages
