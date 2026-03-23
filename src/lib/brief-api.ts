@@ -35,6 +35,23 @@ export async function translateBrief(
   return res.json() as Promise<TranslatedFields>;
 }
 
+export async function confirmShipment(campaignId: string): Promise<boolean> {
+  const res = await fetch(`/api/campaigns/${campaignId}/shipment`, { method: "PATCH" });
+  return res.ok;
+}
+
+export async function updateCampaignStatus(
+  campaignId: string,
+  status: string
+): Promise<boolean> {
+  const res = await fetch(`/api/campaigns/${campaignId}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  return res.ok;
+}
+
 export async function publishBrief(
   campaignId: string,
   content: BriefContent,
