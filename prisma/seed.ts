@@ -310,7 +310,11 @@ async function main() {
       numCreators: 15,
       price: 4800,
       platforms: ['tiktok', 'instagram', 'facebook'],
-      deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)', 'IG 1 Reel + 3 Stories', 'Facebook 2 โพสต์'],
+      deliverables: [
+        'TikTok 1 วิดีโอ (15–60 วิ)',
+        'IG 1 Reel + 3 Stories',
+        'Facebook 2 โพสต์',
+      ],
       cpmLabel: '฿30 / 1K reach',
       cpmSavings: '82%',
       estReach: '1.2M-3M',
@@ -816,6 +820,64 @@ async function main() {
 
     console.log(`  - Dev campaign ID: ${devCampaign.id}`);
     console.log(`  - Visit: /campaigns/${devCampaign.id}/brief/new`);
+
+    const devCampaign2 = await prisma.campaign.upsert({
+      where: { id: 'dev-campaign-2' },
+      update: {},
+      create: {
+        id: 'dev-campaign-2',
+        userId: devUser.id,
+        countryId: 1, // Thailand
+        packageId: 2,
+        promotionType: 'PRODUCT',
+        status: 'DRAFT',
+      },
+    });
+
+    await prisma.campaignProduct.upsert({
+      where: { campaignId: devCampaign2.id },
+      update: {},
+      create: {
+        campaignId: devCampaign2.id,
+        brandName: 'TH Brand',
+        productName: 'ผลิตภัณฑ์ทดสอบ',
+        category: 'Health & Wellness',
+        description: 'รายละเอียดผลิตภัณฑ์สำหรับแคมเปญประเทศไทย',
+        sellingPoints: 'จุดเด่น 1 | จุดเด่น 2 | จุดเด่น 3',
+        isService: false,
+        url: 'https://kollabglobal.com/th-product',
+      },
+    });
+
+    console.log(`  - Dev campaign 2 ID: ${devCampaign2.id}`);
+    console.log(`  - Visit: /campaigns/${devCampaign2.id}/brief/new`);
+
+    const selectedCreators = mainCreators.slice(0, 10);
+    console.log(
+      `  - Assigning ${selectedCreators.length} creators to dev campaigns...`,
+    );
+
+    for (const creator of selectedCreators) {
+      const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+
+      // Assign to dev-campaign-1
+      await prisma.campaignCreator.create({
+        data: {
+          campaignId: devCampaign.id,
+          creatorId: creatorId,
+          status: 'PENDING',
+        },
+      });
+
+      // Assign to dev-campaign-2
+      await prisma.campaignCreator.create({
+        data: {
+          campaignId: devCampaign2.id,
+          creatorId: creatorId,
+          status: 'PENDING',
+        },
+      });
+    }
   }
 
   console.log('Seed complete!');

@@ -56,10 +56,11 @@ Wrapped in `if (process.env.NODE_ENV !== 'production')`. Creates:
 | Resource | ID | Details |
 |---|---|---|
 | User | `dev-user-1` | `dev@kollabglobal.com` |
-| Campaign | `dev-campaign-1` | Vietnam · Popular package · DRAFT |
-| Product | (linked to campaign) | มะม่วงอบแห้ง Premium · Food & Snack |
+| Campaign 1 | `dev-campaign-1` | Vietnam · Popular package · DRAFT |
+| Campaign 2 | `dev-campaign-2` | Thailand · Popular package · DRAFT |
+| Product | (linked to campaigns) | มะม่วงอบแห้ง Premium / TH Brand |
 
-**Test URL after login:** `/campaigns/dev-campaign-1/brief/new`
+**Test URL after login:** `/campaigns/dev-campaign-1/brief/new` or `/campaigns/dev-campaign-2/brief/new`
 
 Run seed:
 ```bash
@@ -78,6 +79,15 @@ All `<Image>` components rendering creator avatars use `unoptimized` as a tempor
 1. Replace all `avatar` values in the seed with real image URLs (S3 after credentials arrive, or direct CDN links to profile photos).
 2. Remove `unoptimized` from all three `<Image>` components — Next.js will then optimize via the `*.s3.*.amazonaws.com` pattern already in `next.config.ts`.
 
+## 4. Dev State Simulation — Creator Acceptance
+
+### `src/components/campaign/accepting-card.tsx`
+
+The `AcceptingCard` component includes a mock simulation button ("▶ จำลองครีเอเตอร์ตอบรับหมด") that artificially advances the `accepted` state of creators. This is solely for demonstrating the UI transition and pipeline updates locally without having real webhooks or creator side interactions.
+
+**What to do before production:**
+- Remove the `"▶ จำลองครีเอเตอร์ตอบรับหมด"` button and its `simulate` state logic from `accepting-card.tsx`, as this state should only be advanced via real API updates from the backend when a creator accepts an invitation.
+
 ---
 
 ## Checklist before production
@@ -85,5 +95,6 @@ All `<Image>` components rendering creator avatars use `unoptimized` as a tempor
 - [ ] Remove or gate `src/app/api/dev/` directory
 - [ ] Remove the Dev Only block from the login page
 - [ ] Confirm `api/dev` is not accessible (returns 404 — already handled by the route guard)
-- [ ] Ensure dev seed data (`dev-user-1`, `dev-campaign-1`) is not present in the production database
+- [ ] Ensure dev seed data (`dev-user-1`, `dev-campaign-1`, `dev-campaign-2`) is not present in the production database
 - [ ] Replace creator `avatar` seed values with real image URLs and remove `unoptimized` from `<Image>` components in creators, package, and checkout pages
+- [ ] Remove Dev State Simulation block ("▶ จำลองครีเอเตอร์ตอบรับหมด") and simulate logic from `src/components/campaign/accepting-card.tsx`
