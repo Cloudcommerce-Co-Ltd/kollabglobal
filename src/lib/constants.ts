@@ -2,17 +2,17 @@ export const CREATOR_LANG_BY_COUNTRY: Record<
   number,
   { code: string; name: string; flag: string }
 > = {
-  1: { code: "th", name: "Thai", flag: "🇹🇭" },       // Thailand
-  2: { code: "vi", name: "Vietnamese", flag: "🇻🇳" },  // Vietnam
-  3: { code: "ms", name: "Malay", flag: "🇲🇾" },       // Malaysia
-  4: { code: "lo", name: "Lao", flag: "🇱🇦" },         // Laos
-  5: { code: "ja", name: "Japanese", flag: "🇯🇵" },    // Japan
-  6: { code: "ko", name: "Korean", flag: "🇰🇷" },      // South Korea
-  7: { code: "en", name: "English", flag: "🇺🇸" },     // United States
-  8: { code: "en", name: "English", flag: "🇬🇧" },     // United Kingdom
-  10: { code: "en", name: "English", flag: "🇦🇺" },    // Australia
-  11: { code: "en", name: "English", flag: "🇪🇺" },    // EU Region
-  9: { code: "en", name: "English", flag: "🌏" },      // CLMV Region
+  1: { code: 'th', name: 'Thai', flag: '🇹🇭' }, // Thailand
+  2: { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' }, // Vietnam
+  3: { code: 'ms', name: 'Malay', flag: '🇲🇾' }, // Malaysia
+  4: { code: 'lo', name: 'Lao', flag: '🇱🇦' }, // Laos
+  5: { code: 'ja', name: 'Japanese', flag: '🇯🇵' }, // Japan
+  6: { code: 'ko', name: 'Korean', flag: '🇰🇷' }, // South Korea
+  7: { code: 'en', name: 'English', flag: '🇺🇸' }, // United States
+  8: { code: 'en', name: 'English', flag: '🇬🇧' }, // United Kingdom
+  10: { code: 'en', name: 'English', flag: '🇦🇺' }, // Australia
+  11: { code: 'en', name: 'English', flag: '🇪🇺' }, // EU Region
+  9: { code: 'en', name: 'English', flag: '🌏' }, // CLMV Region
 };
 
 // IDs 1–6 are Asia countries per seed data
@@ -24,20 +24,23 @@ export interface PackageExtra {
 }
 
 export const PACKAGE_EXTRAS: Record<number, PackageExtra> = {
-  1: {  // Starter
-    platforms: ["tiktok"],
-    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)"],
+  1: {
+    // Starter
+    platforms: ['tiktok'],
+    deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)'],
   },
-  2: {  // Popular
-    platforms: ["tiktok", "instagram"],
-    deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories"],
+  2: {
+    // Popular
+    platforms: ['tiktok', 'instagram'],
+    deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)', 'IG 1 Reel + 3 Stories'],
   },
-  3: {  // Value
-    platforms: ["tiktok", "instagram", "facebook"],
+  3: {
+    // Value
+    platforms: ['tiktok', 'instagram', 'facebook'],
     deliverables: [
-      "TikTok 1 วิดีโอ (15–60 วิ)",
-      "IG 1 Reel + 3 Stories",
-      "Facebook 2 โพสต์",
+      'TikTok 1 วิดีโอ (15–60 วิ)',
+      'IG 1 Reel + 3 Stories',
+      'Facebook 2 โพสต์',
     ],
   },
 };
@@ -45,49 +48,313 @@ export const PACKAGE_EXTRAS: Record<number, PackageExtra> = {
 /** Filters countries by region tab. */
 export function filterCountriesByRegion<T extends { id: number }>(
   countries: T[],
-  region: "asia" | "global"
+  region: 'asia' | 'global',
 ): T[] {
-  if (region === "asia") {
-    return countries.filter((c) => ASIA_COUNTRY_IDS.has(c.id));
+  if (region === 'asia') {
+    return countries.filter(c => ASIA_COUNTRY_IDS.has(c.id));
   }
-  return countries.filter((c) => !ASIA_COUNTRY_IDS.has(c.id));
+  return countries.filter(c => !ASIA_COUNTRY_IDS.has(c.id));
 }
 
 export const PRODUCT_CATEGORIES = [
-  "Food & Snack", "Beauty & Skincare", "Health & Wellness", "Fashion",
-  "Lifestyle", "Beverage", "Electronics", "Home & Living",
+  'Food & Snack',
+  'Beauty & Skincare',
+  'Health & Wellness',
+  'Fashion',
+  'Lifestyle',
+  'Beverage',
+  'Electronics',
+  'Home & Living',
 ];
 
 export const SERVICE_CATEGORIES = [
-  "ร้านอาหาร / คาเฟ่", "ท่องเที่ยว / โรงแรม", "ความงาม / สปา",
-  "ฟิตเนส / สุขภาพ", "การศึกษา / คอร์สเรียน", "แอปพลิเคชัน / Software",
-  "อสังหาริมทรัพย์", "บริการอื่นๆ",
+  'ร้านอาหาร / คาเฟ่',
+  'ท่องเที่ยว / โรงแรม',
+  'ความงาม / สปา',
+  'ฟิตเนส / สุขภาพ',
+  'การศึกษา / คอร์สเรียน',
+  'แอปพลิเคชัน / Software',
+  'อสังหาริมทรัพย์',
+  'บริการอื่นๆ',
 ];
 
 export const SAMPLE_CREATOR_AVATARS = [
-  { avatar: "👩🏻", name: "Linh Tran", niche: "Food Review", eng: "8.5%", reach: "250K", flag: "🇻🇳" },
-  { avatar: "👩🏽", name: "Salwa Ahmad", niche: "Lifestyle", eng: "7.2%", reach: "180K", flag: "🇲🇾" },
-  { avatar: "👨🏻‍🦱", name: "Luca Rossi", niche: "Thai Culture", eng: "9.1%", reach: "320K", flag: "🇮🇹" },
-  { avatar: "👩🏻", name: "Mai Nguyen", niche: "Food & Bev", eng: "6.8%", reach: "150K", flag: "🇻🇳" },
-  { avatar: "👨🏻", name: "James Park", niche: "Lifestyle", eng: "8.9%", reach: "290K", flag: "🇺🇸" },
-  { avatar: "👩🏾", name: "Aisha Karim", niche: "Health", eng: "7.5%", reach: "200K", flag: "🇲🇾" },
-  { avatar: "👩🏽‍🦱", name: "Priya Sharma", niche: "Travel & Food", eng: "8.2%", reach: "270K", flag: "🇮🇳" },
-  { avatar: "👨🏻‍🦰", name: "David Kim", niche: "Fashion", eng: "7.8%", reach: "230K", flag: "🇰🇷" },
-  { avatar: "👩🏿", name: "Nina Williams", niche: "Beauty", eng: "9.3%", reach: "340K", flag: "🇬🇧" },
-  { avatar: "👨🏽", name: "Carlos Santos", niche: "Food", eng: "7.9%", reach: "210K", flag: "🇧🇷" },
-  { avatar: "👩🏼", name: "Olivia Turner", niche: "Skincare", eng: "6.5%", reach: "140K", flag: "🇦🇺" },
-  { avatar: "👨🏾", name: "Ryan Brooks", niche: "Fitness", eng: "7.1%", reach: "190K", flag: "🇺🇸" },
-  { avatar: "👩🏻‍🦰", name: "Maya Lee", niche: "Fashion", eng: "8.0%", reach: "220K", flag: "🇰🇷" },
-  { avatar: "👨🏻", name: "Kevin Nguyen", niche: "Tech & Life", eng: "6.9%", reach: "165K", flag: "🇻🇳" },
-  { avatar: "👩🏽‍🦱", name: "Zara Ahmed", niche: "Beauty", eng: "7.7%", reach: "205K", flag: "🇲🇾" },
+  // The Passport
+  {
+    avatar: 'https://www.tiktok.com/@jutamatketkaew',
+    name: 'Kelly',
+    niche: 'The Passport',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@korbfa',
+    name: 'J',
+    niche: 'The Passport',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@neennein',
+    name: 'Neen',
+    niche: 'The Passport',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@jeerabud',
+    name: 'Garfield',
+    niche: 'The Passport',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.facebook.com/aim.sangboon',
+    name: 'Aim',
+    niche: 'The Passport',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  // The Global Bridge
+  {
+    avatar: 'https://www.tiktok.com/@ssunwa29',
+    name: 'Sunwa',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@earnshares',
+    name: 'Earn',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@enuntr',
+    name: 'Elle',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@arnabarbie',
+    name: 'Anna',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@iratchaa',
+    name: 'Jaew',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@jadeeeeeenn',
+    name: 'Yok',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@benzspch',
+    name: 'Benz',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@retiringtoasia',
+    name: 'Retiring To Asia',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇺🇸',
+  },
+  {
+    avatar: 'https://www.instagram.com/jennalyncreative',
+    name: 'Jennalyn',
+    niche: 'The Global Bridge',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇦🇺',
+  },
+  // The World Dominator
+  {
+    avatar: 'https://www.tiktok.com/@alice_chayada',
+    name: 'Alice',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@_rebecca_int',
+    name: 'Rebecca',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@patchainparis',
+    name: 'Ao',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.facebook.com/Ssura.Koii',
+    name: 'Koii',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.facebook.com/Parjant.Jantakan.H',
+    name: 'Parjant',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@babysuaaa',
+    name: 'Sua',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@newsvilliz',
+    name: 'Newz',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.facebook.com/amm.mimi',
+    name: 'Amm',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@tonwhay2538',
+    name: 'Whay',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@delillahp',
+    name: 'Delila',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇷🇴',
+  },
+  {
+    avatar: 'https://www.instagram.com/iamsonalrana',
+    name: 'Sonal Rana',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇺🇸',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@ugcwithkaytelynn',
+    name: 'Katelynn',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇨🇦',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@seniafd',
+    name: 'Senia',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇮🇹',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@savannalyncreates',
+    name: 'Savanna',
+    niche: 'The World Dominator',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇺🇸',
+  },
+  // Reserves (ตัวสำรอง)
+  {
+    avatar: 'https://www.tiktok.com/@cryzaiah',
+    name: 'Zaiah',
+    niche: 'ตัวสำรอง',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇵🇭',
+  },
+  {
+    avatar: 'https://www.instagram.com/karinaneufeld.ugc',
+    name: 'Karina',
+    niche: 'ตัวสำรอง',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇩🇪',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@lookbasinfrance',
+    name: 'Lookbas',
+    niche: 'ตัวสำรอง',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@cianacia',
+    name: 'Nacia',
+    niche: 'ตัวสำรอง',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇹🇭',
+  },
+  {
+    avatar: 'https://www.tiktok.com/@estherinnl',
+    name: 'Esther',
+    niche: 'ตัวสำรอง',
+    eng: 'N/A',
+    reach: 'N/A',
+    flag: '🇳🇱',
+  },
 ];
 
 export const STATIC_CHECKOUT_DATA = {
-  packageName: "Popular",
+  packageName: 'Popular',
   numCreators: 10,
   numPosts: 20,
-  duration: "30 วัน",
-  campaignType: "สินค้า",
+  duration: '30 วัน',
+  campaignType: 'สินค้า',
   basePrice: 33250,
   vatRate: 0.07,
   serviceFeeRate: 0.03,
