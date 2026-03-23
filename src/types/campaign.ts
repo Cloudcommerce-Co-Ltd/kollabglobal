@@ -1,4 +1,8 @@
-import type { CampaignStatus, CreatorStatus, PromotionType } from "@/types/index";
+import type {
+  CampaignStatus,
+  CreatorStatus,
+  PromotionType,
+} from '@/types/index';
 
 export interface ProductData {
   brandName: string;
@@ -21,7 +25,12 @@ export interface CampaignListItem {
   status: CampaignStatus;
   createdAt: string;
   country: { id: number; name: string; flag: string } | null;
-  package: { id: number; name: string; numCreators: number; platforms: string[] } | null;
+  package: {
+    id: number;
+    name: string;
+    numCreators: number;
+    platforms: string[];
+  } | null;
   product: {
     brandName: string;
     productName: string;
@@ -31,18 +40,48 @@ export interface CampaignListItem {
   creators: Array<{ status: CreatorStatus }>;
 }
 
+export interface CampaignCreatorWithRelation {
+  id: string;
+  status: string;
+  creator: {
+    id: string;
+    name: string;
+    niche: string;
+    engagement: string;
+    reach: string;
+    avatar: string;
+    countryFlag: string;
+    platform: string | null;
+    socialHandle: string | null;
+  };
+}
+
 export interface CampaignWithRelations {
   id: string;
   countryId: number;
   packageId: number;
+  promotionType: string;
   status: string;
   product: ProductData | null;
-  country?: { id: number; name: string; flag: string; languageCode: string; languageName: string } | null;
-  package?: { id: number; name: string; platforms: string[]; deliverables: string[] } | null;
+  country?: {
+    id: number;
+    name: string;
+    flag: string;
+    languageCode: string;
+    languageName: string;
+  } | null;
+  package?: {
+    id: number;
+    name: string;
+    platforms: string[];
+    deliverables: string[];
+    numCreators: number;
+  } | null;
   brief?: {
     id: string;
     content: string;
     contentTh: string | null;
     createdAt: string;
   } | null;
+  creators?: CampaignCreatorWithRelation[];
 }
