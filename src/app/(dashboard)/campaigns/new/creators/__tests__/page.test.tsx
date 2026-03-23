@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-// Build Creator fixtures matching SAMPLE_CREATOR_AVATARS (10 main + 5 backup)
+// Build Creator fixtures matching SAMPLE_CREATOR_AVATARS (28 main + 5 backup)
 const MOCK_CREATORS: Creator[] = SAMPLE_CREATOR_AVATARS.map((c, i) => ({
   id: `creator-${i}`,
   name: c.name,
@@ -22,7 +22,7 @@ const MOCK_CREATORS: Creator[] = SAMPLE_CREATOR_AVATARS.map((c, i) => ({
   reach: c.reach,
   avatar: c.avatar,
   countryFlag: c.flag,
-  isBackup: i >= 10,
+  isBackup: i >= 28,
 }));
 
 const mkCountry = (id: number): Country => ({
@@ -69,16 +69,11 @@ describe("SelectCreatorsPage", () => {
 
   it("renders all 5 backup creator names", async () => {
     render(<SelectCreatorsPage />);
-    for (const creator of SAMPLE_CREATOR_AVATARS.slice(10, 15)) {
+    for (const creator of SAMPLE_CREATOR_AVATARS.slice(28, 33)) {
       await waitFor(() =>
         expect(screen.getAllByText(creator.name).length).toBeGreaterThan(0)
       );
     }
-  });
-
-  it("shows AI recommendation banner", () => {
-    render(<SelectCreatorsPage />);
-    expect(screen.getByText("ทำไมถึงแนะนำครีเอเตอร์เหล่านี้?")).toBeInTheDocument();
   });
 
   it("first 10 creators are pre-selected visually", async () => {

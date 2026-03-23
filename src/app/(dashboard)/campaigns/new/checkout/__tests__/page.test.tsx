@@ -1,14 +1,48 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CheckoutPage from "../page";
-import { SAMPLE_CREATOR_AVATARS } from "@/lib/constants";
+import { useCampaignStore } from "@/stores/campaign-store";
+import type { Creator, Package } from "@/types";
 
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
+
+const MOCK_PACKAGE: Package = {
+  id: 2,
+  name: "Popular",
+  badge: "แนะนำ",
+  numCreators: 10,
+  pricePerCreator: 3500,
+  discountPct: 5,
+  estReach: "500K-1.2M",
+  estEngagement: "3.5-5.5%",
+};
+
+const MOCK_CREATORS: Creator[] = Array.from({ length: 10 }, (_, i) => ({
+  id: `creator-${i}`,
+  name: `Creator ${i}`,
+  niche: "The Global Bridge",
+  engagement: "N/A",
+  reach: "N/A",
+  avatar: `https://example.com/avatar-${i}.jpg`,
+  countryFlag: "🇹🇭",
+  isBackup: false,
+}));
+
+beforeEach(() => {
+  useCampaignStore.getState().reset();
+  useCampaignStore.getState().setPackage(MOCK_PACKAGE);
+  useCampaignStore.getState().setCreators(MOCK_CREATORS);
+  useCampaignStore.getState().setProduct({
+    brandName: "Brand", productName: "Product", category: "Food",
+    description: "", sellingPoints: "", url: "", imageUrl: "", isService: false,
+  });
+  mockPush.mockClear();
+});
 
 describe("CheckoutPage", () => {
   it("renders title สรุปรายการ & ชำระเงิน", () => {
@@ -21,10 +55,9 @@ describe("CheckoutPage", () => {
     expect(screen.getAllByText("Popular").length).toBeGreaterThan(0);
   });
 
-  it("shows 10 creator avatars", () => {
+  it("shows 10 creator avatars from store", () => {
     render(<CheckoutPage />);
-    // Each avatar is rendered with title attribute equal to creator name
-    for (const creator of SAMPLE_CREATOR_AVATARS.slice(0, 10)) {
+    for (const creator of MOCK_CREATORS) {
       expect(screen.getByTitle(creator.name)).toBeInTheDocument();
     }
   });
