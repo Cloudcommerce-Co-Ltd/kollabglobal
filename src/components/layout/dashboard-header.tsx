@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Bell, Globe, LogOut, Plus } from 'lucide-react';
+import { Globe, LogOut, Plus } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import type { User } from 'next-auth';
 
@@ -39,14 +39,6 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
         {/* Right: bell + new campaign + user pill */}
         <div className="flex items-center gap-2.5">
-          <button
-            className="relative cursor-pointer rounded-lg border-none bg-transparent p-2"
-            aria-label="การแจ้งเตือน"
-          >
-            <Bell size={20} color="#4a4a4a" />
-            <span className="absolute right-1 top-1 block size-2 rounded-full bg-[#e74c6c]" />
-          </button>
-
           <Link
             href="/campaigns/new/country"
             className="hidden items-center gap-1.5 rounded-[10px] bg-[#4ECDC4] px-5 py-2.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
