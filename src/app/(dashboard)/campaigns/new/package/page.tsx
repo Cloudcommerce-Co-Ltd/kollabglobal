@@ -6,7 +6,6 @@ import { ArrowLeft, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { PlatformIcon } from '@/components/icons/platform-icons';
-import { calculatePackageTotal } from '@/lib/package-utils';
 import type { Creator, Package } from '@/types';
 
 export default function SelectPackagePage() {
@@ -83,11 +82,7 @@ export default function SelectPackagePage() {
           <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
             {packages.map(pkg => {
               const isSelected = selected === pkg.id;
-              const total = calculatePackageTotal(pkg);
               const avatarCount = Math.min(pkg.numCreators, 7);
-              const creatorDesc = pkg.id === 1
-                ? `${pkg.numCreators} ครีเอเตอร์`
-                : `${pkg.numCreators} ครีเอเตอร์ · ไทย+ต่างชาติ`;
 
               return (
                 <div
@@ -140,10 +135,10 @@ export default function SelectPackagePage() {
                         isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'
                       }`}
                     >
-                      ฿{total.toLocaleString()}
+                      ฿{pkg.price.toLocaleString()}
                     </div>
                     <div className="mt-1 text-[13px] text-[#8a90a3]">
-                      {creatorDesc}
+                      {pkg.numCreators} ครีเอเตอร์
                     </div>
                   </div>
 
