@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run src/stores",
-    "test:integration": "vitest run src/app/api"
+    "test:integration": "vitest run src/app/api",
+    "db:reset": "pnpm exec prisma migrate reset --force && pnpm exec prisma db seed"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
