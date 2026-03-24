@@ -9,7 +9,8 @@ function makeCampaign(status: string, isService = false): CampaignWithRelations 
     packageId: 1,
     promotionType: isService ? "SERVICE" : "PRODUCT",
     status,
-    product: isService ? { isService: true, brandName: "", productName: "", category: "", description: "", sellingPoints: "", url: "", imageUrl: "" } : null,
+    duration: 30,
+    product: isService ? { isService: true, brandName: "", productName: "", category: "", description: "", sellingPoints: "", url: "", imageUrl: null } : null,
   };
 }
 
@@ -28,8 +29,7 @@ describe("getStatusBadge", () => {
   it("returns correct badge for brief", () => {
     const badge = getStatusBadge("brief");
     expect(badge.label).toBe("ต้องสร้าง Brief");
-    expect(badge.bgColor).toBe("#fef3c7");
-    expect(badge.textColor).toBe("#b45309");
+    expect(badge.cls).toContain("text-amber-700");
   });
   it("returns correct badge for accepting", () => {
     expect(getStatusBadge("accepting").label).toBe("รอตอบรับ");

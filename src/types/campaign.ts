@@ -11,12 +11,12 @@ export interface ProductData {
   description: string;
   sellingPoints: string;
   url: string;
-  imageUrl: string;
+  imageUrl: string | null;
   isService: boolean;
-  weight?: number;
-  length?: number;
-  width?: number;
-  height?: number;
+  weight?: number | null;
+  length?: number | null;
+  width?: number | null;
+  height?: number | null;
 }
 
 export interface CampaignListItem {
@@ -43,6 +43,7 @@ export interface CampaignListItem {
 export interface CampaignCreatorWithRelation {
   id: string;
   status: string;
+  contentStatus: string;
   creator: {
     id: string;
     name: string;
@@ -62,6 +63,7 @@ export interface CampaignWithRelations {
   packageId: number;
   promotionType: string;
   status: string;
+  duration: number;
   product: ProductData | null;
   country?: {
     id: number;
@@ -81,6 +83,7 @@ export interface CampaignWithRelations {
     id: string;
     content: string;
     contentTh: string | null;
+    publishedAt: string | null;
     createdAt: string;
   } | null;
   creators?: CampaignCreatorWithRelation[];
