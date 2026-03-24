@@ -24,6 +24,7 @@ const mockCampaign = {
   packageId: 1,
   promotionType: "PRODUCT" as const,
   status: "AWAITING_SHIPMENT" as const,
+  duration: 30,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

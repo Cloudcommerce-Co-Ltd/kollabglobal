@@ -27,6 +27,7 @@ const makeCampaign = (overrides = {}) => ({
   packageId: 1,
   promotionType: "PRODUCT" as const,
   status: "PENDING" as const,
+  duration: 30,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
   country: { id: 1, name: "Thailand", flag: "🇹🇭" },

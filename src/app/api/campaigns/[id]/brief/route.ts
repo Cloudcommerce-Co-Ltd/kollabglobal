@@ -57,10 +57,11 @@ export async function POST(
   const { content, translated } = parsed.data;
   const { finalContent, contentTh } = prepareBriefContent(content, translated);
 
+  const now = new Date();
   const brief = await prisma.campaignBrief.upsert({
     where: { campaignId: id },
-    create: { campaignId: id, content: finalContent, contentTh },
-    update: { content: finalContent, contentTh },
+    create: { campaignId: id, content: finalContent, contentTh, publishedAt: now },
+    update: { content: finalContent, contentTh, publishedAt: now },
   });
 
   await prisma.campaign.update({

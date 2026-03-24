@@ -57,6 +57,7 @@ const mockBrief = {
   campaignId: "campaign-123",
   content: '{"keys":"k"}',
   contentTh: null,
+  publishedAt: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -68,6 +69,7 @@ const mockCampaign = {
   packageId: 1,
   promotionType: "PRODUCT" as const,
   status: "DRAFT" as const,
+  duration: 30,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
