@@ -85,6 +85,13 @@ enum CreatorStatus {
   COMPLETED
 }
 
+enum ContentStatus {
+  NOT_STARTED
+  CREATING
+  SUBMITTED
+  POSTED
+}
+
 enum PaymentMethod {
   CREDIT_CARD
   BANK_TRANSFER
@@ -174,6 +181,7 @@ model Campaign {
   packageId     Int            @map("package_id")
   promotionType PromotionType  @map("promotion_type")
   status        CampaignStatus @default(DRAFT)
+  duration      Int            @default(30) @map("duration")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
@@ -210,12 +218,13 @@ model CampaignProduct {
 }
 
 model CampaignBrief {
-  id         String   @id @default(cuid())
-  campaignId String   @unique @map("campaign_id")
-  content    String   @db.Text
-  contentTh  String?  @map("content_th") @db.Text
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id          String    @id @default(cuid())
+  campaignId  String    @unique @map("campaign_id")
+  content     String    @db.Text
+  contentTh   String?   @map("content_th") @db.Text
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -223,10 +232,11 @@ model CampaignBrief {
 }
 
 model CampaignCreator {
-  id         String        @id @default(cuid())
-  campaignId String        @map("campaign_id")
-  creatorId  String        @map("creator_id")
-  status     CreatorStatus @default(PENDING)
+  id            String        @id @default(cuid())
+  campaignId    String        @map("campaign_id")
+  creatorId     String        @map("creator_id")
+  status        CreatorStatus @default(PENDING)
+  contentStatus ContentStatus @default(NOT_STARTED) @map("content_status")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   creator  Creator  @relation(fields: [creatorId], references: [id])
