@@ -49,11 +49,11 @@ const validBody = {
   productData: validProductData,
 };
 
-// Package with numCreators=10, price=3500 → base=35000 → total=38500 → satang=3850000
+// Package with numCreators=10, price=33250 (total) → vat=2328, fee=998 → total=36576 → satang=3657600
 const mockPackage = {
   id: 2,
   numCreators: 10,
-  price: 3500,
+  price: 33250,
   name: "The Global Bridge",
   tagline: "ขยายฐาน",
   badge: null,
@@ -65,7 +65,7 @@ const mockPackage = {
   estEngagement: null,
 };
 
-const EXPECTED_SATANG = 3850000; // (35000 + 2450 + 1050) * 100
+const EXPECTED_SATANG = 3657600; // (33250 + 2328 + 998) * 100
 
 describe("POST /api/payments/create-charge", () => {
   beforeEach(async () => {

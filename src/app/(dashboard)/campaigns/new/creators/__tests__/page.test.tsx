@@ -46,7 +46,7 @@ const mkCountry = (id: number): Country => ({
 
 const mkPackage = (numCreators = 10): Package => ({
   id: 2, name: 'Popular', tagline: '', badge: null,
-  numCreators, price: 3500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
+  numCreators, price: 33250, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: '500K', estEngagement: '3%',
 });
 

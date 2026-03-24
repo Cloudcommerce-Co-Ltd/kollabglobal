@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCampaignStore } from "@/stores/campaign-store";
-import { calculatePackageTotal, VAT_RATE, SERVICE_FEE_RATE } from "@/lib/package-utils";
+import { VAT_RATE, SERVICE_FEE_RATE } from "@/lib/package-utils";
 
 type PaymentStatus = "idle" | "creating" | "pending" | "completed" | "failed";
 
@@ -24,7 +24,7 @@ export default function CheckoutPage() {
 
   const packageName = packageData?.name ?? '—';
   const numCreators = packageData?.numCreators ?? 0;
-  const basePrice = packageData ? calculatePackageTotal(packageData) : 0;
+  const basePrice = packageData?.price ?? 0;
   const vat = Math.round(basePrice * VAT_RATE);
   const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
   const total = basePrice + vat + serviceFee;

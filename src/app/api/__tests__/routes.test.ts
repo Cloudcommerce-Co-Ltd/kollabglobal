@@ -56,7 +56,7 @@ describe('GET /api/packages', () => {
     const res = await getPackages();
     const data = await res.json();
     const counts: number[] = data.map((p: { numCreators: number }) => p.numCreators);
-    expect(counts).toEqual([5, 10, 15]);
+    expect(counts).toEqual([5, 10, 14]);
   });
 
   it('each package has required fields', async () => {

@@ -11,7 +11,7 @@ const mkCountry = (id: number): Country => ({
 
 const mkPackage = (id: number): Package => ({
   id, name: String(id), tagline: '', badge: null,
-  numCreators: 10, price: 3500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
+  numCreators: 10, price: 33250, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: null, estEngagement: null,
 });
 

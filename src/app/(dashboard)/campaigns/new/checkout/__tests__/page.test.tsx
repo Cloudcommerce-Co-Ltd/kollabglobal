@@ -34,7 +34,7 @@ const MOCK_PACKAGE: Package = {
   tagline: "ขยายฐานข้ามแพลตฟอร์ม",
   badge: "แนะนำ",
   numCreators: 10,
-  price: 3500,
+  price: 33250,
   platforms: ["tiktok", "instagram"],
   deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories"],
   cpmLabel: "฿39 / 1K reach",
@@ -43,7 +43,7 @@ const MOCK_PACKAGE: Package = {
   estEngagement: "3.5-5.5%",
 };
 
-const BASE_PRICE = MOCK_PACKAGE.numCreators * MOCK_PACKAGE.price;
+const BASE_PRICE = MOCK_PACKAGE.price;
 const VAT = Math.round(BASE_PRICE * 0.07);
 const SERVICE_FEE = Math.round(BASE_PRICE * 0.03);
 const TOTAL = BASE_PRICE + VAT + SERVICE_FEE;

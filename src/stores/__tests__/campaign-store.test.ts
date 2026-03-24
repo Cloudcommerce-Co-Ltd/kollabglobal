@@ -16,13 +16,13 @@ const COUNTRY_SG: Country = {
 
 const PKG_STARTER: Package = {
   id: 1, name: 'Starter', tagline: 'Starter package', badge: null,
-  numCreators: 5, price: 2500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
+  numCreators: 5, price: 12500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: null, estEngagement: null,
 };
 
 const PKG_POPULAR: Package = {
   id: 2, name: 'Popular', tagline: 'Popular package', badge: 'แนะนำ',
-  numCreators: 10, price: 3500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
+  numCreators: 10, price: 33250, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
   estReach: null, estEngagement: null,
 };
 

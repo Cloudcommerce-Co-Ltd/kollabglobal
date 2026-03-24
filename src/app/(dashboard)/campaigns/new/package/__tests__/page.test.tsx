@@ -25,7 +25,7 @@ const SAMPLE_PACKAGES: Package[] = [
     tagline: "เริ่มต้นออกสู่ตลาดโลก",
     badge: null,
     numCreators: 5,
-    price: 2500,
+    price: 12500,
     platforms: ["tiktok"],
     deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)"],
     cpmLabel: "฿41 / 1K reach",
@@ -39,7 +39,7 @@ const SAMPLE_PACKAGES: Package[] = [
     tagline: "ขยายฐานข้ามแพลตฟอร์ม",
     badge: "แนะนำ",
     numCreators: 10,
-    price: 3500,
+    price: 33250,
     platforms: ["tiktok", "instagram"],
     deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories"],
     cpmLabel: "฿39 / 1K reach",
@@ -53,7 +53,7 @@ const SAMPLE_PACKAGES: Package[] = [
     tagline: "ครองทุกแพลตฟอร์มพร้อมกัน",
     badge: null,
     numCreators: 15,
-    price: 4800,
+    price: 64800,
     platforms: ["tiktok", "instagram", "facebook"],
     deliverables: ["TikTok 1 วิดีโอ (15–60 วิ)", "IG 1 Reel + 3 Stories", "Facebook 2 โพสต์"],
     cpmLabel: "฿30 / 1K reach",
@@ -112,10 +112,10 @@ describe("SelectPackagePage", () => {
   it("shows total prices prominently", async () => {
     render(<SelectPackagePage />);
     await waitFor(() => expect(screen.getByText("The Passport")).toBeInTheDocument());
-    // totals = numCreators * price: 5*2500=12500, 10*3500=35000, 15*4800=72000
+    // price is the total package price
     expect(screen.getByText("฿12,500")).toBeInTheDocument();
-    expect(screen.getByText("฿35,000")).toBeInTheDocument();
-    expect(screen.getByText("฿72,000")).toBeInTheDocument();
+    expect(screen.getByText("฿33,250")).toBeInTheDocument();
+    expect(screen.getByText("฿64,800")).toBeInTheDocument();
   });
 
   it("renders CPM strip with savings data", async () => {

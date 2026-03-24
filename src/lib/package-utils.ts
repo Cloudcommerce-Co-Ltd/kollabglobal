@@ -1,23 +1,15 @@
 export const VAT_RATE = 0.07;
 export const SERVICE_FEE_RATE = 0.03;
 
-/** Calculates the total package price (base, before fees). */
-export function calculatePackageTotal(pkg: {
-  numCreators: number;
-  price: number;
-}): number {
-  return pkg.numCreators * pkg.price;
-}
-
 /** Calculates the full price breakdown including VAT and service fee. */
-export function calculateTotalWithFees(pkg: { numCreators: number; price: number }): {
+export function calculateTotalWithFees(pkg: { price: number }): {
   basePrice: number;
   vat: number;
   serviceFee: number;
   total: number;
   totalSatang: number;
 } {
-  const basePrice = calculatePackageTotal(pkg);
+  const basePrice = pkg.price;
   const vat = Math.round(basePrice * VAT_RATE);
   const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
   const total = basePrice + vat + serviceFee;
