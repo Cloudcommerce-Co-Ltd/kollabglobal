@@ -5,6 +5,21 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Brand colors */
+  --color-brand: #4ECDC4;
+  --color-brand-light: #e8f8f7;
+  --color-secondary-brand: #4A90D9;
+  --color-secondary-brand-light: #e8f0fa;
+  --color-accent-brand: #9B7ED8;
+  --color-accent-brand-light: #f0ebf8;
+  --color-dark: #4A4A4A;
+  --color-muted-text: #8a90a3;
+  --color-surface: #f5f7fa;
+  --color-border-ui: #e8ecf0;
+  --color-danger: #e74c6c;
+  --color-warning-text: #d97706;
+  --color-warning-bg: #fef3c7;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
