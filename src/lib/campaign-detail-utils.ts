@@ -1,8 +1,8 @@
-import type { CampaignWithRelations } from "@/types/campaign";
-
 export type DisplayStatus = "brief" | "accepting" | "ship" | "active" | "live";
 
-export function resolveDisplayStatus(campaign: CampaignWithRelations): DisplayStatus {
+type CampaignForStatus = { status: string; product?: { isService: boolean } | null };
+
+export function resolveDisplayStatus(campaign: CampaignForStatus): DisplayStatus {
   const isService = campaign.product?.isService ?? false;
   switch (campaign.status) {
     case "DRAFT":
@@ -24,21 +24,20 @@ export function resolveDisplayStatus(campaign: CampaignWithRelations): DisplaySt
 
 export interface StatusBadge {
   label: string;
-  bgColor: string;
-  textColor: string;
+  cls: string;
 }
 
 export function getStatusBadge(displayStatus: DisplayStatus): StatusBadge {
   switch (displayStatus) {
     case "brief":
-      return { label: "ต้องสร้าง Brief", bgColor: "#fef3c7", textColor: "#b45309" };
+      return { label: "ต้องสร้าง Brief", cls: "bg-warning-bg text-amber-700" };
     case "accepting":
-      return { label: "รอตอบรับ", bgColor: "#fef9ec", textColor: "#d97706" };
+      return { label: "รอตอบรับ", cls: "bg-[#fef9ec] text-warning-text" };
     case "ship":
-      return { label: "รอส่งสินค้า", bgColor: "#fee2e2", textColor: "#dc2626" };
+      return { label: "รอส่งสินค้า", cls: "bg-red-100 text-red-600" };
     case "active":
-      return { label: "กำลังดำเนินการ", bgColor: "#e8f8f7", textColor: "#4ECDC4" };
+      return { label: "กำลังดำเนินการ", cls: "bg-brand-light text-brand" };
     case "live":
-      return { label: "Live", bgColor: "#e8f8f7", textColor: "#0d9488" };
+      return { label: "Live", cls: "bg-brand-light text-teal-700" };
   }
 }

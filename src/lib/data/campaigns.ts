@@ -12,3 +12,16 @@ export function getUserCampaigns(userId: string) {
     orderBy: { createdAt: 'desc' },
   });
 }
+
+export function getCampaignDetail(userId: string, id: string) {
+  return prisma.campaign.findFirst({
+    where: { id, userId },
+    include: {
+      country: true,
+      package: true,
+      product: true,
+      brief: true,
+      creators: { include: { creator: true } },
+    },
+  });
+}

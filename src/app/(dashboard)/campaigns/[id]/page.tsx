@@ -1,61 +1,29 @@
-'use client';
-
-import { use, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, FileText, Eye, Send } from 'lucide-react';
-import {
-  fetchCampaign,
-  confirmShipment,
-  updateCampaignStatus,
-} from '@/lib/brief-api';
-import {
-  resolveDisplayStatus,
-  getStatusBadge,
-} from '@/lib/campaign-detail-utils';
+import { redirect, notFound } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft, FileText } from 'lucide-react';
+import { auth } from '@/auth';
+import { getCampaignDetail } from '@/lib/data/campaigns';
+import { resolveDisplayStatus, getStatusBadge } from '@/lib/campaign-detail-utils';
+import { CampaignIcon } from '@/components/ui/campaign-icon';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import { ActionCard } from '@/components/campaign/action-card';
 import { AcceptingCard } from '@/components/campaign/accepting-card';
 import { ShipmentCard } from '@/components/campaign/shipment-card';
 import { CreatorPipeline } from '@/components/campaign/creator-pipeline';
 import { StatsBar } from '@/components/campaign/stats-bar';
-import type { CampaignWithRelations } from '@/types/campaign';
+import { CampaignDetailActions } from './_components/campaign-detail-actions';
 
-const PRIMARY = '#4ECDC4';
-const PRIMARY_LIGHT = '#e8f8f7';
-
-export default function CampaignDetailPage({
+export default async function CampaignDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const router = useRouter();
-  const [campaign, setCampaign] = useState<CampaignWithRelations | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = await params;
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
 
-  useEffect(() => {
-    fetchCampaign(id)
-      .then(setCampaign)
-      .catch(() => setError('ไม่พบแคมเปญนี้'))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f5f7fa]">
-        <p className="text-[#8a90a3] text-sm">กำลังโหลด...</p>
-      </div>
-    );
-  }
-
-  if (error || !campaign) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f5f7fa]">
-        <p className="text-red-500 text-sm">{error ?? 'เกิดข้อผิดพลาด'}</p>
-      </div>
-    );
-  }
+  const campaign = await getCampaignDetail(session.user.id, id);
+  if (!campaign) notFound();
 
   const displayStatus = resolveDisplayStatus(campaign);
   const badge = getStatusBadge(displayStatus);
@@ -68,93 +36,78 @@ export default function CampaignDetailPage({
   const brandName = campaign.product?.brandName ?? 'แคมเปญ';
   const productName = campaign.product?.productName ?? 'สินค้า/บริการ';
   const countryName = campaign.country?.name ?? '';
-  const campaignTitle = countryName
-    ? `${brandName} x ${countryName}`
-    : brandName;
+  const campaignTitle = countryName ? `${brandName} x ${countryName}` : brandName;
 
-  async function handleShipped() {
-    await confirmShipment(id);
-    const updated = await fetchCampaign(id);
-    setCampaign(updated);
-  }
-
-  async function handleAllAccepted(
-    targetStatus: 'AWAITING_SHIPMENT' | 'ACTIVE',
-  ) {
-    await updateCampaignStatus(id, targetStatus);
-    const updated = await fetchCampaign(id);
-    setCampaign(updated);
-  }
+  const serializedCampaign = {
+    ...campaign,
+    createdAt: campaign.createdAt.toISOString(),
+    updatedAt: campaign.updatedAt.toISOString(),
+    brief: campaign.brief
+      ? {
+          ...campaign.brief,
+          publishedAt: campaign.brief.publishedAt?.toISOString() ?? null,
+          createdAt: campaign.brief.createdAt.toISOString(),
+          updatedAt: campaign.brief.updatedAt.toISOString(),
+        }
+      : null,
+    creators: creators.map(cc => ({
+      ...cc,
+      creator: cc.creator,
+    })),
+  };
 
   const briefDoneCard = (
     <ActionCard
       icon={<FileText size={22} color="#0d9488" />}
-      iconBg={PRIMARY_LIGHT}
-      borderColor={`${PRIMARY}40`}
+      iconBg="bg-brand-light"
+      borderColor="border-brand/25"
       title="Campaign Brief"
       badge="เสร็จแล้ว"
-      badgeBg={PRIMARY_LIGHT}
-      badgeText="#0d9488"
+      badgeBg="bg-brand-light"
+      badgeText="text-teal-700"
       description="กำหนดแนวทางแคมเปญเรียบร้อยแล้ว"
       button={
-        <button
-          onClick={() => router.push(`/campaigns/${id}/brief`)}
-          className="px-4 py-2 rounded-xl font-semibold text-sm border border-[#e8ecf0] text-[#4A4A4A] hover:bg-[#f5f7fa] transition-colors whitespace-nowrap"
+        <Link
+          href={`/campaigns/${id}/brief`}
+          className="px-4 py-2 rounded-xl font-semibold text-sm border border-border-ui text-dark hover:bg-surface transition-colors whitespace-nowrap"
         >
           ดู Brief
-        </button>
+        </Link>
       }
       check
     />
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
-      {/* Page header — white bar like mvp */}
-      <div
-        className="bg-white border-b border-[#e8ecf0]"
-        style={{ padding: '20px 32px' }}
-      >
-        <div className="mx-auto" style={{ maxWidth: 1100 }}>
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="flex items-center gap-1.5 text-sm font-semibold text-[#8a90a3] hover:text-[#4A4A4A] mb-3 transition-colors"
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+    <div className="min-h-screen bg-surface">
+      {/* Page header */}
+      <div className="bg-white border-b border-border-ui px-5 sm:px-8 py-5">
+        <div className="mx-auto max-w-[1100px]">
+          <Link
+            href="/campaigns"
+            className="flex items-center gap-1.5 text-sm font-semibold text-muted-text hover:text-dark mb-3 transition-colors"
           >
             <ArrowLeft size={16} />
             กลับไปแคมเปญทั้งหมด
-          </button>
+          </Link>
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              {/* Emoji — 72x72 matching mvp */}
-              <div
-                className="flex items-center justify-center rounded-2xl shrink-0 text-[42px]"
-                style={{
-                  width: 72,
-                  height: 72,
-                  background: `linear-gradient(135deg, ${PRIMARY_LIGHT}, #e8f0fa)`,
-                  border: `2px solid ${PRIMARY}30`,
-                }}
-              >
-                🌟
-              </div>
+              <CampaignIcon product={campaign.product} size="lg" />
               <div>
-                <h1 className="text-2xl font-bold text-[#4A4A4A] m-0">
-                  {campaignTitle}
-                </h1>
+                <h1 className="text-2xl font-bold text-dark m-0">{campaignTitle}</h1>
                 <div className="flex items-center gap-2.5 mt-1 flex-wrap">
-                  <p className="text-sm text-[#8a90a3] m-0">
-                    {productName} • {creatorsCount} ครีเอเตอร์ • 30 วัน
+                  <p className="text-sm text-muted-text m-0">
+                    {productName} • {creatorsCount} ครีเอเตอร์ • {campaign.duration} วัน
                   </p>
                   {isService && (
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[#e8f0fa] text-[#4A90D9]">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-secondary-brand-light text-secondary-brand">
                       บริการ
                     </span>
                   )}
                   {platforms.length > 0 && (
                     <div className="flex items-center gap-1.5">
-                      <div className="w-px h-3 bg-[#e8ecf0]" />
+                      <div className="w-px h-3 bg-border-ui" />
                       <div className="flex items-center gap-1.5">
                         {platforms.map(p => (
                           <PlatformIcon key={p} platform={p} size={14} />
@@ -165,12 +118,7 @@ export default function CampaignDetailPage({
                 </div>
               </div>
             </div>
-
-            {/* Status badge */}
-            <span
-              className="shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold"
-              style={{ background: badge.bgColor, color: badge.textColor }}
-            >
+            <span className={`shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold ${badge.cls}`}>
               {badge.label}
             </span>
           </div>
@@ -179,81 +127,74 @@ export default function CampaignDetailPage({
 
       {/* Stats bar (active/live only) */}
       {(displayStatus === 'active' || isLive) && (
-        <div
-          className="bg-white border-b border-[#e8ecf0]"
-          style={{ padding: '14px 32px' }}
-        >
-          <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <div className="bg-white border-b border-border-ui px-5 sm:px-8 py-3.5">
+          <div className="mx-auto max-w-[1100px]">
             <StatsBar
               activeCount={creators.filter(c => c.status === 'ACCEPTED').length}
               totalCount={creatorsCount}
               platformCount={platforms.length}
               isLive={isLive}
+              duration={campaign.duration}
             />
           </div>
         </div>
       )}
 
-      {/* Content */}
-      <div
-        className="mx-auto py-6"
-        style={{ maxWidth: 1100, padding: '24px 32px' }}
-      >
-        {/* BRIEF state */}
+      {/* Content — interactive parts handled by client component */}
+      <div className="mx-auto max-w-[1100px] px-5 sm:px-8 py-6">
         {displayStatus === 'brief' && (
           <ActionCard
             icon={<FileText size={22} color="#b45309" />}
-            iconBg="#fef3c7"
-            borderColor="#fde68a"
+            iconBg="bg-warning-bg"
+            borderColor="border-[#fde68a]"
             title="Campaign Brief"
             badge="ต้องดำเนินการ"
-            badgeBg="#fef3c7"
-            badgeText="#b45309"
+            badgeBg="bg-warning-bg"
+            badgeText="text-amber-700"
             description={`สร้าง Brief เพื่อกำหนดแนวทางการโปรโมท${isService ? 'บริการ' : 'สินค้า'}`}
             button={
-              <button
-                onClick={() => router.push(`/campaigns/${id}/brief/new`)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-opacity whitespace-nowrap"
-                style={{ background: '#b45309' }}
+              <Link
+                href={`/campaigns/${id}/brief/new`}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-opacity whitespace-nowrap bg-amber-700"
               >
                 <FileText size={15} />
                 สร้าง Brief
-              </button>
+              </Link>
             }
           />
         )}
 
-        {/* ACCEPTING state */}
         {displayStatus === 'accepting' && (
           <div className="space-y-3">
             {briefDoneCard}
-            <AcceptingCard
-              creators={creators}
+            <CampaignDetailActions
+              campaignId={id}
+              displayStatus={displayStatus}
+              serializedCampaign={serializedCampaign}
               isService={isService}
-              onAllAccepted={handleAllAccepted}
             />
           </div>
         )}
 
-        {/* SHIP state */}
         {displayStatus === 'ship' && (
           <div className="space-y-3">
             {briefDoneCard}
-            <ShipmentCard
-              creators={creators}
-              creatorsCount={creatorsCount}
+            <CampaignDetailActions
+              campaignId={id}
+              displayStatus={displayStatus}
+              serializedCampaign={serializedCampaign}
+              isService={isService}
               isDomestic={isDomestic}
-              onShipped={handleShipped}
+              creatorsCount={creatorsCount}
             />
           </div>
         )}
 
-        {/* ACTIVE / LIVE state */}
         {(displayStatus === 'active' || isLive) && (
           <div className="space-y-3">
             {briefDoneCard}
             <CreatorPipeline
-              creators={creators}
+              creators={serializedCampaign.creators}
               isService={isService}
               isLive={isLive}
               displayStatus={displayStatus}
@@ -261,11 +202,10 @@ export default function CampaignDetailPage({
           </div>
         )}
 
-        {/* Creator pipeline placeholder for non-active states */}
         {displayStatus !== 'active' && !isLive && (
           <div className="mt-5">
             <CreatorPipeline
-              creators={creators}
+              creators={serializedCampaign.creators}
               isService={isService}
               displayStatus={displayStatus}
             />
