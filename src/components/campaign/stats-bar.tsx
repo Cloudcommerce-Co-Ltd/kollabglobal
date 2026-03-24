@@ -1,49 +1,68 @@
-import { Users, TrendingUp, Globe, Calendar } from "lucide-react";
+import { Users, TrendingUp, Globe, Calendar } from 'lucide-react';
 
 interface StatsBarProps {
   activeCount: number;
   totalCount: number;
   platformCount: number;
   isLive: boolean;
+  duration: number;
 }
 
-const PRIMARY = "#4ECDC4";
-const SECONDARY = "#4A90D9";
-const ACCENT = "#9B7ED8";
-const GREEN = "#16a34a";
+const stats = [
+  {
+    key: 'creators',
+    label: 'ครีเอเตอร์ที่แอคทีฟ',
+    unit: 'คน',
+    cardCls: 'bg-[#4A90D908] border-[#4A90D920]',
+    iconCls: 'bg-secondary-brand',
+    Icon: Users,
+  },
+  {
+    key: 'status',
+    label: 'สถานะโดยรวม',
+    unit: '',
+    cardCls: 'bg-[#4ECDC408] border-[#4ECDC420]',
+    iconCls: 'bg-brand',
+    Icon: TrendingUp,
+  },
+  {
+    key: 'platforms',
+    label: 'แพลตฟอร์ม',
+    unit: 'แพลตฟอร์ม',
+    cardCls: 'bg-[#9B7ED808] border-[#9B7ED820]',
+    iconCls: 'bg-accent-brand',
+    Icon: Globe,
+  },
+  {
+    key: 'duration',
+    label: 'ระยะเวลาแคมเปญ',
+    unit: 'วัน',
+    cardCls: 'bg-[#16a34a08] border-[#16a34a20]',
+    iconCls: 'bg-green-600',
+    Icon: Calendar,
+  },
+] as const;
 
-export function StatsBar({ activeCount, totalCount, platformCount, isLive }: StatsBarProps) {
-  const stats = [
-    { label: "ครีเอเตอร์ที่แอคทีฟ", value: `${activeCount}/${totalCount}`, unit: "คน", color: SECONDARY, Icon: Users },
-    { label: "สถานะโดยรวม", value: isLive ? "กำลัง Live" : "กำลังดำเนินการ", unit: "", color: PRIMARY, Icon: TrendingUp },
-    { label: "แพลตฟอร์ม", value: platformCount.toString(), unit: "แพลตฟอร์ม", color: ACCENT, Icon: Globe },
-    { label: "ระยะเวลาแคมเปญ", value: "30", unit: "วัน", color: GREEN, Icon: Calendar },
-  ];
+export function StatsBar({ activeCount, totalCount, platformCount, isLive, duration }: StatsBarProps) {
+  const values: Record<string, string> = {
+    creators: `${activeCount}/${totalCount}`,
+    status: isLive ? 'กำลัง Live' : 'กำลังดำเนินการ',
+    platforms: platformCount.toString(),
+    duration: duration.toString(),
+  };
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-      {stats.map((s) => (
-        <div
-          key={s.label}
-          className="rounded-xl p-3 flex items-center gap-2.5"
-          style={{
-            background: `${s.color}08`,
-            border: `1px solid ${s.color}20`,
-          }}
-        >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: s.color }}
-          >
-            <s.Icon size={16} color="#fff" />
+      {stats.map(({ key, label, unit, cardCls, iconCls, Icon }) => (
+        <div key={key} className={`rounded-xl p-3 flex items-center gap-2.5 border ${cardCls}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconCls}`}>
+            <Icon size={16} color="#fff" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] text-[#8a90a3] mb-0.5">{s.label}</div>
-            <div className="text-lg font-bold text-[#4A4A4A] leading-none">
-              {s.value}{" "}
-              {s.unit && (
-                <span className="text-xs font-normal text-[#8a90a3]">{s.unit}</span>
-              )}
+            <div className="text-[11px] text-muted-text mb-0.5">{label}</div>
+            <div className="text-lg font-bold text-dark leading-none">
+              {values[key]}{' '}
+              {unit && <span className="text-xs font-normal text-muted-text">{unit}</span>}
             </div>
           </div>
         </div>
