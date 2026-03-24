@@ -1,38 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Check, Target } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { Creator } from '@/types';
 import { useRouter } from 'next/navigation';
 
-export default function SelectCreatorsPage() {
-  const router = useRouter();
-  const { packageData, selectedCreatorsData, setCreators } = useCampaignStore();
-
-  const maxCreators = packageData?.numCreators ?? 10;
-
-  const [selectedIds, setSelectedIds] = useState<string[]>(
-    selectedCreatorsData && selectedCreatorsData.length > 0
-      ? selectedCreatorsData.map((c: Creator) => c.id)
-      : [],
-  );
-  const [displayCreators, setDisplayCreators] = useState<Creator[]>([]);
-
-  const CreatorCard = ({
-    creator,
-    isSelected,
-    isDisabled,
-  }: {
-    creator: Creator;
-    isSelected: boolean;
-    isDisabled: boolean;
-  }) => {
-    return (
+function CreatorCard({
+  creator,
+  isSelected,
+  isDisabled,
+  onToggle,
+}: {
+  creator: Creator;
+  isSelected: boolean;
+  isDisabled: boolean;
+  onToggle: (id: string) => void;
+}) {
+  return (
       <div
-        onClick={() => !isDisabled && toggleCreator(creator.id)}
+        onClick={() => !isDisabled && onToggle(creator.id)}
         className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${
           isSelected ? 'border-[#4ECDC4]' : 'border-[#e8ecf0]'
         } ${isDisabled ? 'opacity-45' : ''}`}
@@ -85,7 +74,20 @@ export default function SelectCreatorsPage() {
         </div>
       </div>
     );
-  };
+}
+
+export default function SelectCreatorsPage() {
+  const router = useRouter();
+  const { packageData, selectedCreatorsData, setCreators } = useCampaignStore();
+
+  const maxCreators = packageData?.numCreators ?? 10;
+
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    selectedCreatorsData && selectedCreatorsData.length > 0
+      ? selectedCreatorsData.map((c: Creator) => c.id)
+      : [],
+  );
+  const [displayCreators, setDisplayCreators] = useState<Creator[]>([]);
 
   useEffect(() => {
     fetch('/api/creators')
@@ -137,24 +139,6 @@ export default function SelectCreatorsPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-265 px-4 pb-20 pt-6 sm:px-6 lg:px-8">
-        {/* AI Recommendation Banner */}
-        {/*<div className="mb-6 rounded-xl border border-[#4ECDC420] bg-linear-to-r from-[#e8f8f7] to-[#f0ebf8] p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#4ECDC4]">
-              <Target size={18} color="#fff" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-[#4A4A4A]">
-                ทำไมถึงแนะนำครีเอเตอร์เหล่านี้?
-              </div>
-              <div className="mt-0.5 text-xs text-[#8a90a3]">
-                AI วิเคราะห์จากกลุ่มเป้าหมาย ประเภทสินค้า และตลาดที่คุณเลือก
-                เพื่อคัดสรรครีเอเตอร์ที่มีผลลัพธ์ดีที่สุดสำหรับแคมเปญของคุณ
-              </div>
-            </div>
-          </div>
-        </div>*/}
-
         {/* Recommended Section */}
         <div className="mb-6">
           <div className="mb-3 flex items-center gap-2">
@@ -176,6 +160,7 @@ export default function SelectCreatorsPage() {
                   creator={creator}
                   isSelected={isSelected}
                   isDisabled={isDisabled}
+                  onToggle={toggleCreator}
                 />
               );
             })}
@@ -216,6 +201,7 @@ export default function SelectCreatorsPage() {
                       creator={creator}
                       isSelected={isSelected}
                       isDisabled={isDisabled}
+                      onToggle={toggleCreator}
                     />
                   );
                 })}
