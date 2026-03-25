@@ -261,10 +261,8 @@ async function main() {
 
   console.log('Seeding packages...');
 
-  await prisma.package.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
+  const packages = [
+    {
       id: 1,
       name: 'The Passport',
       tagline: 'เริ่มต้นออกสู่ตลาดโลก',
@@ -278,12 +276,7 @@ async function main() {
       estReach: '150K-400K',
       estEngagement: '2.5-4.0%',
     },
-  });
-
-  await prisma.package.upsert({
-    where: { id: 2 },
-    update: {},
-    create: {
+    {
       id: 2,
       name: 'The Global Bridge',
       tagline: 'ขยายฐานข้ามแพลตฟอร์ม',
@@ -297,12 +290,7 @@ async function main() {
       estReach: '500K-1.2M',
       estEngagement: '3.5-5.5%',
     },
-  });
-
-  await prisma.package.upsert({
-    where: { id: 3 },
-    update: {},
-    create: {
+    {
       id: 3,
       name: 'The World Dominator',
       tagline: 'ครองทุกแพลตฟอร์มพร้อมกัน',
@@ -316,7 +304,12 @@ async function main() {
       estReach: '1.2M-3M',
       estEngagement: '4.0-6.0%',
     },
-  });
+  ];
+
+  for (const pkg of packages) {
+    const { id, ...data } = pkg;
+    await prisma.package.upsert({ where: { id }, update: data, create: pkg });
+  }
 
   console.log('Seeding creators...');
 
