@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { PlatformIcon } from '@/components/icons/platform-icons';
@@ -85,39 +85,28 @@ export default function SelectPackagePage() {
               const avatarCount = Math.min(pkg.numCreators, 7);
 
               return (
-                <div
-                  key={pkg.id}
-                  onClick={() => handleSelect(pkg)}
-                  className={`relative flex cursor-pointer flex-col overflow-hidden rounded-[18px] border-2 transition-all ${
-                    isSelected
-                      ? 'border-brand shadow-[0_4px_24px_color-mix(in_srgb,var(--color-brand)_12%,transparent)]'
-                      : 'border-border-ui'
-                  } bg-white`}
-                >
-                  {/* Recommended badge — flat-top tab */}
+                <div key={pkg.id} className="relative">
+                  {/* Recommended badge — top-right pill overlapping border */}
                   {pkg.badge && (
-                    <div className="absolute -top-px left-1/2 -translate-x-1/2 whitespace-nowrap rounded-b-[12px] rounded-t-none bg-brand px-4.5 py-1 text-[11px] font-bold text-white">
+                    <div className="absolute -top-3.5 right-8 z-10 whitespace-nowrap rounded-full bg-brand px-3 py-1 text-sm font-bold text-white shadow-sm">
                       {pkg.badge}
                     </div>
                   )}
-
-                  {/* Radio indicator */}
                   <div
-                    className={`absolute right-4 top-4 flex size-5 items-center justify-center rounded-full border-2 ${
+                    onClick={() => handleSelect(pkg)}
+                    className={`relative flex cursor-pointer flex-col overflow-hidden rounded-[18px] border-2 transition-all ${
                       isSelected
-                        ? 'border-brand bg-brand'
-                        : 'border-border-ui bg-transparent'
-                    }`}
+                        ? 'border-brand shadow-[0_4px_24px_color-mix(in_srgb,var(--color-brand)_12%,transparent)]'
+                        : 'border-border-ui'
+                    } bg-white`}
                   >
-                    {isSelected && <Check size={11} color="#fff" />}
-                  </div>
 
                   {/* Plan name + tagline */}
                   <div
                     className={`border-b border-border-ui px-4.5 pb-4.5 pt-6`}
                   >
                     <div
-                      className={`pr-7 text-lg font-extrabold ${
+                      className={`text-lg font-extrabold ${
                         isSelected ? 'text-brand' : 'text-dark'
                       }`}
                     >
@@ -291,6 +280,7 @@ export default function SelectPackagePage() {
                         {pkg.estEngagement}
                       </div>
                     </div>
+                  </div>
                   </div>
                 </div>
               );

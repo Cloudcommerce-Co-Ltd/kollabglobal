@@ -135,6 +135,7 @@ model Country {
   estOrders     String?    @map("est_orders")
   isActive      Boolean    @default(true) @map("is_active")
   campaigns     Campaign[]
+  creators      Creator[]
 
   @@map("countries")
 }
@@ -165,6 +166,8 @@ model Creator {
   reach         String
   avatar        String
   countryFlag   String            @map("country_flag")
+  countryId     Int?              @map("country_id")
+  country       Country?          @relation(fields: [countryId], references: [id])
   isBackup      Boolean           @default(false) @map("is_backup")
   platform      String?
   socialHandle  String?           @map("social_handle")

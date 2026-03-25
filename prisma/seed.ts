@@ -317,6 +317,18 @@ async function main() {
   await prisma.campaignCreator.deleteMany({});
   await prisma.creator.deleteMany({});
 
+  const flagToCountryId: Record<string, number> = {
+    '🇹🇭': 1,  // Thailand
+    '🇻🇳': 2,  // Vietnam
+    '🇲🇾': 3,  // Malaysia
+    '🇱🇦': 4,  // Laos
+    '🇯🇵': 5,  // Japan
+    '🇰🇷': 6,  // South Korea
+    '🇺🇸': 7,  // United States
+    '🇬🇧': 8,  // United Kingdom
+    '🇦🇺': 10, // Australia
+  };
+
   type CreatorInput = {
     name: string;
     niche: string;
@@ -724,6 +736,7 @@ async function main() {
         id: `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`,
         ...creator,
         isBackup: false,
+        countryId: flagToCountryId[creator.countryFlag] ?? null,
       },
     });
   }
@@ -734,6 +747,7 @@ async function main() {
         id: `backup-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`,
         ...creator,
         isBackup: true,
+        countryId: flagToCountryId[creator.countryFlag] ?? null,
       },
     });
   }

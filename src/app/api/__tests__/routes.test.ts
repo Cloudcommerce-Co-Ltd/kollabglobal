@@ -21,11 +21,17 @@ describe('GET /api/countries', () => {
     expect(data).toHaveLength(8);
   });
 
-  it('returns countries ordered by name ascending', async () => {
+  it('returns countries sorted by creator count descending', async () => {
     const res = await getCountries();
     const data = await res.json();
-    const names: string[] = data.map((c: { name: string }) => c.name);
-    expect(names).toEqual([...names].sort());
+    const counts: number[] = data.map((c: { creatorsAvail: number }) => c.creatorsAvail);
+    expect(counts).toEqual([...counts].sort((a, b) => b - a));
+  });
+
+  it('Thailand appears first (most creators)', async () => {
+    const res = await getCountries();
+    const data = await res.json();
+    expect(data[0].name).toBe('Thailand');
   });
 
   it('each country has required fields and isActive=true', async () => {
