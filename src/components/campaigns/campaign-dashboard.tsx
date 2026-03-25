@@ -30,7 +30,7 @@ export function CampaignDashboard({ campaigns }: CampaignDashboardProps) {
   }, [campaigns, tab]);
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-[#f5f7fa]">
+    <div className="min-h-[calc(100vh-73px)] bg-surface">
       <StatusTabs
         activeTab={tab}
         onTabChange={setTab}

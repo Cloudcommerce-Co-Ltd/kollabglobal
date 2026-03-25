@@ -33,5 +33,5 @@ export default function CampaignNewLayout({
     return null;
   }
 
-  return <div className="min-h-screen bg-[#f5f7fa]">{children}</div>;
+  return <div className="min-h-screen bg-surface">{children}</div>;
 }

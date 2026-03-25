@@ -115,21 +115,21 @@ export default function AddProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen bg-surface">
       {/* page header */}
-      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
+      <div className="border-b border-border-ui bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-275">
           <button
             onClick={() => router.push("/campaigns/new/country")}
-            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]"
+            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-muted-text"
           >
             <ArrowLeft size={16} />
             กลับไปเลือกตลาด
           </button>
-          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">
+          <h1 className="m-0 text-[20px] font-bold text-dark sm:text-[26px]">
             เพิ่มสินค้าหรือบริการที่จะโปรโมท
           </h1>
-          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
+          <p className="m-0 mt-0.5 text-sm text-muted-text">
             กรอกข้อมูลให้ครีเอเตอร์เข้าใจสิ่งที่ต้องโปรโมท
           </p>
         </div>
@@ -137,8 +137,8 @@ export default function AddProductPage() {
 
       <div className="mx-auto max-w-265 px-4 py-7 sm:px-6 lg:px-8">
         {/* Promotion type selector */}
-        <div className="mb-5 rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
-          <div className="mb-3.5 text-[15px] font-bold text-[#4A4A4A]">
+        <div className="mb-5 rounded-2xl border-2 border-border-ui bg-white p-5.5">
+          <div className="mb-3.5 text-[15px] font-bold text-dark">
             คุณต้องการโปรโมทอะไร? <span className="text-red-500">*</span>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -165,20 +165,20 @@ export default function AddProductPage() {
                   className={`flex cursor-pointer items-start gap-3.5 rounded-xl border-2 p-4 text-left transition-all ${
                     active
                       ? isProduct
-                        ? "border-[#4ECDC4] bg-[#e8f8f7]"
-                        : "border-[#4A90D9] bg-[#e8f0fa]"
-                      : "border-[#e8ecf0] bg-white"
+                        ? "border-brand bg-brand-light"
+                        : "border-secondary-brand bg-secondary-brand-light"
+                      : "border-border-ui bg-white"
                   }`}
                 >
                   <div
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-[22px] transition-all ${
                       active
                         ? isProduct
-                          ? "bg-[#4ECDC4]"
-                          : "bg-[#4A90D9]"
+                          ? "bg-brand"
+                          : "bg-secondary-brand"
                         : isProduct
-                          ? "bg-[#4ECDC4]/10"
-                          : "bg-[#4A90D9]/10"
+                          ? "bg-brand/10"
+                          : "bg-secondary-brand/10"
                     }`}
                   >
                     {t.icon}
@@ -188,14 +188,14 @@ export default function AddProductPage() {
                       className={`mb-1 text-[15px] font-bold ${
                         active
                           ? isProduct
-                            ? "text-[#4ECDC4]"
-                            : "text-[#4A90D9]"
-                          : "text-[#4A4A4A]"
+                            ? "text-brand"
+                            : "text-secondary-brand"
+                          : "text-dark"
                       }`}
                     >
                       {t.label}
                     </div>
-                    <div className="text-[13px] leading-relaxed text-[#8a90a3]">
+                    <div className="text-[13px] leading-relaxed text-muted-text">
                       {t.desc}
                     </div>
                   </div>
@@ -203,8 +203,8 @@ export default function AddProductPage() {
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                       active
                         ? isProduct
-                          ? "border-[#4ECDC4] bg-[#4ECDC4]"
-                          : "border-[#4A90D9] bg-[#4A90D9]"
+                          ? "border-brand bg-brand"
+                          : "border-secondary-brand bg-secondary-brand"
                         : "border-[#ccc] bg-transparent"
                     }`}
                   >
@@ -237,15 +237,15 @@ export default function AddProductPage() {
             {/* Left column */}
             <div className="flex flex-col gap-5">
               {/* Image upload card */}
-              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
+              <div className="rounded-2xl border-2 border-border-ui bg-white p-5.5">
                 <div className="mb-3.5 flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f8f7]">
-                    <Upload size={16} color="#4ECDC4" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light">
+                    <Upload size={16} className="text-brand" />
                   </div>
-                  <span className="text-[15px] font-bold text-[#4A4A4A]">
+                  <span className="text-[15px] font-bold text-dark">
                     รูป{isService ? "บริการ" : "สินค้า"}
                   </span>
-                  <span className="text-xs text-[#8a90a3]">(ไม่บังคับ)</span>
+                  <span className="text-xs text-muted-text">(ไม่บังคับ)</span>
                 </div>
                 <input
                   ref={fileInputRef}
@@ -261,8 +261,8 @@ export default function AddProductPage() {
                   onClick={() => fileInputRef.current?.click()}
                   className={`relative h-46 w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition-all ${
                     imageUrl
-                      ? "border-[#4ECDC4]"
-                      : "border-[#e8ecf0] bg-[#fafbfc]"
+                      ? "border-brand"
+                      : "border-border-ui bg-[#fafbfc]"
                   } ${!imageUrl ? "flex flex-col items-center justify-center gap-1.5" : ""}`}
                 >
                   {imageUrl ? (
@@ -273,13 +273,13 @@ export default function AddProductPage() {
                       className="absolute inset-0 h-full w-full object-contain"
                     />
                   ) : uploading ? (
-                    <span className="text-sm text-[#8a90a3]">
+                    <span className="text-sm text-muted-text">
                       กำลังอัปโหลด...
                     </span>
                   ) : (
                     <>
-                      <Upload size={20} color="#8a90a3" />
-                      <span className="text-[13px] text-[#8a90a3]">
+                      <Upload size={20} className="text-muted-text" />
+                      <span className="text-[13px] text-muted-text">
                         คลิกเพื่ออัปโหลดรูป
                       </span>
                     </>
@@ -288,23 +288,23 @@ export default function AddProductPage() {
               </div>
 
               {/* Product / Service info card */}
-              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
+              <div className="rounded-2xl border-2 border-border-ui bg-white p-5.5">
                 <div className="mb-4 flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f0fa]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary-brand-light">
                     {isService ? (
-                      <Target size={16} color="#4A90D9" />
+                      <Target size={16} className="text-secondary-brand" />
                     ) : (
-                      <Package size={16} color="#4A90D9" />
+                      <Package size={16} className="text-secondary-brand" />
                     )}
                   </div>
-                  <span className="text-[15px] font-bold text-[#4A4A4A]">
+                  <span className="text-[15px] font-bold text-dark">
                     ข้อมูล{isService ? "บริการ" : "สินค้า"}
                   </span>
                   <span className="text-xs text-red-500">*</span>
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                     ชื่อแบรนด์ <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -313,13 +313,13 @@ export default function AddProductPage() {
                     onChange={(e) => setBrandName(e.target.value)}
                     placeholder="เช่น KOLLAB, FitLife, The Table"
                     className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none transition-colors ${
-                      brandName ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
+                      brandName ? "border-brand/60" : "border-border-ui"
                     }`}
                   />
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                     ชื่อ{isService ? "บริการ" : "สินค้า"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
@@ -333,13 +333,13 @@ export default function AddProductPage() {
                         : "เช่น มะม่วงอบแห้ง Premium"
                     }
                     className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none transition-colors ${
-                      name ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
+                      name ? "border-brand/60" : "border-border-ui"
                     }`}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                     หมวดหมู่ <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -351,8 +351,8 @@ export default function AddProductPage() {
                           onClick={() => setCategory(cat)}
                           className={`flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.75 text-xs font-semibold transition-all ${
                             active
-                              ? "border-[#4ECDC4] bg-[#e8f8f7] text-[#4ECDC4]"
-                              : "border-[#e8ecf0] bg-white text-[#4A4A4A]"
+                              ? "border-brand bg-brand-light text-brand"
+                              : "border-border-ui bg-white text-dark"
                           }`}
                         >
                           <span className="text-sm">
@@ -370,28 +370,27 @@ export default function AddProductPage() {
             {/* Right column */}
             <div className="flex flex-col gap-5">
               {/* Creator details card */}
-              <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
+              <div className="rounded-2xl border-2 border-border-ui bg-white p-5.5">
                 <div className="mb-4 flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0f4ff]">
                     <FileText size={16} color="#7c6ef7" />
                   </div>
-                  <span className="text-[15px] font-bold text-[#4A4A4A]">
+                  <span className="text-[15px] font-bold text-dark">
                     รายละเอียดสำหรับครีเอเตอร์
                   </span>
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                     URL {isService ? "บริการ" : "สินค้า"}{" "}
-                    <span className="text-[11px] font-normal text-[#8a90a3]">
+                    <span className="text-[11px] font-normal text-muted-text">
                       (ไม่บังคับ)
                     </span>
                   </label>
                   <div className="relative">
                     <Link
                       size={14}
-                      color="#8a90a3"
-                      className="absolute left-3 top-1/2 -translate-y-1/2"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-text"
                     />
                     <input
                       type="url"
@@ -403,19 +402,19 @@ export default function AddProductPage() {
                           : "https://www.yourshop.com/product"
                       }
                       className={`w-full rounded-[10px] border-[1.5px] py-2.5 pl-8 pr-3.5 text-sm outline-none transition-colors ${
-                        url ? "border-[#4ECDC460]" : "border-[#e8ecf0]"
+                        url ? "border-brand/60" : "border-border-ui"
                       }`}
                     />
                   </div>
-                  <p className="mt-1 text-[11px] text-[#8a90a3]">
+                  <p className="mt-1 text-[11px] text-muted-text">
                     ใส่ลิงก์เพื่อให้ AI ดึงข้อมูลมาช่วยสร้าง Brief ได้อัตโนมัติ
                   </p>
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                     รายละเอียด{" "}
-                    <span className="text-[11px] font-normal text-[#8a90a3]">
+                    <span className="text-[11px] font-normal text-muted-text">
                       สั้นๆ
                     </span>
                   </label>
@@ -428,12 +427,12 @@ export default function AddProductPage() {
                         : "เช่น ผลไม้อบแห้งจากสวนจันทบุรี ไม่ใส่สารกันบูด"
                     }
                     rows={3}
-                    className="w-full min-h-18 resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
+                    className="w-full min-h-18 resize-y rounded-[10px] border-[1.5px] border-border-ui px-3.5 py-2.75 text-sm outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                     จุดเด่น / Selling Points
                   </label>
                   <textarea
@@ -445,29 +444,29 @@ export default function AddProductPage() {
                         : "เช่น ได้รับรางวัล OTOP 5 ดาว"
                     }
                     rows={2}
-                    className="w-full min-h-14 resize-y rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.75 text-sm outline-none"
+                    className="w-full min-h-14 resize-y rounded-[10px] border-[1.5px] border-border-ui px-3.5 py-2.75 text-sm outline-none"
                   />
                 </div>
               </div>
 
               {/* Shipping card (product only) */}
               {!isService && (
-                <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-5.5">
+                <div className="rounded-2xl border-2 border-border-ui bg-white p-5.5">
                   <div className="mb-1 flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
-                      <Truck size={16} color="#d97706" />
+                      <Truck size={16} className="text-warning-text" />
                     </div>
-                    <span className="text-[15px] font-bold text-[#4A4A4A]">
+                    <span className="text-[15px] font-bold text-dark">
                       ข้อมูลจัดส่ง
                     </span>
-                    <span className="text-xs text-[#8a90a3]">(ไม่บังคับ)</span>
+                    <span className="text-xs text-muted-text">(ไม่บังคับ)</span>
                   </div>
-                  <p className="mb-3.5 ml-10.5 text-xs text-[#8a90a3]">
+                  <p className="mb-3.5 ml-10.5 text-xs text-muted-text">
                     กรอกเพื่อประเมินค่าจัดส่งสินค้าให้ครีเอเตอร์
                   </p>
 
                   <div className="mb-3">
-                    <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                       น้ำหนัก (กรัม)
                     </label>
                     <input
@@ -475,12 +474,12 @@ export default function AddProductPage() {
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       placeholder="เช่น 250"
-                      className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3.5 py-2.5 text-sm outline-none"
+                      className="w-full rounded-[10px] border-[1.5px] border-border-ui px-3.5 py-2.5 text-sm outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-[13px] font-semibold text-[#4A4A4A]">
+                    <label className="mb-1.5 block text-[13px] font-semibold text-dark">
                       ขนาด (ซม.)
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -497,7 +496,7 @@ export default function AddProductPage() {
                           value={val}
                           onChange={(e) => setter(e.target.value)}
                           placeholder={placeholder}
-                          className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] px-3 py-2.5 text-sm outline-none"
+                          className="w-full rounded-[10px] border-[1.5px] border-border-ui px-3 py-2.5 text-sm outline-none"
                         />
                       ))}
                     </div>
@@ -507,13 +506,13 @@ export default function AddProductPage() {
 
               {/* No-shipping banner (service only) */}
               {isService && (
-                <div className="flex items-center gap-2.5 rounded-xl border border-[#4A90D9]/20 bg-[#e8f0fa] px-4.5 py-3.5">
+                <div className="flex items-center gap-2.5 rounded-xl border border-secondary-brand/20 bg-secondary-brand-light px-4.5 py-3.5">
                   <span className="shrink-0 text-xl">✅</span>
                   <div>
-                    <div className="mb-0.5 text-[13px] font-semibold text-[#4A90D9]">
+                    <div className="mb-0.5 text-[13px] font-semibold text-secondary-brand">
                       ไม่ต้องจัดส่งสินค้า
                     </div>
-                    <div className="text-xs leading-relaxed text-[#8a90a3]">
+                    <div className="text-xs leading-relaxed text-muted-text">
                       แคมเปญบริการไม่มีขั้นตอนส่งของ — ครีเอเตอร์จะรับ Brief
                       และเริ่มสร้างคอนเทนต์ได้เลย
                     </div>
@@ -531,7 +530,7 @@ export default function AddProductPage() {
             onClick={handleSubmit}
             className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
               isValid && !isSubmitting
-                ? "cursor-pointer bg-[#4ECDC4]"
+                ? "cursor-pointer bg-brand"
                 : "cursor-not-allowed bg-[#ccc]"
             }`}
           >

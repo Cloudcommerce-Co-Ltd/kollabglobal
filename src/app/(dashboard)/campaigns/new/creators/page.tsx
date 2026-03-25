@@ -23,15 +23,15 @@ function CreatorCard({
       <div
         onClick={() => !isDisabled && onToggle(creator.id)}
         className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${
-          isSelected ? 'border-[#4ECDC4]' : 'border-[#e8ecf0]'
+          isSelected ? 'border-brand' : 'border-border-ui'
         } ${isDisabled ? 'opacity-45' : ''}`}
       >
         {/* Checkmark */}
         <div
           className={`absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full border-2 ${
             isSelected
-              ? 'border-[#4ECDC4] bg-[#4ECDC4]'
-              : 'border-[#e8ecf0] bg-white'
+              ? 'border-brand bg-brand'
+              : 'border-border-ui bg-white'
           }`}
         >
           {isSelected && <Check size={11} color="#fff" />}
@@ -39,8 +39,8 @@ function CreatorCard({
 
         {/* Avatar */}
         <div className="relative mb-2 inline-block">
-          <div className="relative m-1.5 size-11 overflow-hidden rounded-full bg-[#e8f8f7] flex items-center justify-center">
-            <span className="text-sm font-bold text-[#4ECDC4]">{creator.name.charAt(0)}</span>
+          <div className="relative m-1.5 size-11 overflow-hidden rounded-full bg-brand-light flex items-center justify-center">
+            <span className="text-sm font-bold text-brand">{creator.name.charAt(0)}</span>
             {creator.avatar && (
               <Image
                 src={creator.avatar}
@@ -57,17 +57,17 @@ function CreatorCard({
           </span>
         </div>
 
-        <div className="text-sm font-semibold text-[#4A4A4A]">
+        <div className="text-sm font-semibold text-dark">
           {creator.name}
         </div>
-        <div className="mb-2 text-xs text-[#8a90a3]">{creator.niche}</div>
+        <div className="mb-2 text-xs text-muted-text">{creator.niche}</div>
 
         <div className="w-full flex flex-col gap-1">
-          <span className="w-full flex justify-between rounded-[5px] bg-[#e8f8f7] px-1.5 py-0.5 text-[10px] font-semibold text-[#4ECDC4]">
+          <span className="w-full flex justify-between rounded-[5px] bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">
             <p>Engagement</p>
             <p>{creator.engagement}</p>
           </span>
-          <span className="w-full flex justify-between rounded-[5px] bg-[#e8f0fa] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A90D9]">
+          <span className="w-full flex justify-between rounded-[5px] bg-secondary-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-secondary-brand">
             <p>Reach</p>
             <p>{creator.reach}</p>
           </span>
@@ -117,20 +117,20 @@ export default function SelectCreatorsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
+      <div className="border-b border-border-ui bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-265">
           <Link href="/campaigns/new/package">
-            <button className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]">
+            <button className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-muted-text">
               <ArrowLeft size={16} />
               กลับไปเลือกแพ็กเกจ
             </button>
           </Link>
-          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">
+          <h1 className="m-0 text-[20px] font-bold text-dark sm:text-[26px]">
             เลือกครีเอเตอร์
           </h1>
-          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
+          <p className="m-0 mt-0.5 text-sm text-muted-text">
             {selectedIds.length}/{maxCreators} คนที่เลือก • เลือกได้สูงสุด{' '}
             {maxCreators} คน
           </p>
@@ -142,10 +142,10 @@ export default function SelectCreatorsPage() {
         {/* Recommended Section */}
         <div className="mb-6">
           <div className="mb-3 flex items-center gap-2">
-            <span className="rounded-[8px] bg-[#4ECDC4] px-2.5 py-0.5 text-xs font-bold text-white">
+            <span className="rounded-[8px] bg-brand px-2.5 py-0.5 text-xs font-bold text-white">
               แนะนำ
             </span>
-            <span className="text-sm font-semibold text-[#4A4A4A]">
+            <span className="text-sm font-semibold text-dark">
               Top Picks
             </span>
           </div>
@@ -172,10 +172,10 @@ export default function SelectCreatorsPage() {
           <div>
             <div className="flex justify-between">
               <div className="mb-3 flex gap-2">
-                <span className="h-fit rounded-[8px] bg-[#e8ecf0] px-2.5 py-0.5 text-xs font-bold text-[#8a90a3]">
+                <span className="h-fit rounded-[8px] bg-border-ui px-2.5 py-0.5 text-xs font-bold text-muted-text">
                   สำรอง
                 </span>
-                <span className="text-sm font-semibold text-[#4A4A4A]">
+                <span className="text-sm font-semibold text-dark">
                   ตัวเลือกอื่น
                 </span>
               </div>
@@ -211,11 +211,11 @@ export default function SelectCreatorsPage() {
       </div>
 
       {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-[#e8ecf0] bg-white px-4 py-3 sm:px-6 lg:px-8">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border-ui bg-white px-4 py-3 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-265 items-center justify-end gap-5">
-          <div className="text-sm font-semibold text-[#8a90a3]">
+          <div className="text-sm font-semibold text-muted-text">
             {isComplete ? (
-              <span className="text-[#4ECDC4]">✓ เลือกครบจำนวนแล้ว</span>
+              <span className="text-brand">✓ เลือกครบจำนวนแล้ว</span>
             ) : (
               <p>
                 จำนวนครีเอเตอร์ {selectedIds.length}/{maxCreators} คน
@@ -227,7 +227,7 @@ export default function SelectCreatorsPage() {
             onClick={handleNext}
             className={`rounded-xl border-none px-6 py-2.5 text-sm font-semibold text-white transition-all ${
               isComplete
-                ? 'cursor-pointer bg-[#4ECDC4]'
+                ? 'cursor-pointer bg-brand'
                 : 'cursor-not-allowed bg-[#ccc]'
             }`}
           >

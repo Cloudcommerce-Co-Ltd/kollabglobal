@@ -131,20 +131,20 @@ export default function CheckoutPage() {
   }, [paymentStatus]);
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
+      <div className="border-b border-border-ui bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-240">
           <Link href="/campaigns/new/creators">
-            <button className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]">
+            <button className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-muted-text">
               <ArrowLeft size={16} />
               กลับไปเลือกครีเอเตอร์
             </button>
           </Link>
-          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">
+          <h1 className="m-0 text-[20px] font-bold text-dark sm:text-[26px]">
             สรุปรายการ & ชำระเงิน
           </h1>
-          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
+          <p className="m-0 mt-0.5 text-sm text-muted-text">
             ตรวจสอบรายการแล้วชำระเงิน
           </p>
         </div>
@@ -156,8 +156,8 @@ export default function CheckoutPage() {
           {/* Left column */}
           <div className="flex flex-col gap-5">
             {/* Card 1 — Package Details */}
-            <div className="rounded-xl border border-[#4ECDC420] bg-linear-to-r from-[#e8f8f7] to-[#e8f0fa] p-5">
-              <div className="mb-4 text-base font-bold text-[#4A4A4A]">
+            <div className="rounded-xl border border-brand/[12%] bg-linear-to-r from-brand-light to-secondary-brand-light p-5">
+              <div className="mb-4 text-base font-bold text-dark">
                 รายละเอียดแพ็กเกจ
               </div>
               <div className="flex flex-col gap-2.5">
@@ -171,8 +171,8 @@ export default function CheckoutPage() {
                     key={label}
                     className="flex items-center justify-between"
                   >
-                    <span className="text-sm text-[#8a90a3]">{label}</span>
-                    <span className="text-sm font-semibold text-[#4A4A4A]">
+                    <span className="text-sm text-muted-text">{label}</span>
+                    <span className="text-sm font-semibold text-dark">
                       {value}
                     </span>
                   </div>
@@ -181,12 +181,12 @@ export default function CheckoutPage() {
             </div>
 
             {/* Card 2 — Selected Creators */}
-            <div className="rounded-xl border-2 border-[#e8ecf0] bg-white p-5">
+            <div className="rounded-xl border-2 border-border-ui bg-white p-5">
               <div className="mb-4 flex items-center gap-2">
-                <span className="text-base font-bold text-[#4A4A4A]">
+                <span className="text-base font-bold text-dark">
                   ครีเอเตอร์ที่เลือก
                 </span>
-                <span className="rounded-full bg-[#e8f8f7] px-2.5 py-0.5 text-xs font-bold text-[#4ECDC4]">
+                <span className="rounded-full bg-brand-light px-2.5 py-0.5 text-xs font-bold text-brand">
                   {selectedCreatorsData?.length ?? numCreators} คน
                 </span>
               </div>
@@ -195,9 +195,9 @@ export default function CheckoutPage() {
                   <div
                     key={cr.id}
                     title={cr.name}
-                    className="relative flex size-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#4ECDC440] bg-[#e8f8f7]"
+                    className="relative flex size-10 items-center justify-center overflow-hidden rounded-full border-2 border-brand/25 bg-brand-light"
                   >
-                    <span className="text-sm font-bold text-[#4ECDC4]">
+                    <span className="text-sm font-bold text-brand">
                       {cr.name.charAt(0)}
                     </span>
                     {cr.avatar && (
@@ -218,38 +218,37 @@ export default function CheckoutPage() {
             </div>
 
             {/* Card 3 — Price Breakdown */}
-            <div className="rounded-xl border-2 border-[#e8ecf0] bg-white p-5">
-              <div className="mb-4 text-base font-bold text-[#4A4A4A]">
+            <div className="rounded-xl border-2 border-border-ui bg-white p-5">
+              <div className="mb-4 text-base font-bold text-dark">
                 รายละเอียดราคา
               </div>
               <div className="flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#8a90a3]">ค่าแพ็กเกจ</span>
-                  <span className="text-sm font-semibold text-[#4A4A4A]">
+                  <span className="text-sm text-muted-text">ค่าแพ็กเกจ</span>
+                  <span className="text-sm font-semibold text-dark">
                     ฿{basePrice.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#8a90a3]">VAT (7%)</span>
-                  <span className="text-sm font-semibold text-[#4A4A4A]">
+                  <span className="text-sm text-muted-text">VAT (7%)</span>
+                  <span className="text-sm font-semibold text-dark">
                     ฿{vat.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#8a90a3]">ค่าบริการ (3%)</span>
-                  <span className="text-sm font-semibold text-[#4A4A4A]">
+                  <span className="text-sm text-muted-text">ค่าบริการ (3%)</span>
+                  <span className="text-sm font-semibold text-dark">
                     ฿{serviceFee.toLocaleString()}
                   </span>
                 </div>
               </div>
-              <div className="my-4 h-0.5 bg-[#e8ecf0]" />
+              <div className="my-4 h-0.5 bg-border-ui" />
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-[#4A4A4A]">
+                <span className="text-sm font-bold text-dark">
                   รวมทั้งหมด
                 </span>
                 <span
-                  className="font-extrabold text-[#4ECDC4]"
-                  style={{ fontSize: '26px' }}
+                  className="text-[26px] font-extrabold text-brand"
                 >
                   ฿{total.toLocaleString()}
                 </span>
@@ -260,7 +259,7 @@ export default function CheckoutPage() {
           {/* Right column */}
           <div className="flex flex-col gap-5">
             {/* Card 4 — QR Payment */}
-            <div className="rounded-2xl bg-linear-to-br from-[#4A4A4A] to-[#333] p-7 text-white">
+            <div className="rounded-2xl bg-linear-to-br from-dark to-[#333] p-7 text-white">
               {showAltPayment ? (
                 <div>
                   <div className="mb-5 text-[18px] font-bold">
@@ -288,7 +287,7 @@ export default function CheckoutPage() {
                   </div>
                   <button
                     onClick={() => setShowAltPayment(false)}
-                    className="cursor-pointer border-none bg-transparent text-sm text-[#4A90D9]"
+                    className="cursor-pointer border-none bg-transparent text-sm text-secondary-brand"
                   >
                     ← กลับไปสแกน QR
                   </button>
@@ -308,7 +307,7 @@ export default function CheckoutPage() {
                     className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
                   >
                     {paymentStatus === "creating" && (
-                      <Loader2 size={48} color="#4A4A4A" className="animate-spin" />
+                      <Loader2 size={48} className="animate-spin text-dark" />
                     )}
                     {(paymentStatus === "pending" || paymentStatus === "completed") && qrCodeUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -332,7 +331,7 @@ export default function CheckoutPage() {
                       </span>
                     )}
                     {paymentStatus === "completed" && (
-                      <span className="flex items-center justify-center gap-1.5 text-[#4ECDC4]">
+                      <span className="flex items-center justify-center gap-1.5 text-brand">
                         <CheckCircle2 size={13} />
                         ชำระเงินสำเร็จ — กำลังนำทาง...
                       </span>
@@ -349,7 +348,7 @@ export default function CheckoutPage() {
 
                   <button
                     onClick={() => setShowAltPayment(true)}
-                    className="cursor-pointer border-none bg-transparent text-sm text-[#4A90D9]"
+                    className="cursor-pointer border-none bg-transparent text-sm text-secondary-brand"
                   >
                     เปลี่ยนวิธีชำระเงิน
                   </button>
@@ -358,7 +357,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Terms */}
-            <p className="m-0 text-center text-[12px] text-[#8a90a3]">
+            <p className="m-0 text-center text-[12px] text-muted-text">
               เมื่อสแกนและชำระเงินสำเร็จ ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ
             </p>
           </div>

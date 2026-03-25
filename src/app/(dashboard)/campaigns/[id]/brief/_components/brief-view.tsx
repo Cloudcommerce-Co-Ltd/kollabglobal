@@ -160,7 +160,7 @@ export function BriefView({
           </div>
         ) : (
           <>
-            <Section icon={<FileText size={17} color="#4A90D9" />} iconBg="bg-secondary-brand-light" title="ข้อมูลพื้นฐาน">
+            <Section icon={<FileText size={17} className="text-secondary-brand" />} iconBg="bg-secondary-brand-light" title="ข้อมูลพื้นฐาน">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   ['ชื่อแคมเปญ', content.name ?? '-'],
@@ -175,7 +175,7 @@ export function BriefView({
               </div>
             </Section>
 
-            <Section icon={<Target size={17} color="#9B7ED8" />} iconBg="bg-accent-brand-light" title="Key Messages">
+            <Section icon={<Target size={17} className="text-accent-brand" />} iconBg="bg-accent-brand-light" title="Key Messages">
               <p className="text-sm text-dark leading-relaxed whitespace-pre-wrap">
                 {content.keys ?? 'ยังไม่มีข้อมูล Brief'}
               </p>
@@ -187,7 +187,7 @@ export function BriefView({
               </pre>
             </Section>
 
-            <Section icon={<Video size={17} color="#4ECDC4" />} iconBg="bg-brand-light" title="Deliverables">
+            <Section icon={<Video size={17} className="text-brand" />} iconBg="bg-brand-light" title="Deliverables">
               <pre className="text-sm text-dark leading-relaxed whitespace-pre-wrap font-sans">
                 {content.deliverables ?? 'ยังไม่มีข้อมูล'}
               </pre>
@@ -197,7 +197,7 @@ export function BriefView({
               <Section icon={<Calendar size={17} color="#f59e0b" />} iconBg="bg-warning-bg" title="Deadline">
                 <p className="text-base font-bold text-warning-text">{deadline}</p>
               </Section>
-              <Section icon={<MessageCircle size={17} color="#4A90D9" />} iconBg="bg-secondary-brand-light" title="Required Disclosure">
+              <Section icon={<MessageCircle size={17} className="text-secondary-brand" />} iconBg="bg-secondary-brand-light" title="Required Disclosure">
                 <p className="text-sm font-semibold text-brand leading-relaxed">
                   {content.disclosure ?? '#ad #sponsored #KOLLABGlobal'}
                 </p>

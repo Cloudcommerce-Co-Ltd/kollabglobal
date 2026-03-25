@@ -8,24 +8,24 @@ export default function LoginPage() {
         {/* Logo + brand */}
         <div className="text-center mb-9">
           <div className="animate-float inline-flex mb-3">
-            <div className="size-13 rounded-[14px] bg-[linear-gradient(135deg,#4ECDC4,#4A90D9)] flex items-center justify-center shadow-[0_8px_24px_rgba(78,205,196,0.4)]">
+            <div className="size-13 rounded-[14px] bg-linear-to-br from-brand to-secondary-brand flex items-center justify-center shadow-[0_8px_24px_rgba(78,205,196,0.4)]">
               <Globe size={28} color="#fff" />
             </div>
           </div>
-          <h1 className="text-[24px] font-extrabold text-[#4a4a4a] mb-1 tracking-[-0.5px] sm:text-[32px]">
-            KOLLAB <span className="text-[#4ECDC4]">Global</span>
+          <h1 className="text-[24px] font-extrabold text-dark mb-1 tracking-[-0.5px] sm:text-[32px]">
+            KOLLAB <span className="text-brand">Global</span>
           </h1>
-          <p className="text-[15px] text-[#8a90a3] leading-normal">
+          <p className="text-[15px] text-muted-text leading-normal">
             แพลตฟอร์ม Influencer Marketing สำหรับทุกแบรนด์
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-[20px] px-5 py-7 shadow-[0_12px_48px_rgba(0,0,0,0.08)] border border-[#e8ecf0] sm:px-8 sm:py-9">
-          <h2 className="text-[20px] font-bold text-[#4a4a4a] mb-1.5 text-center">
+        <div className="bg-white rounded-[20px] px-5 py-7 shadow-[0_12px_48px_rgba(0,0,0,0.08)] border border-border-ui sm:px-8 sm:py-9">
+          <h2 className="text-[20px] font-bold text-dark mb-1.5 text-center">
             ยินดีต้อนรับ
           </h2>
-          <p className="text-[14px] text-[#8a90a3] mb-7 text-center">
+          <p className="text-[14px] text-muted-text mb-7 text-center">
             เข้าสู่ระบบเพื่อจัดการแคมเปญของคุณ
           </p>
 
@@ -37,7 +37,7 @@ export default function LoginPage() {
           >
             <button
               type="submit"
-              className="w-full py-3.5 px-5 rounded-xl border-[1.5px] border-[#e8ecf0] bg-white cursor-pointer flex items-center justify-center gap-3 transition-all text-[15px] font-semibold text-[#4a4a4a] hover:border-[#4ECDC4] hover:bg-[rgba(78,205,196,0.06)] active:scale-[0.98]"
+              className="w-full py-3.5 px-5 rounded-xl border-[1.5px] border-border-ui bg-white cursor-pointer flex items-center justify-center gap-3 transition-all text-[15px] font-semibold text-dark hover:border-brand hover:bg-[rgba(78,205,196,0.06)] active:scale-[0.98]"
             >
               <svg
                 width="20"
@@ -67,8 +67,8 @@ export default function LoginPage() {
           </form>
 
           {/*<div className="mt-6 text-center">
-            <span className="text-[13px] text-[#8a90a3]">ยังไม่มีบัญชี? </span>
-            <span className="text-[13px] text-[#4ECDC4] font-semibold cursor-pointer">
+            <span className="text-[13px] text-muted-text">ยังไม่มีบัญชี? </span>
+            <span className="text-[13px] text-brand font-semibold cursor-pointer">
               สมัครสมาชิก
             </span>
           </div>*/}
@@ -92,7 +92,7 @@ export default function LoginPage() {
         )}
 
         {/* Bottom footer */}
-        <p className="text-center mt-6 text-[12px] text-[#8a90a3]">
+        <p className="text-center mt-6 text-[12px] text-muted-text">
           © 2026 KOLLAB Global • Powered by Connex
         </p>
       </div>

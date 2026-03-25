@@ -162,7 +162,7 @@ export default function CreateBriefPage({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa] text-[#8a90a3]">
+      <div className="flex min-h-screen items-center justify-center bg-surface text-muted-text">
         กำลังโหลด...
       </div>
     );
@@ -170,28 +170,28 @@ export default function CreateBriefPage({
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa] text-red-500">
+      <div className="flex min-h-screen items-center justify-center bg-surface text-red-500">
         {loadError}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-10 border-b border-border-ui bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-290">
           <button
             onClick={() => router.push(`/campaigns/${id}`)}
-            className="mb-1.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]"
+            className="mb-1.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-muted-text"
           >
             <ArrowLeft size={16} />
             Back to Campaign
           </button>
-          <h1 className="m-0 text-2xl font-bold text-[#4A4A4A]">
+          <h1 className="m-0 text-2xl font-bold text-dark">
             Create Campaign Brief{' '}
             {isService && (
-              <span className="ml-2 rounded-lg bg-[#e8f0fa] px-2.5 py-0.75 text-sm font-semibold text-[#4A90D9]">
+              <span className="ml-2 rounded-lg bg-secondary-brand-light px-2.5 py-0.75 text-sm font-semibold text-secondary-brand">
                 บริการ
               </span>
             )}
@@ -204,18 +204,18 @@ export default function CreateBriefPage({
           {/* Top 2-col grid: Basic Info (left) + Product Context + Deadline stacked (right) */}
           <div className="mb-5 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2">
             {/* Left: Basic Information */}
-            <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-7">
+            <div className="rounded-2xl border-2 border-border-ui bg-white p-7">
               <div className="mb-5.5 flex items-center gap-2.5">
-                <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#e8f0fa]">
-                  <FileText size={20} className="text-[#4A90D9]" />
+                <div className="flex size-10 items-center justify-center rounded-[10px] bg-secondary-brand-light">
+                  <FileText size={20} className="text-secondary-brand" />
                 </div>
-                <h3 className="m-0 text-lg font-bold text-[#4A4A4A]">
+                <h3 className="m-0 text-lg font-bold text-dark">
                   Basic Information
                 </h3>
               </div>
 
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-semibold text-[#4A4A4A]">
+                <label className="mb-1.5 block text-sm font-semibold text-dark">
                   Campaign Name
                 </label>
                 <input
@@ -223,32 +223,32 @@ export default function CreateBriefPage({
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g., Dried Mango x Vietnam"
-                  className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] bg-white px-3.5 py-2.75 text-sm outline-none focus:border-[#4ECDC4]"
+                  className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-white px-3.5 py-2.75 text-sm outline-none focus:border-brand"
                 />
               </div>
 
               {campaign?.product && (
                 <>
                   <div className="mb-4">
-                    <label className="mb-1.5 block text-sm font-semibold text-[#4A4A4A]">
+                    <label className="mb-1.5 block text-sm font-semibold text-dark">
                       Brand Name
                     </label>
                     <input
                       type="text"
                       value={campaign.product.brandName}
                       readOnly
-                      className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] bg-[#f5f7fa] px-3.5 py-2.75 text-sm outline-none"
+                      className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
                     />
                   </div>
                   <div className="mb-0">
-                    <label className="mb-1.5 block text-sm font-semibold text-[#4A4A4A]">
+                    <label className="mb-1.5 block text-sm font-semibold text-dark">
                       {isService ? 'Service' : 'Product'}
                     </label>
                     <input
                       type="text"
                       value={campaign.product.productName}
                       readOnly
-                      className="w-full rounded-[10px] border-[1.5px] border-[#e8ecf0] bg-[#f5f7fa] px-3.5 py-2.75 text-sm outline-none"
+                      className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
                     />
                   </div>
                 </>
@@ -262,34 +262,34 @@ export default function CreateBriefPage({
                 (campaign.product.description ||
                   campaign.product.sellingPoints ||
                   campaign.product.category) && (
-                  <div className="rounded-2xl border border-[#4ECDC4]/20 bg-gradient-to-br from-[#e8f8f7] to-[#e8f0fa] p-5">
+                  <div className="rounded-2xl border border-brand/20 bg-gradient-to-br from-brand-light to-secondary-brand-light p-5">
                     <div className="mb-3.5 flex items-center gap-2">
                       {isService ? (
-                        <Target size={17} className="text-[#4ECDC4]" />
+                        <Target size={17} className="text-brand" />
                       ) : (
-                        <Package size={17} className="text-[#4ECDC4]" />
+                        <Package size={17} className="text-brand" />
                       )}
-                      <span className="text-[15px] font-bold text-[#4A4A4A]">
+                      <span className="text-[15px] font-bold text-dark">
                         ข้อมูล{isService ? 'บริการ' : 'สินค้า'}จากแบรนด์
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
                       {campaign.product.category && (
-                        <div className="rounded-[10px] border border-[#e8ecf0] bg-white p-3">
-                          <div className="mb-1 text-[11px] font-semibold text-[#8a90a3]">หมวดหมู่</div>
-                          <div className="text-sm font-semibold text-[#4A90D9]">{campaign.product.category}</div>
+                        <div className="rounded-[10px] border border-border-ui bg-white p-3">
+                          <div className="mb-1 text-[11px] font-semibold text-muted-text">หมวดหมู่</div>
+                          <div className="text-sm font-semibold text-secondary-brand">{campaign.product.category}</div>
                         </div>
                       )}
                       {campaign.product.description && (
-                        <div className="rounded-[10px] border border-[#e8ecf0] bg-white p-3">
-                          <div className="mb-1 text-[11px] font-semibold text-[#8a90a3]">รายละเอียด</div>
-                          <div className="text-[13px] leading-relaxed text-[#4A4A4A]">{campaign.product.description}</div>
+                        <div className="rounded-[10px] border border-border-ui bg-white p-3">
+                          <div className="mb-1 text-[11px] font-semibold text-muted-text">รายละเอียด</div>
+                          <div className="text-[13px] leading-relaxed text-dark">{campaign.product.description}</div>
                         </div>
                       )}
                       {campaign.product.sellingPoints && (
-                        <div className="col-span-2 rounded-[10px] border border-[#e8ecf0] bg-white p-3">
-                          <div className="mb-1 text-[11px] font-semibold text-[#8a90a3]">จุดเด่น</div>
-                          <div className="text-[13px] font-semibold leading-relaxed text-[#9B7ED8]">{campaign.product.sellingPoints}</div>
+                        <div className="col-span-2 rounded-[10px] border border-border-ui bg-white p-3">
+                          <div className="mb-1 text-[11px] font-semibold text-muted-text">จุดเด่น</div>
+                          <div className="text-[13px] font-semibold leading-relaxed text-accent-brand">{campaign.product.sellingPoints}</div>
                         </div>
                       )}
                     </div>
@@ -300,17 +300,17 @@ export default function CreateBriefPage({
               <div
                 className={`rounded-2xl border-2 bg-white p-7 ${
                   isDeadlineFilled
-                    ? 'border-[#4ECDC4]/60'
+                    ? 'border-brand/60'
                     : isContentFilled
                       ? 'border-amber-400'
-                      : 'border-[#e8ecf0]'
+                      : 'border-border-ui'
                 }`}
               >
                 <div className="mb-4.5 flex items-center gap-2.5">
                   <div
                     className={`flex size-10 items-center justify-center rounded-[10px] ${
                       isDeadlineFilled
-                        ? 'bg-[#e8f8f7]'
+                        ? 'bg-brand-light'
                         : isContentFilled
                           ? 'bg-amber-50'
                           : 'bg-[#f3f4f6]'
@@ -320,15 +320,15 @@ export default function CreateBriefPage({
                       size={20}
                       className={
                         isDeadlineFilled
-                          ? 'text-[#4ECDC4]'
+                          ? 'text-brand'
                           : isContentFilled
                             ? 'text-amber-500'
-                            : 'text-[#8a90a3]'
+                            : 'text-muted-text'
                       }
                     />
                   </div>
                   <div>
-                    <h3 className="m-0 text-lg font-bold text-[#4A4A4A]">
+                    <h3 className="m-0 text-lg font-bold text-dark">
                       Timeline & Deadline
                     </h3>
                     {isContentFilled && !isDeadlineFilled && (
@@ -344,7 +344,7 @@ export default function CreateBriefPage({
                     </div>
                   )}
                 </div>
-                <label className="mb-2 block text-sm font-semibold text-[#4A4A4A]">
+                <label className="mb-2 block text-sm font-semibold text-dark">
                   Posting Deadline
                 </label>
                 <input
@@ -353,10 +353,10 @@ export default function CreateBriefPage({
                   onChange={e => setForm({ ...form, deadline: e.target.value })}
                   className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none ${
                     isDeadlineFilled
-                      ? 'border-[#4ECDC4]/60'
+                      ? 'border-brand/60'
                       : isContentFilled
                         ? 'border-amber-400'
-                        : 'border-[#e8ecf0]'
+                        : 'border-border-ui'
                   }`}
                 />
               </div>
@@ -364,26 +364,26 @@ export default function CreateBriefPage({
           </div>
 
           {/* Platforms & Deliverables — full-width bar */}
-          <div className="mb-5 flex items-center gap-4 rounded-xl border border-[#4ECDC4]/25 bg-white px-5 py-3.5">
+          <div className="mb-5 flex items-center gap-4 rounded-xl border border-brand/25 bg-white px-5 py-3.5">
             <div className="flex shrink-0 gap-1.5">
               {platforms.map(p => (
                 <span
                   key={p}
-                  className="rounded-md bg-[#f5f7fa] px-2 py-0.5 text-[11px] font-semibold text-[#4A4A4A]"
+                  className="rounded-md bg-surface px-2 py-0.5 text-[11px] font-semibold text-dark"
                 >
                   {p}
                 </span>
               ))}
             </div>
             <div>
-              <div className="mb-1 text-[13px] font-bold text-[#4A4A4A]">
+              <div className="mb-1 text-[13px] font-bold text-dark">
                 สิ่งที่ครีเอเตอร์ต้องโพสต์ (per creator)
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {campaignDeliverables.map((d, i) => (
                   <span
                     key={i}
-                    className="rounded-md border border-[#4ECDC4]/20 bg-[#e8f8f7] px-2.5 py-0.75 text-[13px] text-[#4A4A4A]"
+                    className="rounded-md border border-brand/20 bg-brand-light px-2.5 py-0.75 text-[13px] text-dark"
                   >
                     {d}
                   </span>
@@ -395,12 +395,12 @@ export default function CreateBriefPage({
           {/* Content Guidelines + Translation — 2-column grid */}
           <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
             {/* Left: Content Guidelines */}
-            <div className="rounded-2xl border-2 border-[#e8ecf0] bg-white p-7">
+            <div className="rounded-2xl border-2 border-border-ui bg-white p-7">
               <div className="mb-5.5 flex items-center gap-2.5">
-                <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#f0ebf8]">
-                  <Video size={20} className="text-[#9B7ED8]" />
+                <div className="flex size-10 items-center justify-center rounded-[10px] bg-accent-brand-light">
+                  <Video size={20} className="text-accent-brand" />
                 </div>
-                <h3 className="m-0 text-lg font-bold text-[#4A4A4A]">
+                <h3 className="m-0 text-lg font-bold text-dark">
                   Content Guidelines
                 </h3>
                 <div className="ml-auto flex items-center gap-2">
@@ -415,15 +415,15 @@ export default function CreateBriefPage({
                     disabled={aiLoading || aiFilled || !campaign?.product}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg border-none px-3 py-1.5 text-xs font-semibold transition-all ${
                       aiLoading
-                        ? 'cursor-wait bg-[#e8ecf0] text-[#8a90a3]'
+                        ? 'cursor-wait bg-border-ui text-muted-text'
                         : aiFilled
-                          ? 'cursor-not-allowed bg-[#e8ecf0] text-[#8a90a3]'
-                          : 'bg-linear-to-br from-[#9B7ED8] to-[#4A90D9] text-white'
+                          ? 'cursor-not-allowed bg-border-ui text-muted-text'
+                          : 'bg-linear-to-br from-accent-brand to-secondary-brand text-white'
                     }`}
                   >
                     {aiLoading ? (
                       <>
-                        <span className="inline-block size-3 animate-spin rounded-full border-2 border-[#9B7ED8] border-t-[#9B7ED8]/30" />
+                        <span className="inline-block size-3 animate-spin rounded-full border-2 border-accent-brand border-t-accent-brand/30" />
                         กำลังวิเคราะห์…
                       </>
                     ) : aiFilled ? (
@@ -475,9 +475,9 @@ export default function CreateBriefPage({
                 ] as const
               ).map(field => (
                 <div key={field.key} className="mb-4.5">
-                  <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-[#4A4A4A]">
+                  <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-dark">
                     {field.label}
-                    <Sparkles size={13} className="text-[#9B7ED8]" />
+                    <Sparkles size={13} className="text-accent-brand" />
                     {form[field.key] && (
                       <CheckCircle
                         size={13}
@@ -494,8 +494,8 @@ export default function CreateBriefPage({
                     rows={field.rows}
                     className={`w-full resize-y rounded-[10px] border px-3.5 py-2.75 text-sm outline-none ${
                       form[field.key]
-                        ? 'border-[#4ECDC4]/60'
-                        : 'border-[#e8ecf0]'
+                        ? 'border-brand/60'
+                        : 'border-border-ui'
                     }`}
                   />
                 </div>
@@ -506,33 +506,33 @@ export default function CreateBriefPage({
             <div
               className={`rounded-2xl border-2 bg-white p-7 ${
                 aiTranslated
-                  ? 'border-[#4ECDC4]/60'
+                  ? 'border-brand/60'
                   : needsTranslation
-                    ? 'border-[#9B7ED8]/60'
-                    : 'border-[#e8ecf0]'
+                    ? 'border-accent-brand/60'
+                    : 'border-border-ui'
               }`}
             >
               <div className="mb-4.5 flex items-center gap-2.5">
                 <div
                   className={`flex size-10 items-center justify-center rounded-[10px] ${
-                    aiTranslated ? 'bg-[#e8f8f7]' : 'bg-[#f0ebf8]'
+                    aiTranslated ? 'bg-brand-light' : 'bg-accent-brand-light'
                   }`}
                 >
                   <Languages
                     size={20}
                     className={
-                      aiTranslated ? 'text-[#4ECDC4]' : 'text-[#9B7ED8]'
+                      aiTranslated ? 'text-brand' : 'text-accent-brand'
                     }
                   />
                 </div>
                 <div>
-                  <h3 className="m-0 text-lg font-bold text-[#4A4A4A]">
+                  <h3 className="m-0 text-lg font-bold text-dark">
                     {needsTranslation
                       ? `แปล Brief → ${targetLang?.name} ${targetLang?.flag}`
                       : 'Translation'}
                   </h3>
                   {!needsTranslation && (
-                    <div className="mt-0.5 text-[13px] text-[#8a90a3]">
+                    <div className="mt-0.5 text-[13px] text-muted-text">
                       ครีเอเตอร์พูดภาษาไทย ไม่ต้องแปล
                     </div>
                   )}
@@ -550,10 +550,10 @@ export default function CreateBriefPage({
                       disabled={aiTranslated || translating || !isContentFilled}
                       className={`flex cursor-pointer items-center gap-1.5 rounded-lg border-none px-3 py-1.5 text-xs font-semibold transition-all ${
                         aiTranslated
-                          ? 'cursor-not-allowed bg-[#e8ecf0] text-[#8a90a3]'
+                          ? 'cursor-not-allowed bg-border-ui text-muted-text'
                           : translating || !isContentFilled
                             ? 'cursor-not-allowed bg-[#e5e7eb] text-[#9ca3af]'
-                            : 'bg-linear-to-br from-[#9B7ED8] to-[#7c5cbf] text-white'
+                            : 'bg-linear-to-br from-accent-brand to-[#7c5cbf] text-white'
                       }`}
                     >
                       {translating ? (
@@ -610,7 +610,7 @@ export default function CreateBriefPage({
                     ] as const
                   ).map(field => (
                     <div key={field.key} className="mb-4.5">
-                      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-[#4A4A4A]">
+                      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-dark">
                         {field.label}
                         {translatedForm[field.key] && (
                           <CheckCircle
@@ -636,8 +636,8 @@ export default function CreateBriefPage({
                         rows={field.rows}
                         className={`w-full resize-y rounded-[10px] border px-3.5 py-2.75 text-sm outline-none transition-colors ${
                           aiTranslated || translatedForm[field.key]
-                            ? 'border-[#4ECDC4]/60 bg-white'
-                            : 'cursor-not-allowed border-[#e8ecf0] bg-[#f7f8fa] text-[#8a90a3]'
+                            ? 'border-brand/60 bg-white'
+                            : 'cursor-not-allowed border-border-ui bg-[#f7f8fa] text-muted-text'
                         }`}
                       />
                     </div>
@@ -646,8 +646,8 @@ export default function CreateBriefPage({
               )}
 
               {!needsTranslation && (
-                <div className="flex flex-col items-center justify-center py-8 text-center text-[#8a90a3]">
-                  <CheckCircle size={32} className="mb-2 text-[#4ECDC4]" />
+                <div className="flex flex-col items-center justify-center py-8 text-center text-muted-text">
+                  <CheckCircle size={32} className="mb-2 text-brand" />
                   <div className="text-sm font-semibold">ไม่ต้องแปล</div>
                   <div className="mt-1 text-xs">
                     ครีเอเตอร์ในประเทศนี้พูดภาษาไทย
@@ -661,31 +661,31 @@ export default function CreateBriefPage({
           <div
             className={`rounded-2xl border-2 p-7 transition-opacity ${
               canPublish
-                ? 'border-[#4ECDC4] bg-linear-to-br from-[#e8f8f7] to-[#e8f0fa] opacity-100'
-                : 'border-[#e8ecf0] bg-white opacity-50'
+                ? 'border-brand bg-linear-to-br from-[#e8f8f7] to-[#e8f0fa] opacity-100'
+                : 'border-border-ui bg-white opacity-50'
             }`}
           >
             <div className="mb-4.5 flex items-center gap-2.5">
               <div
                 className={`flex size-10 items-center justify-center rounded-[10px] ${
-                  canPublish ? 'bg-[#4ECDC4]' : 'bg-[#e8ecf0]'
+                  canPublish ? 'bg-brand' : 'bg-border-ui'
                 }`}
               >
                 <Send
                   size={20}
-                  className={canPublish ? 'text-white' : 'text-[#8a90a3]'}
+                  className={canPublish ? 'text-white' : 'text-muted-text'}
                 />
               </div>
               <div>
                 <h3
                   className={`m-0 text-xl font-bold ${
-                    canPublish ? 'text-[#4A4A4A]' : 'text-[#8a90a3]'
+                    canPublish ? 'text-dark' : 'text-muted-text'
                   }`}
                 >
                   เผยแพร่ Brief
                 </h3>
                 {!canPublish && (
-                  <div className="mt-0.5 text-sm text-[#8a90a3]">
+                  <div className="mt-0.5 text-sm text-muted-text">
                     {!isContentFilled
                       ? 'กรอก Brief ก่อน'
                       : !isDeadlineFilled
@@ -694,7 +694,7 @@ export default function CreateBriefPage({
                   </div>
                 )}
                 {canPublish && (
-                  <div className="mt-0.5 text-sm font-semibold text-[#4ECDC4]">
+                  <div className="mt-0.5 text-sm font-semibold text-brand">
                     พร้อมส่งให้ครีเอเตอร์แล้ว!
                   </div>
                 )}
@@ -710,8 +710,8 @@ export default function CreateBriefPage({
               disabled={!canPublish || publishing}
               className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-none py-4 text-lg font-bold text-white transition-all ${
                 canPublish && !publishing
-                  ? 'bg-linear-to-br from-[#4ECDC4] to-[#4A90D9]'
-                  : 'cursor-not-allowed bg-[#d1d5db] text-[#9ca3af]'
+                  ? 'bg-linear-to-br from-brand to-secondary-brand'
+                  : 'cursor-not-allowed bg-gray-300 text-gray-400'
               }`}
             >
               {publishing ? (

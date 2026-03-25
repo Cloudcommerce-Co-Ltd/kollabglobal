@@ -10,14 +10,14 @@ export const CAMPAIGN_STATUS_CONFIG: Record<
   CampaignStatus,
   { label: string; pillClass: string; sortOrder: number }
 > = {
-  DRAFT:             { label: "ร่างแคมเปญ",      pillClass: "bg-[#f0f0f0] text-[#8a90a3]",  sortOrder: 0 },
-  AWAITING_PAYMENT:  { label: "รอชำระเงิน",      pillClass: "bg-[#fee2e2] text-[#dc2626]",  sortOrder: 1 },
-  PENDING:           { label: "รอดำเนินการ",     pillClass: "bg-[#fef3c7] text-[#b45309]",  sortOrder: 2 },
-  ACCEPTING:         { label: "รอตอบรับ",         pillClass: "bg-[#fef3c7] text-[#d97706]",  sortOrder: 3 },
-  AWAITING_SHIPMENT: { label: "รอส่งสินค้า",     pillClass: "bg-[#fee2e2] text-[#dc2626]",  sortOrder: 4 },
-  ACTIVE:            { label: "กำลังดำเนินการ",  pillClass: "bg-[#e8f0fa] text-[#4A90D9]",  sortOrder: 5 },
-  COMPLETED:         { label: "เสร็จสิ้น",        pillClass: "bg-[#e8f8f7] text-[#0d9488]",  sortOrder: 6 },
-  CANCELLED:         { label: "ยกเลิก",           pillClass: "bg-[#f0f0f0] text-[#8a90a3]",  sortOrder: 7 },
+  DRAFT:             { label: "ร่างแคมเปญ",      pillClass: "bg-[#f0f0f0] text-muted-text",          sortOrder: 0 },
+  AWAITING_PAYMENT:  { label: "รอชำระเงิน",      pillClass: "bg-[#fee2e2] text-[#dc2626]",           sortOrder: 1 },
+  PENDING:           { label: "รอดำเนินการ",     pillClass: "bg-warning-bg text-[#b45309]",           sortOrder: 2 },
+  ACCEPTING:         { label: "รอตอบรับ",         pillClass: "bg-warning-bg text-warning-text",        sortOrder: 3 },
+  AWAITING_SHIPMENT: { label: "รอส่งสินค้า",     pillClass: "bg-[#fee2e2] text-[#dc2626]",           sortOrder: 4 },
+  ACTIVE:            { label: "กำลังดำเนินการ",  pillClass: "bg-secondary-brand-light text-secondary-brand", sortOrder: 5 },
+  COMPLETED:         { label: "เสร็จสิ้น",        pillClass: "bg-brand-light text-[#0d9488]",          sortOrder: 6 },
+  CANCELLED:         { label: "ยกเลิก",           pillClass: "bg-[#f0f0f0] text-muted-text",          sortOrder: 7 },
 };
 
 export const CAMPAIGN_STATUS_TABS: Array<{ key: "all" | CampaignStatus; label: string }> = [

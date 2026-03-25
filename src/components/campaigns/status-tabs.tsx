@@ -12,7 +12,7 @@ interface StatusTabsProps {
 
 export function StatusTabs({ activeTab, onTabChange, counts, totalCount }: StatusTabsProps) {
   return (
-    <div className="border-b border-[#e8ecf0] bg-white px-4 sm:px-8">
+    <div className="border-b border-border-ui bg-white px-4 sm:px-8">
       <div className="mx-auto max-w-[1100px]">
         <div className="flex overflow-x-auto">
           {CAMPAIGN_STATUS_TABS.map(({ key, label }) => {
@@ -24,8 +24,8 @@ export function StatusTabs({ activeTab, onTabChange, counts, totalCount }: Statu
                 onClick={() => onTabChange(key)}
                 className={`shrink-0 cursor-pointer border-b-[3px] bg-transparent px-4 py-3.5 text-[14px] font-medium transition-colors duration-200 ${
                   isActive
-                    ? 'border-[#4ECDC4] text-[#4ECDC4]'
-                    : 'border-transparent text-[#8a90a3] hover:text-[#4a4a4a]'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-muted-text hover:text-dark'
                 }`}
               >
                 {label} ({count})

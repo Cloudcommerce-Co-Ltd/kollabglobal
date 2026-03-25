@@ -46,21 +46,21 @@ export default function SelectCountryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen bg-surface">
       {/* Page header */}
-      <div className="border-b border-[#e8ecf0] bg-white px-4 py-5 sm:px-6 lg:px-8">
+      <div className="border-b border-border-ui bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-275">
           <button
             onClick={() => router.push('/')}
-            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-[#8a90a3]"
+            className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-muted-text"
           >
             <ArrowLeft size={16} />
             กลับหน้าหลัก
           </button>
-          <h1 className="m-0 text-[20px] font-bold text-[#4A4A4A] sm:text-[26px]">
+          <h1 className="m-0 text-[20px] font-bold text-dark sm:text-[26px]">
             เลือกตลาดเป้าหมาย
           </h1>
-          <p className="m-0 mt-0.5 text-sm text-[#8a90a3]">
+          <p className="m-0 mt-0.5 text-sm text-muted-text">
             เลือกพื้นที่ที่คุณต้องการโปรโมทแบรนด์
           </p>
         </div>
@@ -68,7 +68,7 @@ export default function SelectCountryPage() {
 
       <div className="mx-auto max-w-275 px-4 sm:px-6 lg:px-8">
         {/* Tab bar */}
-        <div className="mb-7 flex gap-1 border-b-2 border-[#e8ecf0]">
+        <div className="mb-7 flex gap-1 border-b-2 border-border-ui">
           {(['asia', 'global'] as Tab[]).map(k => (
             <button
               key={k}
@@ -77,8 +77,8 @@ export default function SelectCountryPage() {
               }}
               className={`cursor-pointer border-x-0 border-t-0 border-b-[3px] bg-transparent px-4 py-3 text-[15px] font-semibold transition-all sm:px-7 ${
                 tab === k
-                  ? 'border-[#4ECDC4] text-[#4ECDC4]'
-                  : 'border-transparent text-[#8a90a3]'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-muted-text'
               }`}
             >
               {k === 'asia' ? 'Asia' : 'Global'}
@@ -90,7 +90,7 @@ export default function SelectCountryPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {loading ? (
-              <div className="col-span-2 py-12 text-center text-[#8a90a3]">
+              <div className="col-span-2 py-12 text-center text-muted-text">
                 กำลังโหลด...
               </div>
             ) : (
@@ -102,8 +102,8 @@ export default function SelectCountryPage() {
                     onClick={() => handleSelect(c)}
                     className={`flex cursor-pointer items-center gap-3.5 rounded-[14px] border-2 p-4.5 text-left transition-all ${
                       isSelected
-                        ? 'border-[#4ECDC4] bg-[#e8f8f7]'
-                        : 'border-[#e8ecf0] bg-white'
+                        ? 'border-brand bg-brand-light'
+                        : 'border-border-ui bg-white'
                     }`}
                   >
                     <div className="flex size-13 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#e8f8f7] to-[#e8f0fa] text-[30px]">
@@ -111,12 +111,12 @@ export default function SelectCountryPage() {
                     </div>
                     <div className="flex-1">
                       <div
-                        className={`text-base font-semibold ${isSelected ? 'text-[#4ECDC4]' : 'text-[#4A4A4A]'}`}
+                        className={`text-base font-semibold ${isSelected ? 'text-brand' : 'text-dark'}`}
                       >
                         {c.name}
                       </div>
                       {c.creatorsAvail != null && (
-                        <div className="mt-0.5 text-[13px] text-[#8a90a3]">
+                        <div className="mt-0.5 text-[13px] text-muted-text">
                           {c.creatorsAvail.toLocaleString()} ครีเอเตอร์
                         </div>
                       )}
@@ -124,7 +124,7 @@ export default function SelectCountryPage() {
                     <div
                       className={`flex size-5.5 items-center justify-center rounded-full border-2 ${
                         isSelected
-                          ? 'border-[#4ECDC4] bg-[#4ECDC4]'
+                          ? 'border-brand bg-brand'
                           : 'border-[#ccc] bg-transparent'
                       }`}
                     >
@@ -145,7 +145,7 @@ export default function SelectCountryPage() {
             onClick={handleNext}
             className={`w-full rounded-xl border-none px-8 py-3.5 text-[15px] font-semibold text-white transition-all sm:w-auto ${
               selected
-                ? 'cursor-pointer bg-[#4ECDC4]'
+                ? 'cursor-pointer bg-brand'
                 : 'cursor-not-allowed bg-[#ccc]'
             }`}
           >
