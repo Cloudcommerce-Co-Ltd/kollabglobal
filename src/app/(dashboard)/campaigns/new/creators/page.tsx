@@ -87,16 +87,22 @@ export default function SelectCreatorsPage() {
       ? selectedCreatorsData.map((c: Creator) => c.id)
       : [],
   );
-  const [displayCreators, setDisplayCreators] = useState<Creator[]>([]);
+  const [mainCreators, setMainCreators] = useState<Creator[]>([]);
+  const [backupCreators, setBackupCreators] = useState<Creator[]>([]);
 
   useEffect(() => {
     fetch('/api/creators')
       .then(r => r.json())
       .then((data: Creator[]) => {
-        setDisplayCreators(data);
-        setSelectedIds(data.slice(0, maxCreators).map(c => c.id));
+        const main = data.filter((c: Creator) => !c.isBackup);
+        const backup = data.filter((c: Creator) => c.isBackup);
+        setMainCreators(main);
+        setBackupCreators(backup);
+        setSelectedIds(main.slice(0, maxCreators).map(c => c.id));
       });
   }, [maxCreators]);
+
+  const allCreators = [...mainCreators, ...backupCreators];
 
   function toggleCreator(id: string) {
     const next = selectedIds.includes(id)
@@ -105,14 +111,14 @@ export default function SelectCreatorsPage() {
         ? [...selectedIds, id]
         : selectedIds;
     setSelectedIds(next);
-    setCreators(displayCreators.filter(c => next.includes(c.id)));
+    setCreators(allCreators.filter(c => next.includes(c.id)));
   }
 
   const isComplete = selectedIds.length === maxCreators;
 
   function handleNext() {
     if (!isComplete) return;
-    setCreators(displayCreators.filter(c => selectedIds.includes(c.id)));
+    setCreators(allCreators.filter(c => selectedIds.includes(c.id)));
     router.push('/campaigns/new/checkout');
   }
 
@@ -150,7 +156,7 @@ export default function SelectCreatorsPage() {
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {displayCreators.slice(0, maxCreators).map((creator, i) => {
+            {mainCreators.slice(0, maxCreators).map((creator, i) => {
               const isSelected = selectedIds.includes(creator.id);
               const isDisabled =
                 !isSelected && selectedIds.length >= maxCreators;
@@ -168,7 +174,7 @@ export default function SelectCreatorsPage() {
         </div>
 
         {/* Backup Section */}
-        {displayCreators.length > maxCreators && (
+        {backupCreators.length > 0 && (
           <div>
             <div className="flex justify-between">
               <div className="mb-3 flex gap-2">
@@ -188,23 +194,20 @@ export default function SelectCreatorsPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {displayCreators
-                .slice(maxCreators, displayCreators.length)
-                .map((creator, offset) => {
-                  const i = 10 + offset;
-                  const isSelected = selectedIds.includes(creator.id);
-                  const isDisabled =
-                    !isSelected && selectedIds.length >= maxCreators;
-                  return (
-                    <CreatorCard
-                      key={i}
-                      creator={creator}
-                      isSelected={isSelected}
-                      isDisabled={isDisabled}
-                      onToggle={toggleCreator}
-                    />
-                  );
-                })}
+              {backupCreators.map((creator, i) => {
+                const isSelected = selectedIds.includes(creator.id);
+                const isDisabled =
+                  !isSelected && selectedIds.length >= maxCreators;
+                return (
+                  <CreatorCard
+                    key={creator.id}
+                    creator={creator}
+                    isSelected={isSelected}
+                    isDisabled={isDisabled}
+                    onToggle={toggleCreator}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
