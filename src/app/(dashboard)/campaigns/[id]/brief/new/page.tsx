@@ -13,6 +13,7 @@ import {
   Languages,
   Target,
   Package,
+  Lock,
 } from 'lucide-react';
 import { isBriefContentFilled, canPublishBrief } from '@/lib/brief-utils';
 import {
@@ -75,7 +76,11 @@ export default function CreateBriefPage({
           name: data.product?.productName ?? '',
         }));
         const lang = data.country
-          ? { code: data.country.languageCode, name: data.country.languageName, flag: data.country.flag }
+          ? {
+              code: data.country.languageCode,
+              name: data.country.languageName,
+              flag: data.country.flag,
+            }
           : { code: 'en', name: 'English', flag: '🇺🇸' };
         setTargetLang(lang);
         setLoading(false);
@@ -276,20 +281,32 @@ export default function CreateBriefPage({
                     <div className="grid grid-cols-2 gap-2.5">
                       {campaign.product.category && (
                         <div className="rounded-[10px] border border-border-ui bg-white p-3">
-                          <div className="mb-1 text-[11px] font-semibold text-muted-text">หมวดหมู่</div>
-                          <div className="text-sm font-semibold text-secondary-brand">{campaign.product.category}</div>
+                          <div className="mb-1 text-[11px] font-semibold text-muted-text">
+                            หมวดหมู่
+                          </div>
+                          <div className="text-sm font-semibold text-secondary-brand">
+                            {campaign.product.category}
+                          </div>
                         </div>
                       )}
                       {campaign.product.description && (
                         <div className="rounded-[10px] border border-border-ui bg-white p-3">
-                          <div className="mb-1 text-[11px] font-semibold text-muted-text">รายละเอียด</div>
-                          <div className="text-[13px] leading-relaxed text-dark">{campaign.product.description}</div>
+                          <div className="mb-1 text-[11px] font-semibold text-muted-text">
+                            รายละเอียด
+                          </div>
+                          <div className="text-[13px] leading-relaxed text-dark">
+                            {campaign.product.description}
+                          </div>
                         </div>
                       )}
                       {campaign.product.sellingPoints && (
                         <div className="col-span-2 rounded-[10px] border border-border-ui bg-white p-3">
-                          <div className="mb-1 text-[11px] font-semibold text-muted-text">จุดเด่น</div>
-                          <div className="text-[13px] font-semibold leading-relaxed text-accent-brand">{campaign.product.sellingPoints}</div>
+                          <div className="mb-1 text-[11px] font-semibold text-muted-text">
+                            จุดเด่น
+                          </div>
+                          <div className="text-[13px] font-semibold leading-relaxed text-accent-brand">
+                            {campaign.product.sellingPoints}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -393,7 +410,15 @@ export default function CreateBriefPage({
           </div>
 
           {/* Content Guidelines + Translation — 2-column grid */}
-          <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {!isDeadlineFilled && (
+            <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+              <Lock size={15} className="shrink-0 text-amber-500" />
+              กรุณาตั้ง Deadline ก่อน เพื่อกรอก Brief
+            </div>
+          )}
+          <div
+            className={`mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2 transition-opacity ${!isDeadlineFilled ? 'pointer-events-none select-none opacity-40' : ''}`}
+          >
             {/* Left: Content Guidelines */}
             <div className="rounded-2xl border-2 border-border-ui bg-white p-7">
               <div className="mb-5.5 flex items-center gap-2.5">
@@ -493,9 +518,7 @@ export default function CreateBriefPage({
                     placeholder={field.placeholder}
                     rows={field.rows}
                     className={`w-full resize-y rounded-[10px] border px-3.5 py-2.75 text-sm outline-none ${
-                      form[field.key]
-                        ? 'border-brand/60'
-                        : 'border-border-ui'
+                      form[field.key] ? 'border-brand/60' : 'border-border-ui'
                     }`}
                   />
                 </div>
