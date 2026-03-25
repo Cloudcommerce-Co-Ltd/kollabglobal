@@ -16,18 +16,16 @@ export const CAMPAIGN_STATUS_CONFIG: Record<
   ACCEPTING:         { label: "รอตอบรับ",         pillClass: "bg-warning-bg text-warning-text",        sortOrder: 3 },
   AWAITING_SHIPMENT: { label: "รอส่งสินค้า",     pillClass: "bg-[#fee2e2] text-[#dc2626]",           sortOrder: 4 },
   ACTIVE:            { label: "กำลังดำเนินการ",  pillClass: "bg-secondary-brand-light text-secondary-brand", sortOrder: 5 },
-  COMPLETED:         { label: "เสร็จสิ้น",        pillClass: "bg-brand-light text-[#0d9488]",          sortOrder: 6 },
+  COMPLETED:         { label: "Live",               pillClass: "bg-brand-light text-[#0d9488]",          sortOrder: 6 },
   CANCELLED:         { label: "ยกเลิก",           pillClass: "bg-[#f0f0f0] text-muted-text",          sortOrder: 7 },
 };
 
 export const CAMPAIGN_STATUS_TABS: Array<{ key: "all" | CampaignStatus; label: string }> = [
   { key: "all",               label: "ทั้งหมด" },
-  { key: "DRAFT",             label: "ร่างแคมเปญ" },
   { key: "AWAITING_PAYMENT",  label: "รอชำระเงิน" },
   { key: "PENDING",           label: "รอดำเนินการ" },
   { key: "ACCEPTING",         label: "รอตอบรับ" },
   { key: "AWAITING_SHIPMENT", label: "รอส่งสินค้า" },
   { key: "ACTIVE",            label: "กำลังดำเนินการ" },
-  { key: "COMPLETED",         label: "เสร็จสิ้น" },
-  { key: "CANCELLED",         label: "ยกเลิก" },
+  { key: "COMPLETED",         label: "Live" },
 ];

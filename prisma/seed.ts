@@ -791,102 +791,228 @@ async function main() {
       },
     });
 
-    const devCampaign = await prisma.campaign.upsert({
-      where: { id: 'dev-campaign-1' },
-      update: {},
-      create: {
+    // Clean up dev campaigns so re-seeding always reflects fresh state
+    await prisma.campaign.deleteMany({ where: { userId: devUser.id } });
+
+    // Campaign 1: PENDING — Vietnam, PRODUCT
+    // Payment confirmed, waiting for brand to create brief
+    const c1 = await prisma.campaign.create({
+      data: {
         id: 'dev-campaign-1',
         userId: devUser.id,
-        countryId: 2,
-        packageId: 2,
+        countryId: 2, // Vietnam
+        packageId: 2, // Global Bridge (10 creators)
         promotionType: 'PRODUCT',
-        status: 'DRAFT',
+        status: 'PENDING',
       },
     });
-
-    await prisma.campaignProduct.upsert({
-      where: { campaignId: devCampaign.id },
-      update: {},
-      create: {
-        campaignId: devCampaign.id,
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c1.id,
         brandName: 'KOLLAB Global',
         productName: 'มะม่วงอบแห้ง Premium',
         category: 'Food & Snack',
-        description:
-          'มะม่วงอบแห้งคัดพิเศษจากเชียงราย รสชาติหวานอมเปรี้ยว ไม่มีสารกันบูด',
-        sellingPoints:
-          'ออร์แกนิค 100% | ไม่มีน้ำตาลเพิ่ม | บรรจุถุงซิปล็อก | ส่งตรงจากสวน',
+        description: 'มะม่วงอบแห้งคัดพิเศษจากเชียงราย รสชาติหวานอมเปรี้ยว ไม่มีสารกันบูด',
+        sellingPoints: 'ออร์แกนิค 100% | ไม่มีน้ำตาลเพิ่ม | บรรจุถุงซิปล็อก | ส่งตรงจากสวน',
         isService: false,
         url: 'https://kollabglobal.com/dried-mango',
       },
     });
 
-    console.log(`  - Dev campaign ID: ${devCampaign.id}`);
-    console.log(`  - Visit: /campaigns/${devCampaign.id}/brief/new`);
-
-    const devCampaign2 = await prisma.campaign.upsert({
-      where: { id: 'dev-campaign-2' },
-      update: {},
-      create: {
+    // Campaign 2: ACCEPTING — Thailand, SERVICE
+    // Brief submitted, accepting creator applications
+    const c2 = await prisma.campaign.create({
+      data: {
         id: 'dev-campaign-2',
         userId: devUser.id,
         countryId: 1, // Thailand
-        packageId: 2,
+        packageId: 2, // Global Bridge (10 creators)
         promotionType: 'SERVICE',
-        status: 'DRAFT',
+        status: 'ACCEPTING',
       },
     });
-
-    await prisma.campaignProduct.upsert({
-      where: { campaignId: devCampaign2.id },
-      update: {},
-      create: {
-        campaignId: devCampaign2.id,
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c2.id,
         brandName: 'TH Brand',
-        productName: 'ผลิตภัณฑ์ทดสอบ',
-        category: 'Health & Wellness',
-        description: 'รายละเอียดผลิตภัณฑ์สำหรับแคมเปญประเทศไทย',
-        sellingPoints: 'จุดเด่น 1 | จุดเด่น 2 | จุดเด่น 3',
-        isService: false,
-        url: 'https://kollabglobal.com/th-product',
+        productName: 'บริการสปาพรีเมียม',
+        category: 'ความงาม / สปา',
+        description: 'บริการสปาระดับ 5 ดาว ใจกลางกรุงเทพฯ นวดผ่อนคลายและทรีตเมนต์บำรุงผิว',
+        sellingPoints: 'นวดโดยผู้เชี่ยวชาญ | สมุนไพรไทยแท้ | ฟรีอาหารว่างออร์แกนิค | จองได้ 24 ชม.',
+        isService: true,
+        url: 'https://thbrand.com/spa',
       },
     });
-
-    console.log(`  - Dev campaign 2 ID: ${devCampaign2.id}`);
-    console.log(`  - Visit: /campaigns/${devCampaign2.id}/brief/new`);
-
-    const selectedCreators = mainCreators.slice(0, 10);
-    console.log(
-      `  - Assigning ${selectedCreators.length} creators to dev campaigns...`,
-    );
-
-    for (const creator of selectedCreators) {
+    await prisma.campaignBrief.create({
+      data: {
+        campaignId: c2.id,
+        content: '## Campaign Brief: TH Brand Spa\n\nCreate content showcasing our premium spa experience. Focus on the relaxation and luxury atmosphere. Show the herbal treatments and professional staff.',
+        contentTh: '## แคมเปญสปา TH Brand\n\nสร้างคอนเทนต์แสดงประสบการณ์สปาระดับพรีเมียม เน้นบรรยากาศผ่อนคลายและความหรูหรา แสดงการบำบัดด้วยสมุนไพรและทีมผู้เชี่ยวชาญ',
+        publishedAt: new Date(),
+      },
+    });
+    for (const creator of mainCreators.slice(0, 10)) {
       const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
-
-      // Assign to dev-campaign-1
       await prisma.campaignCreator.create({
-        data: {
-          campaignId: devCampaign.id,
-          creatorId: creatorId,
-          status: 'PENDING',
-        },
-      });
-
-      // Assign to dev-campaign-2
-      await prisma.campaignCreator.create({
-        data: {
-          campaignId: devCampaign2.id,
-          creatorId: creatorId,
-          status: 'PENDING',
-        },
+        data: { campaignId: c2.id, creatorId, status: 'PENDING' },
       });
     }
+
+    // Campaign 3: AWAITING_SHIPMENT — Malaysia, PRODUCT
+    // Creators accepted, brand needs to ship product samples
+    const c3 = await prisma.campaign.create({
+      data: {
+        id: 'dev-campaign-3',
+        userId: devUser.id,
+        countryId: 3, // Malaysia
+        packageId: 1, // Passport (5 creators)
+        promotionType: 'PRODUCT',
+        status: 'AWAITING_SHIPMENT',
+      },
+    });
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c3.id,
+        brandName: 'Glow Labs',
+        productName: 'Vitamin C Serum',
+        category: 'Beauty & Skincare',
+        description: 'วิตามิน C เซรั่มเข้มข้น 20% ลดเลือนจุดด่างดำ กระจ่างใส ใน 2 สัปดาห์',
+        sellingPoints: 'Vitamin C 20% | Hyaluronic Acid | ทดสอบโดยผิวแพ้ง่าย | Cruelty-Free',
+        isService: false,
+        url: 'https://glowlabs.com/vitamin-c',
+      },
+    });
+    await prisma.campaignBrief.create({
+      data: {
+        campaignId: c3.id,
+        content: '## Campaign Brief: Glow Labs Vitamin C Serum\n\nCreate authentic before/after content showing the serum routine. Emphasize the brightening effect and skin texture improvement after 2 weeks.',
+        contentTh: '## แคมเปญ Glow Labs Vitamin C Serum\n\nสร้างคอนเทนต์แบบ before/after แสดงขั้นตอนการใช้เซรั่ม เน้นผลลัพธ์ที่กระจ่างใสและผิวพรรณที่ดีขึ้นใน 2 สัปดาห์',
+        publishedAt: new Date(),
+      },
+    });
+    for (const creator of mainCreators.slice(10, 15)) {
+      const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+      await prisma.campaignCreator.create({
+        data: { campaignId: c3.id, creatorId, status: 'ACCEPTED' },
+      });
+    }
+
+    // Campaign 4: ACTIVE — Japan, PRODUCT
+    // Product shipped, creators are producing content
+    const c4 = await prisma.campaign.create({
+      data: {
+        id: 'dev-campaign-4',
+        userId: devUser.id,
+        countryId: 5, // Japan
+        packageId: 1, // Passport (5 creators)
+        promotionType: 'PRODUCT',
+        status: 'ACTIVE',
+      },
+    });
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c4.id,
+        brandName: 'SnackBox TH',
+        productName: 'ทุเรียนกรอบ Premium',
+        category: 'Food & Snack',
+        description: 'ทุเรียนกรอบ premium อบด้วยเทคโนโลยี freeze-dry รักษาคุณค่าทางโภชนาการ',
+        sellingPoints: 'ทุเรียนพันธุ์หมอนทอง | ไม่มีน้ำมันทอด | กรอบทุกชิ้น | บรรจุพร้อมส่งต่างประเทศ',
+        isService: false,
+        url: 'https://snackboxth.com/durian',
+      },
+    });
+    await prisma.campaignBrief.create({
+      data: {
+        campaignId: c4.id,
+        content: '## Campaign Brief: SnackBox TH Durian Crisps\n\nCreate a reaction/taste test video. Show the crispy texture and authentic Thai durian flavor. Add a "first time trying durian" angle for Japanese audience.',
+        contentTh: '## แคมเปญ SnackBox TH ทุเรียนกรอบ\n\nสร้างวิดีโอทดลองชิมทุเรียนกรอบ แสดงเนื้อสัมผัสกรอบและรสชาติทุเรียนไทยแท้ เพิ่มมุม "ครั้งแรกที่ได้ลองทุเรียน" สำหรับผู้ชมญี่ปุ่น',
+        publishedAt: new Date(),
+      },
+    });
+    for (const creator of mainCreators.slice(15, 20)) {
+      const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+      await prisma.campaignCreator.create({
+        data: { campaignId: c4.id, creatorId, status: 'ACCEPTED' },
+      });
+    }
+
+    // Campaign 5: COMPLETED (Live) — Vietnam, PRODUCT
+    // Campaign complete, all creators have posted
+    const c5 = await prisma.campaign.create({
+      data: {
+        id: 'dev-campaign-5',
+        userId: devUser.id,
+        countryId: 2, // Vietnam
+        packageId: 1, // Passport (5 creators)
+        promotionType: 'PRODUCT',
+        status: 'COMPLETED',
+      },
+    });
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c5.id,
+        brandName: 'BambooTea',
+        productName: 'ชาเขียวออร์แกนิค',
+        category: 'Beverage',
+        description: 'ชาเขียวออร์แกนิคจากไร่ที่ได้รับการรับรอง ชงง่าย รสชาติสด',
+        sellingPoints: 'Organic certified | Zero sugar | 30 sachets | Ship worldwide',
+        isService: false,
+        url: 'https://bambootea.com/green',
+      },
+    });
+    await prisma.campaignBrief.create({
+      data: {
+        campaignId: c5.id,
+        content: '## Campaign Brief: BambooTea Green Tea\n\nCreate a morning routine video featuring our organic green tea. Show the calming ritual and highlight the zero-sugar, organic certification.',
+        contentTh: '## แคมเปญ BambooTea ชาเขียวออร์แกนิค\n\nสร้างวิดีโอ morning routine ที่มีชาเขียวออร์แกนิคของเรา แสดงช่วงเวลาผ่อนคลายและเน้น zero-sugar และใบรับรองออร์แกนิค',
+        publishedAt: new Date(),
+      },
+    });
+    for (const creator of mainCreators.slice(20, 25)) {
+      const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+      await prisma.campaignCreator.create({
+        data: { campaignId: c5.id, creatorId, status: 'COMPLETED' },
+      });
+    }
+
+    // Campaign 6: AWAITING_PAYMENT — Thailand, PRODUCT
+    // All steps complete, waiting for payment confirmation from Omise
+    const c6 = await prisma.campaign.create({
+      data: {
+        id: 'dev-campaign-6',
+        userId: devUser.id,
+        countryId: 1, // Thailand
+        packageId: 1, // Passport (5 creators)
+        promotionType: 'PRODUCT',
+        status: 'AWAITING_PAYMENT',
+      },
+    });
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c6.id,
+        brandName: 'NatureCare',
+        productName: 'คอลลาเจนไตรเปปไทด์',
+        category: 'Health & Wellness',
+        description: 'คอลลาเจน Tripeptide ดูดซึมเร็ว 100% เสริมสร้างผิวเนียนนุ่ม ลดริ้วรอย',
+        sellingPoints: 'Tripeptide 5000mg | Vitamin C เสริม | ไม่มีน้ำตาล | รสสตรอเบอร์รี่',
+        isService: false,
+        url: 'https://naturecare.th/collagen',
+      },
+    });
+
+    console.log(`  - dev-campaign-1: PENDING (Vietnam, รอสร้าง brief)`);
+    console.log(`  - dev-campaign-2: ACCEPTING (Thailand service, 10 creators)`);
+    console.log(`  - dev-campaign-3: AWAITING_SHIPMENT (Malaysia, 5 creators)`);
+    console.log(`  - dev-campaign-4: ACTIVE (Japan, 5 creators)`);
+    console.log(`  - dev-campaign-5: COMPLETED/Live (Vietnam, 5 creators)`);
+    console.log(`  - dev-campaign-6: AWAITING_PAYMENT (Thailand, รอชำระเงิน)`);
   }
 
   console.log('Seed complete!');
   console.log('  - 11 countries (8 active, 3 inactive)');
   console.log('  - 3 packages');
   console.log('  - 33 creators (28 main, 5 backup)');
+  console.log('  - 6 dev campaigns covering all UX statuses (PENDING → ACCEPTING → AWAITING_SHIPMENT → ACTIVE → COMPLETED + AWAITING_PAYMENT)');
 }
 
 main()

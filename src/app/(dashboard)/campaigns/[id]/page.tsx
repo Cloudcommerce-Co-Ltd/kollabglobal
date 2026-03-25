@@ -26,6 +26,10 @@ export default async function CampaignDetailPage({
   if (!campaign) notFound();
 
   const displayStatus = resolveDisplayStatus(campaign);
+
+  if (displayStatus === 'awaiting_payment') {
+    redirect(`/campaigns/new/checkout`);
+  }
   const badge = getStatusBadge(displayStatus);
   const isService = campaign.product?.isService ?? false;
   const isLive = displayStatus === 'live';
@@ -202,13 +206,19 @@ export default async function CampaignDetailPage({
           </div>
         )}
 
-        {displayStatus !== 'active' && !isLive && (
+        {(displayStatus === 'brief' || displayStatus === 'accepting' || displayStatus === 'ship') && (
           <div className="mt-5">
             <CreatorPipeline
               creators={serializedCampaign.creators}
               isService={isService}
               displayStatus={displayStatus}
             />
+          </div>
+        )}
+
+        {displayStatus === 'cancelled' && (
+          <div className="rounded-2xl border border-border-ui bg-white p-6 text-center text-muted-text">
+            <p className="text-sm font-medium">แคมเปญนี้ถูกยกเลิกแล้ว</p>
           </div>
         )}
       </div>

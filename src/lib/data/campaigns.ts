@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma';
 
 export function getUserCampaigns(userId: string) {
   return prisma.campaign.findMany({
-    where: { userId },
+    where: { userId, status: { not: 'DRAFT' } },
     include: {
       country: true,
       package: true,

@@ -15,17 +15,21 @@ function makeCampaign(status: string, isService = false): CampaignWithRelations 
 }
 
 describe("resolveDisplayStatus", () => {
-  it("maps DRAFT to brief", () => expect(resolveDisplayStatus(makeCampaign("DRAFT"))).toBe("brief"));
-  it("maps AWAITING_PAYMENT to brief", () => expect(resolveDisplayStatus(makeCampaign("AWAITING_PAYMENT"))).toBe("brief"));
+  it("maps AWAITING_PAYMENT to awaiting_payment", () => expect(resolveDisplayStatus(makeCampaign("AWAITING_PAYMENT"))).toBe("awaiting_payment"));
   it("maps PENDING to brief", () => expect(resolveDisplayStatus(makeCampaign("PENDING"))).toBe("brief"));
   it("maps ACCEPTING to accepting", () => expect(resolveDisplayStatus(makeCampaign("ACCEPTING"))).toBe("accepting"));
   it("maps AWAITING_SHIPMENT (product) to ship", () => expect(resolveDisplayStatus(makeCampaign("AWAITING_SHIPMENT"))).toBe("ship"));
   it("maps AWAITING_SHIPMENT (service) to active", () => expect(resolveDisplayStatus(makeCampaign("AWAITING_SHIPMENT", true))).toBe("active"));
   it("maps ACTIVE to active", () => expect(resolveDisplayStatus(makeCampaign("ACTIVE"))).toBe("active"));
   it("maps COMPLETED to live", () => expect(resolveDisplayStatus(makeCampaign("COMPLETED"))).toBe("live"));
+  it("maps CANCELLED to cancelled", () => expect(resolveDisplayStatus(makeCampaign("CANCELLED"))).toBe("cancelled"));
+  it("maps unknown status to cancelled", () => expect(resolveDisplayStatus(makeCampaign("DRAFT"))).toBe("cancelled"));
 });
 
 describe("getStatusBadge", () => {
+  it("returns correct badge for awaiting_payment", () => {
+    expect(getStatusBadge("awaiting_payment").label).toBe("รอชำระเงิน");
+  });
   it("returns correct badge for brief", () => {
     const badge = getStatusBadge("brief");
     expect(badge.label).toBe("ต้องสร้าง Brief");
@@ -42,5 +46,8 @@ describe("getStatusBadge", () => {
   });
   it("returns correct badge for live", () => {
     expect(getStatusBadge("live").label).toBe("Live");
+  });
+  it("returns correct badge for cancelled", () => {
+    expect(getStatusBadge("cancelled").label).toBe("ยกเลิก");
   });
 });
