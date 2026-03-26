@@ -2,17 +2,20 @@ import { createHmac } from "crypto";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "../omise/route";
 
-vi.mock("@/lib/prisma", () => ({
-  default: {
-    payment: {
-      findFirst: vi.fn(),
-      update: vi.fn(),
-    },
-    campaign: {
-      update: vi.fn(),
-    },
-    $transaction: vi.fn(),
+// Mock the payment queue and redis to prevent real connections
+vi.mock("@/lib/queue/payment-queue", () => ({
+  paymentQueue: {
+    add: vi.fn(),
   },
+  PAYMENT_EVENTS_QUEUE: "payment-events",
+}));
+
+vi.mock("@/lib/redis", () => ({
+  default: {
+    on: vi.fn(),
+    quit: vi.fn(),
+  },
+  isRedisConfigured: vi.fn().mockReturnValue(false),
 }));
 
 // Secret must be base64-encoded (as Omise stores it) — decoded bytes are used as HMAC key
@@ -37,18 +40,6 @@ const makeWebhookRequest = (body: unknown) => {
     },
     body: rawBody,
   });
-};
-
-const mockPayment = {
-  id: "payment_1",
-  campaignId: "campaign_1",
-  omiseChargeId: "chrg_test_123",
-  amount: 100000,
-  currency: "THB",
-  method: "QR_CODE" as never,
-  status: "PENDING" as never,
-  createdAt: new Date(),
-  updatedAt: new Date(),
 };
 
 describe("POST /api/webhooks/omise", () => {
@@ -89,76 +80,6 @@ describe("POST /api/webhooks/omise", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 200 for non-charge.complete events (ignores them)", async () => {
-    const req = makeWebhookRequest({ key: "charge.create", data: { id: "chrg_test_123" } });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
-  it("returns 200 (idempotent) when no payment found for chargeId", async () => {
-    const prisma = (await import("@/lib/prisma")).default;
-    vi.mocked(prisma.payment.findFirst).mockResolvedValue(null);
-
-    const req = makeWebhookRequest({
-      key: "charge.complete",
-      data: { id: "chrg_unknown", status: "successful" },
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
-  it("updates payment to COMPLETED and campaign to PENDING on charge.complete with status: successful", async () => {
-    const prisma = (await import("@/lib/prisma")).default;
-    vi.mocked(prisma.payment.findFirst).mockResolvedValue(mockPayment);
-    vi.mocked(prisma.$transaction).mockResolvedValue([{}, {}]);
-
-    const req = makeWebhookRequest({
-      key: "charge.complete",
-      data: { id: "chrg_test_123", status: "successful" },
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    expect(prisma.$transaction).toHaveBeenCalled();
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
-  it("updates payment to FAILED and campaign to CANCELLED on charge.complete with status: failed", async () => {
-    const prisma = (await import("@/lib/prisma")).default;
-    vi.mocked(prisma.payment.findFirst).mockResolvedValue(mockPayment);
-    vi.mocked(prisma.$transaction).mockResolvedValue([{}, {}]);
-
-    const req = makeWebhookRequest({
-      key: "charge.complete",
-      data: { id: "chrg_test_123", status: "failed" },
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    expect(prisma.$transaction).toHaveBeenCalled();
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
-  it("updates payment to FAILED and campaign to CANCELLED on charge.complete with status: expired", async () => {
-    const prisma = (await import("@/lib/prisma")).default;
-    vi.mocked(prisma.payment.findFirst).mockResolvedValue(mockPayment);
-    vi.mocked(prisma.$transaction).mockResolvedValue([{}, {}]);
-
-    const req = makeWebhookRequest({
-      key: "charge.complete",
-      data: { id: "chrg_test_123", status: "expired" },
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    expect(prisma.$transaction).toHaveBeenCalled();
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
   it("returns 401 when webhook timestamp is older than 5 minutes", async () => {
     // 600 seconds old — well outside the 5-min window
     const oldTimestamp = String(Math.floor(FIXED_NOW_MS / 1000) - 600);
@@ -185,43 +106,6 @@ describe("POST /api/webhooks/omise", () => {
     expect(res.status).toBe(200);
   });
 
-  it("returns 200 without updating when payment is already COMPLETED (state guard)", async () => {
-    const prisma = (await import("@/lib/prisma")).default;
-    vi.mocked(prisma.payment.findFirst).mockResolvedValue({
-      ...mockPayment,
-      status: "COMPLETED" as never,
-    });
-
-    const req = makeWebhookRequest({
-      key: "charge.complete",
-      data: { id: "chrg_test_123", status: "failed" },
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    // Transaction should NOT be called — payment already settled
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
-  it("returns 200 without updating when payment is already FAILED (state guard)", async () => {
-    const prisma = (await import("@/lib/prisma")).default;
-    vi.mocked(prisma.payment.findFirst).mockResolvedValue({
-      ...mockPayment,
-      status: "FAILED" as never,
-    });
-
-    const req = makeWebhookRequest({
-      key: "charge.complete",
-      data: { id: "chrg_test_123", status: "successful" },
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-    const data = await res.json();
-    expect(data).toEqual({ received: true });
-  });
-
   it("returns 400 on invalid JSON (with valid signature)", async () => {
     const rawBody = "not-valid-json{{{";
     const req = new Request("http://localhost/api/webhooks/omise", {
@@ -237,5 +121,87 @@ describe("POST /api/webhooks/omise", () => {
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error).toBe("Invalid JSON");
+  });
+
+  it("returns 200 for non-charge.complete events without calling queue", async () => {
+    const { paymentQueue } = await import("@/lib/queue/payment-queue");
+    const req = makeWebhookRequest({ key: "charge.create", data: { id: "chrg_test_123" } });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toEqual({ received: true });
+    expect(paymentQueue.add).not.toHaveBeenCalled();
+  });
+
+  it("returns 200 without calling queue when chargeId is missing", async () => {
+    const { paymentQueue } = await import("@/lib/queue/payment-queue");
+    const req = makeWebhookRequest({
+      key: "charge.complete",
+      data: { status: "successful" }, // no id
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toEqual({ received: true });
+    expect(paymentQueue.add).not.toHaveBeenCalled();
+  });
+
+  it("calls paymentQueue.add with correct job data on valid charge.complete", async () => {
+    const { paymentQueue } = await import("@/lib/queue/payment-queue");
+    vi.mocked(paymentQueue.add).mockResolvedValue({} as never);
+
+    const req = makeWebhookRequest({
+      key: "charge.complete",
+      data: { id: "chrg_test_123", status: "successful" },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toEqual({ received: true });
+
+    expect(paymentQueue.add).toHaveBeenCalledWith(
+      "charge-chrg_test_123",
+      expect.objectContaining({
+        chargeId: "chrg_test_123",
+        chargeStatus: "successful",
+        omiseEventKey: "charge.complete",
+      }),
+      { jobId: "charge-complete-chrg_test_123" },
+    );
+  });
+
+  it("uses 'unknown' chargeStatus when charge.complete data has no status", async () => {
+    const { paymentQueue } = await import("@/lib/queue/payment-queue");
+    vi.mocked(paymentQueue.add).mockResolvedValue({} as never);
+
+    const req = makeWebhookRequest({
+      key: "charge.complete",
+      data: { id: "chrg_test_456" }, // no status field
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+
+    expect(paymentQueue.add).toHaveBeenCalledWith(
+      "charge-chrg_test_456",
+      expect.objectContaining({
+        chargeId: "chrg_test_456",
+        chargeStatus: "unknown",
+      }),
+      { jobId: "charge-complete-chrg_test_456" },
+    );
+  });
+
+  it("returns 503 when Redis/queue is unavailable (queue.add throws)", async () => {
+    const { paymentQueue } = await import("@/lib/queue/payment-queue");
+    vi.mocked(paymentQueue.add).mockRejectedValue(new Error("Redis connection refused"));
+
+    const req = makeWebhookRequest({
+      key: "charge.complete",
+      data: { id: "chrg_test_789", status: "successful" },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(503);
+    const data = await res.json();
+    expect(data.error).toBe("Service unavailable");
   });
 });

@@ -80,7 +80,7 @@ describe("GET /api/campaigns", () => {
     await GET();
     expect(vi.mocked(prisma.campaign.findMany)).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: "user-1" },
+        where: expect.objectContaining({ userId: "user-1" }),
       })
     );
   });
