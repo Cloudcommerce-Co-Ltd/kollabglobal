@@ -55,18 +55,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  // Enqueue for async processing — respond fast, worker handles DB writes
-  await paymentQueue.add(
-    `charge-${chargeId}`,
-    {
-      chargeId,
-      chargeStatus: (chargeStatus ?? "unknown") as OmiseChargeStatus,
-      omiseEventKey: event.key ?? "",
-      receivedAt: Date.now(),
-      rawPayload: event as Record<string, unknown>,
-    },
-    { jobId: `charge-complete-${chargeId}` }, // idempotency: same chargeId = same job
-  );
+  // Enqueue for async processing — worker handles all DB writes.
+  // We await the enqueue: if Redis is unavailable, return 503 so Omise retries.
+  // Duplicate deliveries are deduplicated by jobId (BullMQ idempotency).
+  try {
+    await paymentQueue.add(
+      `charge-${chargeId}`,
+      {
+        chargeId,
+        chargeStatus: (chargeStatus ?? "unknown") as OmiseChargeStatus,
+        omiseEventKey: event.key ?? "",
+        receivedAt: Date.now(),
+        rawPayload: event as Record<string, unknown>,
+      },
+      { jobId: `charge-complete-${chargeId}` },
+    );
+  } catch (err) {
+    console.error("[webhook] Failed to enqueue payment event:", err);
+    // Return 503 so Omise retries the webhook delivery
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
 
   return NextResponse.json({ received: true });
 }
