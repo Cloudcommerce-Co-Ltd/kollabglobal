@@ -1,7 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { PaymentStatus, CampaignStatus } from "@/generated/prisma/client";
+import { paymentQueue, type OmiseChargeStatus } from "@/lib/queue/payment-queue";
 
 function verifySignature(rawBody: string, timestamp: string | null, signature: string | null): boolean {
   const secret = process.env.OMISE_WEBHOOK_SECRET;
@@ -56,44 +55,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  const payment = await prisma.payment.findFirst({
-    where: { omiseChargeId: chargeId },
-  });
-
-  // Idempotent — no payment record means nothing to update
-  if (!payment) {
-    return NextResponse.json({ received: true });
-  }
-
-  // State guard — only transition PENDING payments; ignore replayed/out-of-order events
-  if (payment.status !== PaymentStatus.PENDING) {
-    return NextResponse.json({ received: true });
-  }
-
-  if (chargeStatus === "successful") {
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: PaymentStatus.COMPLETED },
-      }),
-      prisma.campaign.update({
-        where: { id: payment.campaignId },
-        data: { status: CampaignStatus.PENDING },
-      }),
-    ]);
-  } else if (chargeStatus === "failed" || chargeStatus === "expired") {
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: PaymentStatus.FAILED },
-      }),
-      prisma.campaign.update({
-        where: { id: payment.campaignId },
-        data: { status: CampaignStatus.CANCELLED },
-      }),
-    ]);
-  }
-  // Any other status — no-op
+  // Enqueue for async processing — respond fast, worker handles DB writes
+  await paymentQueue.add(
+    `charge-${chargeId}`,
+    {
+      chargeId,
+      chargeStatus: (chargeStatus ?? "unknown") as OmiseChargeStatus,
+      omiseEventKey: event.key ?? "",
+      receivedAt: Date.now(),
+      rawPayload: event as Record<string, unknown>,
+    },
+    { jobId: `charge-complete-${chargeId}` }, // idempotency: same chargeId = same job
+  );
 
   return NextResponse.json({ received: true });
 }
