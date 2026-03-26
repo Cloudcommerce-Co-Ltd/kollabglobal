@@ -46,26 +46,37 @@ banner()
 // ── Database ────────────────────────────────────────────────────────────────
 const SEED_MARKER = '.db-seeded'
 
+console.log(divider())
+info(`${c.bold}Database${c.reset} — applying pending migrations…`)
+console.log('')
+try {
+  execSync('pnpm exec prisma migrate deploy', { stdio: 'inherit' })
+  ok('Migrations up to date')
+} catch {
+  console.log('')
+  err('Migration failed — fix the error above and retry.')
+  process.exit(1)
+}
+
 if (!existsSync(SEED_MARKER)) {
-  console.log(divider())
-  info(`${c.bold}Database${c.reset} — first run detected, migrating + seeding…`)
+  console.log('')
+  info('First run — seeding database…')
   console.log('')
   try {
-    execSync('pnpm exec prisma migrate deploy', { stdio: 'inherit' })
     execSync('pnpm exec prisma db seed', { stdio: 'inherit' })
     writeFileSync(SEED_MARKER, new Date().toISOString())
     console.log('')
-    ok(`Database migrated & seeded`)
+    ok('Database seeded')
   } catch {
     console.log('')
     err('Seed failed — fix the error above and retry.')
     process.exit(1)
   }
-  console.log(divider())
-  console.log('')
 } else {
-  ok(`Database already seeded ${c.dim}(delete .db-seeded to re-run)${c.reset}`)
+  ok(`Seed already done ${c.dim}(delete .db-seeded to re-run)${c.reset}`)
 }
+console.log(divider())
+console.log('')
 
 // ── Start processes ──────────────────────────────────────────────────────────
 function run(cmd, args, opts = {}) {
@@ -109,7 +120,7 @@ try {
   console.log('')
   console.log(`  ${c.dim}Local   ${c.reset}${c.white}http://localhost:3000${c.reset}`)
   console.log(`  ${c.dim}Ngrok   ${c.reset}${c.cyan}${c.bold}${url}${c.reset}`)
-  console.log(`  ${c.dim}Webhook ${c.reset}${c.magenta}${c.bold}${webhookUrl}${c.reset}`)
+  console.log(`  ${c.dim}Webhook ${c.reset}${c.magenta}${c.bold}${webhookUrl}${c.reset} ${c.dim}<- add this in https://dashboard.omise.co/v2/settings/webhooks${c.reset}`)
   console.log('')
   console.log(divider('─'))
   console.log('')
