@@ -28,14 +28,14 @@ NOTED: เพิ่ม Vitest setup + unit/integration tests ไว้เพร�
 ### Day 4 — SelectCreators + Checkout + Omise Charge
 - [x] GET /api/creators
 - [x] Port + wire SelectCreators (auto-select first N per package)
-- [] POST /api/payments/create-charge — create Omise PromptPay source + charge
-- [] Port + wire Checkout page — real Omise QR display, price (base + 7% VAT + 3% fee)
-- [] Payment waiting screen — polls GET /api/payments/[chargeId]/status every 3s
+- [x] POST /api/payments/create-charge — create Omise PromptPay source + charge
+- [x] Port + wire Checkout page — real Omise QR display, price (base + 7% VAT + 3% fee)
+- [x] Payment waiting screen — polls GET /api/payments/[chargeId]/status every 3s
 
 ### Day 5 — Omise Webhook + Campaign Creation
-- [] POST /api/webhooks/omise — HMAC signature verify + atomic Prisma tx: Campaign + CampaignProduct + CampaignCreator[] + Payment
-- [] GET /api/payments/[chargeId]/status — return status + campaignId when confirmed
-- [] Wire polling → confirmed → redirect to /campaigns/[id]/brief
+- [x] POST /api/webhooks/omise — HMAC signature verify + atomic Prisma tx: Campaign + CampaignProduct + CampaignCreator[] + Payment
+- [x] GET /api/payments/[chargeId]/status — return status + campaignId when confirmed
+- [x] Wire polling → confirmed → redirect to /campaigns/[id]/brief
 
 ### Day 6 — Create Brief + AI
 - [x] POST /api/ai/fill-brief (Gemini)
@@ -44,19 +44,19 @@ NOTED: เพิ่ม Vitest setup + unit/integration tests ไว้เพร�
 - [x] Port + wire CreateBrief page
 
 ### Day 7 — Home + Dashboard
-- [] Port + wire HomePage
-- [] GET /api/campaigns
-- [] Port + wire Dashboard — all status tabs, sorted
-- [] Route protection across all pages
+- [x] Port + wire HomePage
+- [x] GET /api/campaigns
+- [x] Port + wire Dashboard — all status tabs, sorted
+- [x] Route protection across all pages
 
 ### Day 8 — Campaign Detail
-- [] GET /api/campaigns/[id]
-- [] Port + wire CampaignDetail — status banner, creator pipeline from DB
-- [] Port + wire ViewBrief (read-only + translation toggle)
-- [] "สร้าง Brief" CTA for PENDING campaigns
-- [] PATCH /api/campaigns/[id]/shipment → "ส่งแล้ว" (TH product) → status ACTIVE
-- [] Service flow: skip shipment → ACTIVE directly after ACCEPTING
-- [] Connex placeholder (global product)
+- [x] GET /api/campaigns/[id]
+- [x] Port + wire CampaignDetail — status banner, creator pipeline from DB
+- [x] Port + wire ViewBrief (read-only + translation toggle)
+- [x] "สร้าง Brief" CTA for PENDING campaigns
+- [x] PATCH /api/campaigns/[id]/shipment → "ส่งแล้ว" (TH product) → status ACTIVE
+- [x] Service flow: skip shipment → ACTIVE directly after ACCEPTING
+- [x] Connex placeholder (global product)
 
 ### Day 9 — Demo Seed + Full Flow Wiring
 - [] Seed 5 demo campaigns across all statuses with real brand data from company
