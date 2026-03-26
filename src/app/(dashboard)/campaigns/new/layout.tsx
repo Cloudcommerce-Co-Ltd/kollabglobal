@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCampaignStore } from "@/stores/campaign-store";
 import { getStepFromPathname, validateStep } from "@/lib/campaign-steps";
@@ -15,6 +15,14 @@ export default function CampaignNewLayout({
   const { countryData, productData, packageData, selectedCreatorsData } =
     useCampaignStore();
 
+  // Zustand persist uses sessionStorage which is only available client-side.
+  // We must wait for hydration before running the step guard, otherwise the
+  // server-rendered initial state (all null) triggers a spurious redirect.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   const step = getStepFromPathname(pathname);
   const result = validateStep(step, {
     countryData,
@@ -24,10 +32,16 @@ export default function CampaignNewLayout({
   });
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!result.allowed) {
       router.replace(result.redirectTo);
     }
-  }, [result, router]);
+  }, [hydrated, result, router]);
+
+  // While hydrating, show nothing to avoid flash of wrong content.
+  if (!hydrated) {
+    return <div className="min-h-screen bg-surface" />;
+  }
 
   if (!result.allowed) {
     return null;

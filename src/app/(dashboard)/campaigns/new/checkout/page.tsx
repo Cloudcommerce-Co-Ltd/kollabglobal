@@ -1,25 +1,45 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, CreditCard, Building2, Loader2, CheckCircle2, XCircle } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCampaignStore } from "@/stores/campaign-store";
-import { VAT_RATE, SERVICE_FEE_RATE } from "@/lib/package-utils";
+import { useState, useEffect, useRef } from 'react';
+import {
+  ArrowLeft,
+  CreditCard,
+  Building2,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCampaignStore } from '@/stores/campaign-store';
+import { VAT_RATE, SERVICE_FEE_RATE } from '@/lib/package-utils';
 
-type PaymentStatus = "idle" | "creating" | "pending" | "completed" | "failed";
+type PaymentStatus = 'idle' | 'creating' | 'pending' | 'completed' | 'failed';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { packageData, selectedCreatorsData, productData, countryData, promotionType } =
-    useCampaignStore();
+  const {
+    packageData,
+    selectedCreatorsData,
+    productData,
+    countryData,
+    promotionType,
+    chargeId: storedChargeId,
+    campaignId: storedCampaignId,
+    qrCodeUrl: storedQrCodeUrl,
+    setCheckoutData,
+    reset,
+  } = useCampaignStore();
 
   const [showAltPayment, setShowAltPayment] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
-  const [chargeId, setChargeId] = useState<string | null>(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
-  const [campaignId, setCampaignId] = useState<string | null>(null);
+  // Restore payment state from persisted store so refresh during QR polling doesn't restart
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(
+    storedChargeId ? 'pending' : 'idle',
+  );
+  const [chargeId, setChargeId] = useState<string | null>(storedChargeId);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(storedQrCodeUrl);
+  const [campaignId, setCampaignId] = useState<string | null>(storedCampaignId);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const packageName = packageData?.name ?? '—';
@@ -34,26 +54,35 @@ export default function CheckoutPage() {
   const campaignType = productData?.isService ? 'บริการ' : 'สินค้า';
   const duration = '30 วัน';
 
-  // Auto-create charge on mount
+  // Auto-create charge on mount — skipped if we already have a chargeId from persisted store
   useEffect(() => {
-    if (!packageData || !countryData || !productData || !promotionType || selectedCreatorsData.length === 0) {
+    // Already have a charge from a previous visit (e.g. page refresh). Resume polling.
+    if (storedChargeId) return;
+
+    if (
+      !packageData ||
+      !countryData ||
+      !productData ||
+      !promotionType ||
+      selectedCreatorsData.length === 0
+    ) {
       return;
     }
 
     const controller = new AbortController();
 
     async function createCharge() {
-      setPaymentStatus("creating");
+      setPaymentStatus('creating');
       try {
-        const res = await fetch("/api/payments/create-charge", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/payments/create-charge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
           body: JSON.stringify({
             countryId: countryData!.id,
             packageId: packageData!.id,
             promotionType: promotionType!,
-            creatorIds: selectedCreatorsData.map((c) => c.id),
+            creatorIds: selectedCreatorsData.map(c => c.id),
             productData: {
               brandName: productData!.brandName,
               productName: productData!.productName,
@@ -72,7 +101,7 @@ export default function CheckoutPage() {
         });
 
         if (!res.ok) {
-          setPaymentStatus("failed");
+          setPaymentStatus('failed');
           return;
         }
 
@@ -80,10 +109,12 @@ export default function CheckoutPage() {
         setChargeId(data.chargeId);
         setQrCodeUrl(data.qrCodeUrl);
         setCampaignId(data.campaignId);
-        setPaymentStatus("pending");
+        // Persist to store so a page refresh can resume without re-creating the charge
+        setCheckoutData(data.chargeId, data.campaignId, data.qrCodeUrl);
+        setPaymentStatus('pending');
       } catch (err) {
-        if ((err as Error).name === "AbortError") return;
-        setPaymentStatus("failed");
+        if ((err as Error).name === 'AbortError') return;
+        setPaymentStatus('failed');
       }
     }
 
@@ -95,17 +126,17 @@ export default function CheckoutPage() {
 
   // Poll status when pending
   useEffect(() => {
-    if (paymentStatus !== "pending" || !chargeId) return;
+    if (paymentStatus !== 'pending' || !chargeId) return;
 
     pollingRef.current = setInterval(async () => {
       try {
         const res = await fetch(`/api/payments/${chargeId}/status`);
         if (!res.ok) return;
         const data = await res.json();
-        if (data.status === "successful") {
-          setPaymentStatus("completed");
-        } else if (data.status === "failed" || data.status === "expired") {
-          setPaymentStatus("failed");
+        if (data.status === 'successful') {
+          setPaymentStatus('completed');
+        } else if (data.status === 'failed' || data.status === 'expired') {
+          setPaymentStatus('failed');
         }
       } catch {
         // continue polling on network errors
@@ -119,11 +150,14 @@ export default function CheckoutPage() {
 
   // Auto-redirect on success
   useEffect(() => {
-    if (paymentStatus !== "completed") return;
+    if (paymentStatus !== 'completed') return;
     if (pollingRef.current) clearInterval(pollingRef.current);
 
     const timer = setTimeout(() => {
-      router.push("/campaigns");
+      const dest = campaignId ? `/campaigns/${campaignId}` : '/campaigns';
+      // Clear draft session before navigating away
+      reset();
+      router.push(dest);
     }, 1500);
 
     return () => clearTimeout(timer);
@@ -156,7 +190,7 @@ export default function CheckoutPage() {
           {/* Left column */}
           <div className="flex flex-col gap-5">
             {/* Card 1 — Package Details */}
-            <div className="rounded-xl border border-brand/[12%] bg-linear-to-r from-brand-light to-secondary-brand-light p-5">
+            <div className="rounded-xl border border-brand/12 bg-linear-to-r from-brand-light to-secondary-brand-light p-5">
               <div className="mb-4 text-base font-bold text-dark">
                 รายละเอียดแพ็กเกจ
               </div>
@@ -236,7 +270,9 @@ export default function CheckoutPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-text">ค่าบริการ (3%)</span>
+                  <span className="text-sm text-muted-text">
+                    ค่าบริการ (3%)
+                  </span>
                   <span className="text-sm font-semibold text-dark">
                     ฿{serviceFee.toLocaleString()}
                   </span>
@@ -244,12 +280,8 @@ export default function CheckoutPage() {
               </div>
               <div className="my-4 h-0.5 bg-border-ui" />
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-dark">
-                  รวมทั้งหมด
-                </span>
-                <span
-                  className="text-[26px] font-extrabold text-brand"
-                >
+                <span className="text-sm font-bold text-dark">รวมทั้งหมด</span>
+                <span className="text-[26px] font-extrabold text-brand">
                   ฿{total.toLocaleString()}
                 </span>
               </div>
@@ -306,38 +338,42 @@ export default function CheckoutPage() {
                     aria-label="QR Code"
                     className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
                   >
-                    {paymentStatus === "creating" && (
+                    {paymentStatus === 'creating' && (
                       <Loader2 size={48} className="animate-spin text-dark" />
                     )}
-                    {(paymentStatus === "pending" || paymentStatus === "completed") && qrCodeUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={qrCodeUrl}
-                        alt="PromptPay QR Code"
-                        className="size-full rounded-xl object-contain"
-                      />
-                    )}
-                    {paymentStatus === "failed" && (
+                    {(paymentStatus === 'pending' ||
+                      paymentStatus === 'completed') &&
+                      qrCodeUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={qrCodeUrl}
+                          alt="PromptPay QR Code"
+                          className="size-full rounded-xl object-contain"
+                        />
+                      )}
+                    {paymentStatus === 'failed' && (
                       <XCircle size={48} color="#ef4444" />
                     )}
                   </div>
 
                   <div className="mb-5 text-center text-[13px] text-[#bbb]">
-                    {paymentStatus === "creating" && "กำลังสร้าง QR Code..."}
-                    {paymentStatus === "pending" && (
+                    {paymentStatus === 'creating' && 'กำลังสร้าง QR Code...'}
+                    {paymentStatus === 'pending' && (
                       <span className="flex items-center justify-center gap-1.5">
                         <Loader2 size={13} className="animate-spin" />
                         รอการชำระเงิน
                       </span>
                     )}
-                    {paymentStatus === "completed" && (
+                    {paymentStatus === 'completed' && (
                       <span className="flex items-center justify-center gap-1.5 text-brand">
                         <CheckCircle2 size={13} />
                         ชำระเงินสำเร็จ — กำลังนำทาง...
                       </span>
                     )}
-                    {paymentStatus === "failed" && (
-                      <span className="text-red-400">การชำระเงินล้มเหลว กรุณาลองใหม่</span>
+                    {paymentStatus === 'failed' && (
+                      <span className="text-red-400">
+                        การชำระเงินล้มเหลว กรุณาลองใหม่
+                      </span>
                     )}
                   </div>
 

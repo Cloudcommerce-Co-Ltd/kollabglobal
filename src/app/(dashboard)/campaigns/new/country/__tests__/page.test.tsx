@@ -6,11 +6,13 @@ import SelectCountryPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
 import type { Country } from "@/types";
 
-// Mock next/navigation
+// Mock next/navigation — must include useSearchParams
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
+const mockSearchParams = { get: vi.fn(() => null) };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useSearchParams: () => mockSearchParams,
 }));
 
 const mkCountry = (id: number, name: string, flag: string, creatorsAvail: number, region: string): Country => ({
@@ -30,6 +32,7 @@ beforeEach(() => {
   useCampaignStore.getState().reset();
   mockPush.mockClear();
   mockReplace.mockClear();
+  mockSearchParams.get.mockReturnValue(null); // default: no ?new=1
 
   global.fetch = vi.fn().mockResolvedValue({
     json: () => Promise.resolve(SAMPLE_COUNTRIES),
@@ -92,12 +95,27 @@ describe("SelectCountryPage", () => {
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/product");
   });
 
-  it("resets store on mount so CTA starts disabled", async () => {
-    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"));
+  it("restores previously selected country from store without ?new=1", async () => {
+    // Pre-populate store (simulates returning to step 1 via back button)
+    useCampaignStore.getState().setCountry(mkCountry(1, "Thailand", "🇹🇭", 1500, "asia"));
+    mockSearchParams.get.mockReturnValue(null); // no ?new=1
     render(<SelectCountryPage />);
-    await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Thailand")).toBeInTheDocument());
+    // CTA should be enabled because country is pre-selected from store
     const cta = screen.getByText("ถัดไป — เพิ่มสินค้า / บริการ");
-    expect(cta).toBeDisabled();
+    expect(cta).not.toBeDisabled();
   });
 
+  it("resets store and clears selection when ?new=1 is present", async () => {
+    // Pre-populate store
+    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"));
+    mockSearchParams.get.mockReturnValue("1"); // simulate ?new=1
+    render(<SelectCountryPage />);
+    await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());
+    // CTA should be disabled because reset was called
+    const cta = screen.getByText("ถัดไป — เพิ่มสินค้า / บริการ");
+    expect(cta).toBeDisabled();
+    // Store should be reset
+    expect(useCampaignStore.getState().countryData).toBeNull();
+  });
 });

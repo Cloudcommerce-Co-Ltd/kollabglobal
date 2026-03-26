@@ -40,7 +40,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         {/* Right: bell + new campaign + user pill */}
         <div className="flex items-center gap-2.5">
           <Link
-            href="/campaigns/new/country"
+            href="/campaigns/new/country?new=1"
             className="hidden items-center gap-1.5 rounded-[10px] bg-brand px-5 py-2.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 sm:flex"
           >
             <Plus size={16} />
@@ -48,7 +48,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           </Link>
           {/* Mobile: icon-only */}
           <Link
-            href="/campaigns/new/country"
+            href="/campaigns/new/country?new=1"
             className="flex size-9 items-center justify-center rounded-[10px] bg-brand sm:hidden"
             aria-label="สร้างแคมเปญใหม่"
           >

@@ -45,16 +45,22 @@ describe('campaign-store', () => {
 
   it('has correct initial state', () => {
     const state = useCampaignStore.getState();
+    expect(state.status).toBe('idle');
     expect(state.countryData).toBeNull();
     expect(state.promotionType).toBeNull();
     expect(state.productData).toBeNull();
     expect(state.packageData).toBeNull();
     expect(state.selectedCreatorsData).toEqual([]);
+    expect(state.chargeId).toBeNull();
+    expect(state.campaignId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
   });
 
-  it('setCountry sets countryData', () => {
+  it('setCountry sets countryData and status to draft', () => {
     useCampaignStore.getState().setCountry(COUNTRY_TH);
-    expect(useCampaignStore.getState().countryData).toEqual(COUNTRY_TH);
+    const state = useCampaignStore.getState();
+    expect(state.countryData).toEqual(COUNTRY_TH);
+    expect(state.status).toBe('draft');
   });
 
   it('setPromotionType sets PRODUCT', () => {
@@ -92,18 +98,32 @@ describe('campaign-store', () => {
     expect(useCampaignStore.getState().selectedCreatorsData).toEqual([CREATOR_1, CREATOR_2]);
   });
 
-  it('reset returns to initial state after mutations', () => {
+  it('setCheckoutData stores charge info and sets status to checkout', () => {
+    useCampaignStore.getState().setCheckoutData('charge-abc', 'campaign-xyz', 'https://qr.code/img');
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBe('charge-abc');
+    expect(state.campaignId).toBe('campaign-xyz');
+    expect(state.qrCodeUrl).toBe('https://qr.code/img');
+    expect(state.status).toBe('checkout');
+  });
+
+  it('reset returns to initial state after mutations including checkout data', () => {
     useCampaignStore.getState().setCountry(COUNTRY_SG);
     useCampaignStore.getState().setPackage(PKG_POPULAR);
     useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
 
     useCampaignStore.getState().reset();
 
     const state = useCampaignStore.getState();
+    expect(state.status).toBe('idle');
     expect(state.countryData).toBeNull();
     expect(state.promotionType).toBeNull();
     expect(state.productData).toBeNull();
     expect(state.packageData).toBeNull();
     expect(state.selectedCreatorsData).toEqual([]);
+    expect(state.chargeId).toBeNull();
+    expect(state.campaignId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
   });
 });

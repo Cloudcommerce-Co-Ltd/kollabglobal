@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useCampaignStore } from '@/stores/campaign-store';
 import type { Country } from '@/types';
@@ -10,16 +10,25 @@ type Tab = 'asia' | 'global';
 
 export default function SelectCountryPage() {
   const router = useRouter();
-  const { setCountry, reset } = useCampaignStore();
+  const searchParams = useSearchParams();
+  const { countryData, setCountry, reset } = useCampaignStore();
 
   const [tab, setTab] = useState<Tab>('asia');
-  const [selected, setSelected] = useState<number | null>(null);
+  // Restore previously selected country from persisted store
+  const [selected, setSelected] = useState<number | null>(
+    countryData?.id ?? null,
+  );
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    reset();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Only reset when explicitly starting a new campaign (?new=1).
+    // Without this guard, navigating back from step 2 would clear all data.
+    if (searchParams.get('new') === '1') {
+      reset();
+      setSelected(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -106,7 +115,7 @@ export default function SelectCountryPage() {
                         : 'border-border-ui bg-white'
                     }`}
                   >
-                    <div className="flex size-13 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#e8f8f7] to-[#e8f0fa] text-[30px]">
+                    <div className="flex size-13 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand-light to-secondary-brand-light text-[30px]">
                       {c.flag}
                     </div>
                     <div className="flex-1">

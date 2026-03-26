@@ -50,7 +50,7 @@ function EmptyState() {
       <p className="mb-1 text-[16px] font-semibold text-dark">ยังไม่มีแคมเปญ</p>
       <p className="mb-5 text-[13px] text-muted-text">สร้างแคมเปญแรกของคุณเพื่อเริ่มต้น</p>
       <Link
-        href="/campaigns/new/country"
+        href="/campaigns/new/country?new=1"
         className="rounded-[10px] bg-brand px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-90"
       >
         สร้างแคมเปญใหม่

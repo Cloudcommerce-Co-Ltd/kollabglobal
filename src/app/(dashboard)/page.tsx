@@ -29,7 +29,7 @@ export default async function DashboardPage() {
         <div className="grid w-full max-w-140 grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Create campaign */}
           <Link
-            href="/campaigns/new/country"
+            href="/campaigns/new/country?new=1"
             className="group flex flex-col gap-3.5 rounded-2xl border-2 border-border-ui bg-white p-5 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-180 hover:-translate-y-0.5 hover:border-brand hover:bg-brand-light hover:shadow-[0_6px_24px_rgba(78,205,196,0.20)] sm:p-7"
           >
             <div className="flex size-11 items-center justify-center rounded-xl bg-[rgba(78,205,196,0.15)] transition-all duration-180 group-hover:bg-brand">

@@ -7,12 +7,21 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const MAX_SIZE = 5_242_880; // 5MB
 
 export interface UseImageUploadResult {
-  imageUrl: string | null;    // blob URL for preview only
+  imageUrl: string | null;    // data URL (base64) for preview — survives sessionStorage
   uploading: boolean;
   error: string | null;
-  handleFileSelect: (file: File) => void; // sync — just validates + shows preview
-  upload: () => Promise<string | null>;   // async — PUTs to S3, returns stored URL
+  handleFileSelect: (file: File) => void; // validates + converts to base64 for preview
+  upload: () => Promise<string | null>;   // PUTs to S3, returns permanent URL
   reset: () => void;
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export function useImageUpload(initialUrl?: string): UseImageUploadResult {
@@ -20,15 +29,14 @@ export function useImageUpload(initialUrl?: string): UseImageUploadResult {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<File | null>(null);
-  const blobUrlRef = useRef<string | null>(null);
 
+  // When the initial URL changes (e.g. restored from session store after hydration),
+  // sync it into local state so the preview shows without requiring user interaction.
   useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-      }
-    };
-  }, []);
+    if (initialUrl && !fileRef.current) {
+      setImageUrl(initialUrl);
+    }
+  }, [initialUrl]);
 
   function handleFileSelect(file: File) {
     setError(null);
@@ -47,18 +55,20 @@ export function useImageUpload(initialUrl?: string): UseImageUploadResult {
       return;
     }
 
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
-    }
-    const url = URL.createObjectURL(file);
-    blobUrlRef.current = url;
     fileRef.current = file;
-    setImageUrl(url);
+
+    // Convert to base64 data URL so the preview survives sessionStorage serialization.
+    fileToDataUrl(file).then((dataUrl) => {
+      setImageUrl(dataUrl);
+    }).catch(() => {
+      setError("ไม่สามารถอ่านไฟล์ได้");
+    });
   }
 
   async function upload(): Promise<string | null> {
     const file = fileRef.current;
-    if (!file) return null;
+    // No new file selected — return the existing URL (already persisted from store)
+    if (!file) return imageUrl;
 
     setUploading(true);
     setError(null);
@@ -82,7 +92,8 @@ export function useImageUpload(initialUrl?: string): UseImageUploadResult {
       };
 
       if (data.mock) {
-        return imageUrl; // blob URL is fine for mock
+        // Mock mode: return the base64 data URL (persists in sessionStorage)
+        return imageUrl;
       }
 
       await fetch(data.presignedUrl!, {
@@ -102,10 +113,6 @@ export function useImageUpload(initialUrl?: string): UseImageUploadResult {
   }
 
   function reset() {
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
-      blobUrlRef.current = null;
-    }
     fileRef.current = null;
     setImageUrl(null);
     setUploading(false);

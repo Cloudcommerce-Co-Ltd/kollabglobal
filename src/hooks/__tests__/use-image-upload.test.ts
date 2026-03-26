@@ -1,14 +1,29 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useImageUpload } from "../use-image-upload";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-const mockCreateObjectURL = vi.fn(() => "blob:mock-url");
-global.URL.createObjectURL = mockCreateObjectURL;
-global.URL.revokeObjectURL = vi.fn();
+// FileReader stub: constructor returns an instance whose readAsDataURL
+// synchronously fires onload with a deterministic base64 result.
+const DATA_URL = "data:image/jpeg;base64,AAAA";
+const mockReadAsDataURL = vi.fn();
+
+class MockFileReader {
+  onload: ((e: ProgressEvent) => void) | null = null;
+  onerror: ((e: ProgressEvent) => void) | null = null;
+  result: string = DATA_URL;
+
+  readAsDataURL(file: File) {
+    mockReadAsDataURL(file);
+    // Fire onload synchronously so the Promise in fileToDataUrl resolves immediately.
+    if (this.onload) this.onload({} as ProgressEvent);
+  }
+}
+
+vi.stubGlobal("FileReader", MockFileReader);
 
 function makeFile(name = "photo.jpg", type = "image/jpeg", size = 1024) {
   return new File(["x".repeat(size)], name, { type });
@@ -16,7 +31,7 @@ function makeFile(name = "photo.jpg", type = "image/jpeg", size = 1024) {
 
 beforeEach(() => {
   mockFetch.mockReset();
-  mockCreateObjectURL.mockClear();
+  mockReadAsDataURL.mockReset();
 });
 
 afterEach(() => {
@@ -47,16 +62,16 @@ describe("useImageUpload", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("handleFileSelect sets blob preview immediately — no fetch", () => {
+  it("handleFileSelect converts file to base64 data URL — no fetch", async () => {
     const { result } = renderHook(() => useImageUpload());
     const file = makeFile();
     act(() => { result.current.handleFileSelect(file); });
-    expect(mockCreateObjectURL).toHaveBeenCalledWith(file);
-    expect(result.current.imageUrl).toBe("blob:mock-url");
+    await waitFor(() => expect(result.current.imageUrl).toBe("data:image/jpeg;base64,AAAA"));
+    expect(mockReadAsDataURL).toHaveBeenCalledWith(file);
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("upload() with no file selected returns null without fetching", async () => {
+  it("upload() with no file and no initial URL returns null without fetching", async () => {
     const { result } = renderHook(() => useImageUpload());
     let returned: string | null = "sentinel";
     await act(async () => { returned = await result.current.upload(); });
@@ -64,7 +79,7 @@ describe("useImageUpload", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("mock mode: upload() calls presign and returns blob URL", async () => {
+  it("mock mode: upload() calls presign and returns the data URL", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ mock: true, presignedUrl: null, objectUrl: null, key: null }),
@@ -73,6 +88,7 @@ describe("useImageUpload", () => {
     const { result } = renderHook(() => useImageUpload());
     const file = makeFile();
     act(() => { result.current.handleFileSelect(file); });
+    await waitFor(() => expect(result.current.imageUrl).not.toBeNull());
 
     let returned: string | null = null;
     await act(async () => { returned = await result.current.upload(); });
@@ -81,7 +97,7 @@ describe("useImageUpload", () => {
       "/api/upload/presign",
       expect.objectContaining({ method: "POST" })
     );
-    expect(returned).toBe("blob:mock-url");
+    expect(returned).toBe("data:image/jpeg;base64,AAAA");
     expect(result.current.uploading).toBe(false);
     expect(result.current.error).toBeNull();
   });
@@ -103,6 +119,7 @@ describe("useImageUpload", () => {
     const { result } = renderHook(() => useImageUpload());
     const file = makeFile("photo.png", "image/png", 2048);
     act(() => { result.current.handleFileSelect(file); });
+    await waitFor(() => expect(result.current.imageUrl).not.toBeNull());
 
     let returned: string | null = null;
     await act(async () => { returned = await result.current.upload(); });
@@ -122,6 +139,7 @@ describe("useImageUpload", () => {
 
     const { result } = renderHook(() => useImageUpload());
     act(() => { result.current.handleFileSelect(makeFile()); });
+    await waitFor(() => expect(result.current.imageUrl).not.toBeNull());
 
     let returned: string | null = "sentinel";
     await act(async () => { returned = await result.current.upload(); });
@@ -139,6 +157,7 @@ describe("useImageUpload", () => {
 
     const { result } = renderHook(() => useImageUpload());
     act(() => { result.current.handleFileSelect(makeFile()); });
+    await waitFor(() => expect(result.current.imageUrl).not.toBeNull());
 
     let returned: string | null = "sentinel";
     await act(async () => { returned = await result.current.upload(); });
@@ -150,17 +169,22 @@ describe("useImageUpload", () => {
   it("reset clears all state and prevents upload", async () => {
     const { result } = renderHook(() => useImageUpload());
     act(() => { result.current.handleFileSelect(makeFile()); });
-    expect(result.current.imageUrl).toBe("blob:mock-url");
+    await waitFor(() => expect(result.current.imageUrl).toBe("data:image/jpeg;base64,AAAA"));
 
     act(() => { result.current.reset(); });
     expect(result.current.imageUrl).toBeNull();
     expect(result.current.uploading).toBe(false);
     expect(result.current.error).toBeNull();
 
-    // upload after reset should do nothing
+    // upload after reset returns null (no file, no initial URL)
     let returned: string | null = "sentinel";
     await act(async () => { returned = await result.current.upload(); });
     expect(returned).toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("initialUrl is shown as preview without selecting a new file", () => {
+    const { result } = renderHook(() => useImageUpload("https://example.com/stored.jpg"));
+    expect(result.current.imageUrl).toBe("https://example.com/stored.jpg");
   });
 });

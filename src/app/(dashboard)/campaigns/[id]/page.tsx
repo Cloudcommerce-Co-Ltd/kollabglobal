@@ -3,12 +3,13 @@ import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { auth } from '@/auth';
 import { getCampaignDetail } from '@/lib/data/campaigns';
-import { resolveDisplayStatus, getStatusBadge } from '@/lib/campaign-detail-utils';
+import {
+  resolveDisplayStatus,
+  getStatusBadge,
+} from '@/lib/campaign-detail-utils';
 import { CampaignIcon } from '@/components/ui/campaign-icon';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import { ActionCard } from '@/components/campaign/action-card';
-import { AcceptingCard } from '@/components/campaign/accepting-card';
-import { ShipmentCard } from '@/components/campaign/shipment-card';
 import { CreatorPipeline } from '@/components/campaign/creator-pipeline';
 import { StatsBar } from '@/components/campaign/stats-bar';
 import { CampaignDetailActions } from './_components/campaign-detail-actions';
@@ -28,7 +29,9 @@ export default async function CampaignDetailPage({
   const displayStatus = resolveDisplayStatus(campaign);
 
   if (displayStatus === 'awaiting_payment') {
-    redirect(`/campaigns/new/checkout`);
+    // Do not redirect to checkout — the session store may be empty after a refresh
+    // and the checkout page would fail without campaign creation data.
+    // Fall through to render the awaiting_payment status UI below.
   }
   const badge = getStatusBadge(displayStatus);
   const isService = campaign.product?.isService ?? false;
@@ -40,7 +43,9 @@ export default async function CampaignDetailPage({
   const brandName = campaign.product?.brandName ?? 'แคมเปญ';
   const productName = campaign.product?.productName ?? 'สินค้า/บริการ';
   const countryName = campaign.country?.name ?? '';
-  const campaignTitle = countryName ? `${brandName} x ${countryName}` : brandName;
+  const campaignTitle = countryName
+    ? `${brandName} x ${countryName}`
+    : brandName;
 
   const serializedCampaign = {
     ...campaign,
@@ -86,7 +91,7 @@ export default async function CampaignDetailPage({
     <div className="min-h-screen bg-surface">
       {/* Page header */}
       <div className="bg-white border-b border-border-ui px-5 sm:px-8 py-5">
-        <div className="mx-auto max-w-[1100px]">
+        <div className="mx-auto max-w-275">
           <Link
             href="/campaigns"
             className="flex items-center gap-1.5 text-sm font-semibold text-muted-text hover:text-dark mb-3 transition-colors"
@@ -99,10 +104,13 @@ export default async function CampaignDetailPage({
             <div className="flex items-center gap-4">
               <CampaignIcon product={campaign.product} size="lg" />
               <div>
-                <h1 className="text-2xl font-bold text-dark m-0">{campaignTitle}</h1>
+                <h1 className="text-2xl font-bold text-dark m-0">
+                  {campaignTitle}
+                </h1>
                 <div className="flex items-center gap-2.5 mt-1 flex-wrap">
                   <p className="text-sm text-muted-text m-0">
-                    {productName} • {creatorsCount} ครีเอเตอร์ • {campaign.duration} วัน
+                    {productName} • {creatorsCount} ครีเอเตอร์ •{' '}
+                    {campaign.duration} วัน
                   </p>
                   {isService && (
                     <span className="text-xs font-semibold px-2 py-0.5 rounded bg-secondary-brand-light text-secondary-brand">
@@ -122,7 +130,9 @@ export default async function CampaignDetailPage({
                 </div>
               </div>
             </div>
-            <span className={`shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold ${badge.cls}`}>
+            <span
+              className={`shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold ${badge.cls}`}
+            >
               {badge.label}
             </span>
           </div>
@@ -132,7 +142,7 @@ export default async function CampaignDetailPage({
       {/* Stats bar (active/live only) */}
       {(displayStatus === 'active' || isLive) && (
         <div className="bg-white border-b border-border-ui px-5 sm:px-8 py-3.5">
-          <div className="mx-auto max-w-[1100px]">
+          <div className="mx-auto max-w-275">
             <StatsBar
               activeCount={creators.filter(c => c.status === 'ACCEPTED').length}
               totalCount={creatorsCount}
@@ -145,7 +155,25 @@ export default async function CampaignDetailPage({
       )}
 
       {/* Content — interactive parts handled by client component */}
-      <div className="mx-auto max-w-[1100px] px-5 sm:px-8 py-6">
+      <div className="mx-auto max-w-275 px-5 sm:px-8 py-6">
+        {displayStatus === 'awaiting_payment' && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+            <div className="mb-3 text-3xl">⏳</div>
+            <h2 className="mb-2 text-lg font-bold text-dark">รอการชำระเงิน</h2>
+            <p className="mb-5 text-sm text-muted-text">
+              แคมเปญนี้ยังรอการยืนยันการชำระเงิน
+              <br />
+              หากคุณยังอยู่ระหว่างสแกน QR สามารถกลับไปที่หน้าชำระเงินได้
+            </p>
+            <Link
+              href="/campaigns/new/checkout"
+              className="inline-block rounded-xl bg-red-600 px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+            >
+              กลับไปหน้าชำระเงิน
+            </Link>
+          </div>
+        )}
+
         {displayStatus === 'brief' && (
           <ActionCard
             icon={<FileText size={22} color="#b45309" />}
@@ -206,7 +234,9 @@ export default async function CampaignDetailPage({
           </div>
         )}
 
-        {(displayStatus === 'brief' || displayStatus === 'accepting' || displayStatus === 'ship') && (
+        {(displayStatus === 'brief' ||
+          displayStatus === 'accepting' ||
+          displayStatus === 'ship') && (
           <div className="mt-5">
             <CreatorPipeline
               creators={serializedCampaign.creators}

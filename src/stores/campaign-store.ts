@@ -1,15 +1,23 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { ProductData } from "@/types/campaign";
 import { Country, Creator, Package } from "@/types";
 
 export type { ProductData };
 
+type DraftStatus = "idle" | "draft" | "checkout";
+
 interface CampaignCreationState {
+  status: DraftStatus;
   countryData: Country | null;
   promotionType: "PRODUCT" | "SERVICE" | null;
   productData: ProductData | null;
   packageData: Package | null;
   selectedCreatorsData: Creator[];
+  // Checkout state — persisted so refresh during QR polling doesn't create duplicate charge
+  chargeId: string | null;
+  campaignId: string | null;
+  qrCodeUrl: string | null;
 }
 
 interface CampaignCreationActions {
@@ -18,26 +26,52 @@ interface CampaignCreationActions {
   setProduct: (data: ProductData) => void;
   setPackage: (data: Package) => void;
   setCreators: (data: Creator[]) => void;
+  setCheckoutData: (chargeId: string, campaignId: string, qrCodeUrl: string) => void;
   reset: () => void;
 }
 
 type CampaignStore = CampaignCreationState & CampaignCreationActions;
 
 const initialState: CampaignCreationState = {
+  status: "idle",
   countryData: null,
   promotionType: null,
   productData: null,
   packageData: null,
   selectedCreatorsData: [],
+  chargeId: null,
+  campaignId: null,
+  qrCodeUrl: null,
 };
 
-export const useCampaignStore = create<CampaignStore>((set) => ({
-  ...initialState,
+export const useCampaignStore = create<CampaignStore>()(
+  persist(
+    (set) => ({
+      ...initialState,
 
-  setCountry: (data) => set({ countryData: data }),
-  setPromotionType: (type) => set({ promotionType: type }),
-  setProduct: (data) => set({ productData: data }),
-  setPackage: (data) => set({ packageData: data }),
-  setCreators: (data) => set({ selectedCreatorsData: data }),
-  reset: () => set(initialState),
-}));
+      setCountry: (data) => set({ countryData: data, status: "draft" }),
+      setPromotionType: (type) => set({ promotionType: type }),
+      setProduct: (data) => set({ productData: data }),
+      setPackage: (data) => set({ packageData: data }),
+      setCreators: (data) => set({ selectedCreatorsData: data }),
+      setCheckoutData: (chargeId, campaignId, qrCodeUrl) =>
+        set({ chargeId, campaignId, qrCodeUrl, status: "checkout" }),
+      reset: () => set(initialState),
+    }),
+    {
+      name: "kollab-campaign-draft",
+      storage: createJSONStorage(() => {
+        if (typeof window === "undefined") {
+          // SSR or Node.js test environment — use a no-op storage so the store
+          // still initialises without errors (persist just won't save anything).
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          } as unknown as Storage;
+        }
+        return window.sessionStorage;
+      }),
+    }
+  )
+);
