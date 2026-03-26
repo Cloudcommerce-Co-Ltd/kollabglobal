@@ -1000,19 +1000,65 @@ async function main() {
       },
     });
 
+    // Campaign 7: ACCEPTING — Thailand, SERVICE, all creators ACCEPTED
+    // All creators have accepted — brand can proceed to active
+    const c7 = await prisma.campaign.create({
+      data: {
+        id: 'dev-campaign-7',
+        userId: devUser.id,
+        countryId: 1, // Thailand
+        packageId: 1, // Passport (5 creators)
+        promotionType: 'SERVICE',
+        status: 'ACCEPTING',
+      },
+    });
+    await prisma.campaignProduct.create({
+      data: {
+        campaignId: c7.id,
+        brandName: 'Urban Fit',
+        productName: 'Personal Training Online',
+        category: 'ฟิตเนส / สุขภาพ',
+        description: 'บริการโค้ชออกกำลังกายส่วนตัวออนไลน์ โปรแกรมเฉพาะบุคคล ดูแลโดยเทรนเนอร์มืออาชีพ',
+        sellingPoints: 'โปรแกรมเฉพาะบุคคล | เทรนเนอร์ certified | ติดตามผลรายสัปดาห์ | ไม่ต้องออกจากบ้าน',
+        isService: true,
+        url: 'https://urbanfit.th/online',
+      },
+    });
+    await prisma.campaignBrief.create({
+      data: {
+        campaignId: c7.id,
+        content: JSON.stringify({
+          name: 'Urban Fit x Online Training',
+          keys: 'เน้นความสะดวกสบายในการออกกำลังกายที่บ้าน — ผลลัพธ์จริง โค้ชมืออาชีพ เหมาะกับทุกไลฟ์สไตล์',
+          dos: 'DO: แสดงประสบการณ์จริงของคุณกับโปรแกรม\nDO: โชว์ผลลัพธ์ที่เห็นได้ชัด เช่น ความฟิต น้ำหนัก ความมั่นใจ\n\nDON\'T: เปรียบเทียบกับโปรแกรมอื่นโดยตรง\nDON\'T: อ้างผลลัพธ์เกินจริงหรือสัญญาผลลัพธ์ที่ไม่สมจริง',
+          deliverables: '• 1 วิดีโอ TikTok (30-60 วินาที) — รีวิวประสบการณ์การเทรน โชว์ท่าออกกำลังกาย\n• 3 Instagram Stories — เบื้องหลังการเทรน พร้อม Swipe-up link\n• 1 Instagram Reel — Transformation หรือ Day-in-life กับโปรแกรม',
+          disclosure: '#ad #sponsored #KOLLABGlobal #UrbanFit',
+          deadline: '2026-05-01',
+        }),
+        publishedAt: new Date(),
+      },
+    });
+    for (const creator of mainCreators.slice(0, 5)) {
+      const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+      await prisma.campaignCreator.create({
+        data: { campaignId: c7.id, creatorId, status: 'ACCEPTED' },
+      });
+    }
+
     console.log(`  - dev-campaign-1: PENDING (Vietnam, รอสร้าง brief)`);
-    console.log(`  - dev-campaign-2: ACCEPTING (Thailand service, 10 creators)`);
+    console.log(`  - dev-campaign-2: ACCEPTING (Thailand service, 10 creators, PENDING)`);
     console.log(`  - dev-campaign-3: AWAITING_SHIPMENT (Malaysia, 5 creators)`);
     console.log(`  - dev-campaign-4: ACTIVE (Japan, 5 creators)`);
     console.log(`  - dev-campaign-5: COMPLETED/Live (Vietnam, 5 creators)`);
     console.log(`  - dev-campaign-6: AWAITING_PAYMENT (Thailand, รอชำระเงิน)`);
+    console.log(`  - dev-campaign-7: ACCEPTING (Thailand service, 5 creators ALL ACCEPTED)`);
   }
 
   console.log('Seed complete!');
   console.log('  - 11 countries (8 active, 3 inactive)');
   console.log('  - 3 packages');
   console.log('  - 33 creators (28 main, 5 backup)');
-  console.log('  - 6 dev campaigns covering all UX statuses (PENDING → ACCEPTING → AWAITING_SHIPMENT → ACTIVE → COMPLETED + AWAITING_PAYMENT)');
+  console.log('  - 7 dev campaigns covering all UX statuses (PENDING → ACCEPTING → AWAITING_SHIPMENT → ACTIVE → COMPLETED + AWAITING_PAYMENT + ACCEPTING-all-accepted-service)');
 }
 
 main()
