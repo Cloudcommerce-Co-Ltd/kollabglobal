@@ -94,15 +94,20 @@ export default function SelectCreatorsPage() {
     fetch('/api/creators')
       .then(r => r.json())
       .then((data: Creator[]) => {
-        const main = data.filter((c: Creator) => !c.isBackup);
+        const main = data.filter((c: Creator) => !c.isBackup && c.niche === packageData?.name);
         const backup = data.filter((c: Creator) => c.isBackup);
         setMainCreators(main);
         setBackupCreators(backup);
-        setSelectedIds(prev =>
-          prev.length > 0 ? prev : main.slice(0, maxCreators).map(c => c.id),
-        );
+        if (main.length < maxCreators) {
+          setSelectedIds([
+            ...main.slice(0, maxCreators).map(c => c.id),
+            ...backup.slice(0, maxCreators - main.length).map(c => c.id),
+          ]);
+        } else {
+          setSelectedIds(main.slice(0, maxCreators).map(c => c.id));
+        }
       });
-  }, [maxCreators]);
+  }, [maxCreators, packageData]);
 
   const allCreators = [...mainCreators, ...backupCreators];
 
@@ -196,7 +201,7 @@ export default function SelectCreatorsPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {backupCreators.map((creator, i) => {
+              {backupCreators.map((creator) => {
                 const isSelected = selectedIds.includes(creator.id);
                 const isDisabled =
                   !isSelected && selectedIds.length >= maxCreators;

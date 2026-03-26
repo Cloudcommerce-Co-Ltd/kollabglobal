@@ -17,7 +17,7 @@ const MOCK_CREATORS: Creator[] = [
   ...Array.from({ length: 28 }, (_, i): Creator => ({
     id: `creator-${i}`,
     name: `Creator${i}`,
-    niche: 'The Passport',
+    niche: 'The Global Bridge',
     engagement: 'N/A',
     reach: 'N/A',
     avatar: '',
@@ -45,9 +45,9 @@ const mkCountry = (id: number): Country => ({
 });
 
 const mkPackage = (numCreators = 10): Package => ({
-  id: 2, name: 'Popular', tagline: '', badge: null,
-  numCreators, price: 33250, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
-  estReach: '500K', estEngagement: '3%',
+  id: 2, name: 'The Global Bridge', tagline: 'ขยายฐานข้ามแพลตฟอร์ม', badge: 'แนะนำ',
+  numCreators, price: 33250, platforms: ['tiktok'], deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)'], cpmLabel: '฿39 / 1K reach', cpmSavings: '77%',
+  estReach: '500K-1.2M', estEngagement: '3.5-5.5%',
 });
 
 beforeEach(() => {
