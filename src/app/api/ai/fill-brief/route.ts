@@ -62,6 +62,12 @@ export async function POST(req: NextRequest) {
   }
 
   const entityType = isService ? "บริการ" : "สินค้า";
+  const productLines = [
+    description ? `รายละเอียด: ${description}` : "",
+    sellingPoints ? `จุดเด่น: ${sellingPoints}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
   const contextLines = [
     countryName ? `ตลาดเป้าหมาย: ${countryName}` : "",
     platforms?.length ? `แพลตฟอร์ม: ${platforms.join(", ")}` : "",
@@ -72,9 +78,7 @@ export async function POST(req: NextRequest) {
   const prompt = `คุณคือผู้เชี่ยวชาญด้าน Influencer Marketing ช่วยเขียน Campaign Brief สำหรับ:
 แบรนด์: ${brandName}
 ${entityType}: ${productName}
-หมวดหมู่: ${category}
-รายละเอียด: ${description}
-จุดเด่น: ${sellingPoints}
+หมวดหมู่: ${category}${productLines ? `\n${productLines}` : ""}
 ${url ? `URL: ${url}` : ""}
 ${contextLines ? `\n${contextLines}` : ""}
 ${packageDeliverables?.length ? `\nข้อกำหนด Deliverables: ต้องครอบคลุมรายการเหล่านี้ [${packageDeliverables.join(", ")}] โดยเพิ่มไอเดียการนำเสนอเข้าไปด้วย` : ""}

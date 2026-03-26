@@ -13,7 +13,6 @@ import {
   Languages,
   Target,
   Package,
-  Lock,
 } from 'lucide-react';
 import { isBriefContentFilled, canPublishBrief } from '@/lib/brief-utils';
 import {
@@ -261,13 +260,13 @@ export default function CreateBriefPage({
             </div>
 
             {/* Right: Product Context + Deadline stacked */}
-            <div className="flex flex-col gap-5 [&>:last-child]:flex-1">
+            <div className="flex flex-col gap-5 *:last:flex-1">
               {/* ข้อมูลสินค้าจากแบรนด์ */}
               {campaign?.product &&
                 (campaign.product.description ||
                   campaign.product.sellingPoints ||
                   campaign.product.category) && (
-                  <div className="rounded-2xl border border-brand/20 bg-gradient-to-br from-brand-light to-secondary-brand-light p-5">
+                  <div className="rounded-2xl border border-brand/20 bg-linear-to-br from-brand-light to-secondary-brand-light p-5">
                     <div className="mb-3.5 flex items-center gap-2">
                       {isService ? (
                         <Target size={17} className="text-brand" />
@@ -410,12 +409,6 @@ export default function CreateBriefPage({
           </div>
 
           {/* Content Guidelines + Translation — 2-column grid */}
-          {!isDeadlineFilled && (
-            <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-              <Lock size={15} className="shrink-0 text-amber-500" />
-              กรุณาตั้ง Deadline ก่อน เพื่อกรอก Brief
-            </div>
-          )}
           <div
             className={`mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2 transition-opacity ${!isDeadlineFilled ? 'pointer-events-none select-none opacity-40' : ''}`}
           >
@@ -684,7 +677,7 @@ export default function CreateBriefPage({
           <div
             className={`rounded-2xl border-2 p-7 transition-opacity ${
               canPublish
-                ? 'border-brand bg-linear-to-br from-[#e8f8f7] to-[#e8f0fa] opacity-100'
+                ? 'border-brand bg-linear-to-br from-brand-light to-secondary-brand-light opacity-100'
                 : 'border-border-ui bg-white opacity-50'
             }`}
           >
