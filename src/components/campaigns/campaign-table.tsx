@@ -71,8 +71,9 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
   return (
     <div className="overflow-hidden rounded-[14px] border border-border-ui bg-white">
       {/* Desktop header row */}
-      <div className="hidden grid-cols-[2.5fr_1.2fr_0.9fr_1.2fr] gap-3 border-b border-border-ui bg-[#fafbfc] px-5 py-2.5 sm:grid">
+      <div className="hidden grid-cols-[2.5fr_1fr_1.2fr_0.9fr_1.2fr] gap-3 border-b border-border-ui bg-[#fafbfc] px-5 py-2.5 sm:grid">
         <div className="text-[12px] font-semibold uppercase tracking-wide text-muted-text">แคมเปญ</div>
+        <div className="text-[12px] font-semibold uppercase tracking-wide text-muted-text">ประเทศ</div>
         <div className="text-center text-[12px] font-semibold uppercase tracking-wide text-muted-text">สถานะ</div>
         <div className="text-center text-[12px] font-semibold uppercase tracking-wide text-muted-text">ครีเอเตอร์</div>
         <div />
@@ -91,7 +92,7 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
             className="block border-b border-border-ui last:border-b-0 transition-colors hover:bg-[#fafbfc]"
           >
             {/* Desktop row */}
-            <div className="hidden grid-cols-[2.5fr_1.2fr_0.9fr_1.2fr] items-center gap-3 px-5 py-3.5 sm:grid">
+            <div className="hidden grid-cols-[2.5fr_1fr_1.2fr_0.9fr_1.2fr] items-center gap-3 px-5 py-3.5 sm:grid">
               {/* Column 1: Campaign info */}
               <div className="flex items-center gap-3">
                 <CampaignIcon product={c.product} />
@@ -122,7 +123,19 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
                 </div>
               </div>
 
-              {/* Column 2: Status pill */}
+              {/* Column 2: Country */}
+              <div className="flex items-center gap-1.5 text-[13px] text-dark">
+                {c.country ? (
+                  <>
+                    <span>{c.country.flag}</span>
+                    <span className="truncate">{c.country.name}</span>
+                  </>
+                ) : (
+                  <span className="text-muted-text">—</span>
+                )}
+              </div>
+
+              {/* Column 3: Status pill */}
               <div className="text-center">
                 <span className={`rounded-full px-3 py-1 text-[12px] font-semibold ${statusCfg.pillClass}`}>
                   {statusCfg.label}
@@ -165,7 +178,7 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
                       )}
                     </div>
                     <div className="mt-0.5 text-[12px] text-muted-text">
-                      {c.package?.numCreators ?? total} ครีเอเตอร์ • {accepted}/{c.package?.numCreators ?? total} ตอบรับ
+                      {c.country ? `${c.country.flag} ${c.country.name} • ` : ''}{c.package?.numCreators ?? total} ครีเอเตอร์ • {accepted}/{c.package?.numCreators ?? total} ตอบรับ
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-muted-text mt-0.5 shrink-0" />

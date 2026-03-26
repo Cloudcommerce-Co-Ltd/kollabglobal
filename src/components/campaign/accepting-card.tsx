@@ -77,8 +77,9 @@ export function AcceptingCard({ creators, isService, onAllAccepted }: AcceptingC
         </div>
 
         <div className="flex flex-col rounded-xl overflow-hidden gap-px bg-border-ui">
-          {creators.map((cc) => (
+          {creators.map((cc, i) => (
             <div key={cc.id} className="flex items-center gap-3 px-4 py-3 bg-white">
+              <div className="w-5 shrink-0 text-center text-xs font-semibold text-muted-text">{i + 1}</div>
               <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 relative overflow-hidden bg-brand-light">
                 {cc.creator.avatar ? (
                   <Image

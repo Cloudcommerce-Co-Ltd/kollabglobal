@@ -136,8 +136,10 @@ export function CreatorPipeline({ creators, isService, isLive = false, displaySt
         return (
           <div
             key={cc.id}
-            className={`grid gap-3 px-5 py-[11px] items-center [grid-template-columns:36px_1fr_auto]${i < filtered.length - 1 ? ' border-b border-border-ui' : ''}`}
+            className={`flex items-center gap-3 px-5 py-4${i < filtered.length - 1 ? ' border-b border-border-ui' : ''}`}
           >
+            {/* Row number */}
+            <div className="w-5 shrink-0 text-center text-xs font-semibold text-muted-text">{i + 1}</div>
             {/* Avatar */}
             <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 relative overflow-hidden bg-brand-light border-2 border-border-ui">
               {cc.creator.avatar ? (
@@ -155,13 +157,13 @@ export function CreatorPipeline({ creators, isService, isLive = false, displaySt
             </div>
 
             {/* Name + niche */}
-            <div className="min-w-0">
+            <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm text-dark truncate">{cc.creator.name}</div>
               <div className="text-xs text-muted-text">{cc.creator.niche}</div>
             </div>
 
             {/* Step indicators */}
-            <div className="flex items-center gap-1">
+            <div className="ml-auto shrink-0 flex items-center gap-1">
               {stepIcons.map((Icon, j) => (
                 <div key={j} className="flex items-center gap-1">
                   <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center shrink-0 border-2 ${stepCls(ss[j])}`}>
