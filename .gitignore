@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Local dev marker (created by pnpm dev:all after first DB seed)
+.db-seeded
+
 # dependencies
 /node_modules
 /.pnp

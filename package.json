@@ -13,7 +13,8 @@
     "test:integration": "vitest run src/app/api",
     "db:reset": "pnpm exec prisma migrate reset --force && pnpm exec prisma db seed",
     "worker": "tsx src/workers/payment-worker.ts",
-    "worker:dev": "tsx watch src/workers/payment-worker.ts"
+    "worker:dev": "tsx watch src/workers/payment-worker.ts",
+    "dev:all": "node scripts/dev-all.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
