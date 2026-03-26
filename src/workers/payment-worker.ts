@@ -38,7 +38,7 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
   const { chargeId, chargeStatus, omiseEventKey } = job.data;
 
   // 1. Look up payment by Omise charge ID
-  const payment = await prisma.payment.findFirst({
+  const payment = await prisma.payment.findUnique({
     where: { omiseChargeId: chargeId },
   });
 
@@ -48,7 +48,27 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
     return;
   }
 
-  // 3. State guard — only transition PENDING payments; ignore replayed/out-of-order
+  // 3. Special case: allow COMPLETED → REFUNDED for reversed charges
+  if (payment.status === PaymentStatus.COMPLETED && chargeStatus === "reversed") {
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.REFUNDED },
+      });
+      await tx.paymentEvent.create({
+        data: {
+          chargeId,
+          eventName: omiseEventKey,
+          status: PaymentEventStatus.REVERSED,
+          payload: job.data.rawPayload as Prisma.InputJsonValue,
+        },
+      });
+    });
+    console.log(`[payment-worker] Payment ${payment.id} refunded for chargeId ${chargeId}`);
+    return;
+  }
+
+  // 4. State guard — only transition PENDING payments; ignore replayed/out-of-order
   if (payment.status !== PaymentStatus.PENDING) {
     console.log(
       `[payment-worker] Payment ${payment.id} is ${payment.status} — skipping (idempotent)`,
@@ -56,7 +76,7 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
     return;
   }
 
-  // 4. Determine new statuses
+  // 5. Determine new statuses
   let newPaymentStatus: PaymentStatus;
   let newCampaignStatus: CampaignStatus;
 
@@ -67,8 +87,7 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
     newPaymentStatus = PaymentStatus.FAILED;
     newCampaignStatus = CampaignStatus.CANCELLED;
   } else {
-    // "reversed" or unknown status — write audit log but no state transition.
-    // Reversals are recorded for traceability; unknown statuses are flagged.
+    // "reversed" on a PENDING payment or unknown status — write audit log only.
     if (chargeStatus !== "reversed") {
       console.warn(
         `[payment-worker] Unknown chargeStatus "${chargeStatus}" for chargeId ${chargeId} — writing audit log only`,
@@ -85,26 +104,24 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
     return;
   }
 
-  // 5. Atomic state transition
-  await prisma.$transaction([
-    prisma.payment.update({
+  // 6. Atomic state transition + audit log in one transaction
+  await prisma.$transaction(async (tx) => {
+    await tx.payment.update({
       where: { id: payment.id },
       data: { status: newPaymentStatus },
-    }),
-    prisma.campaign.update({
+    });
+    await tx.campaign.update({
       where: { id: payment.campaignId },
       data: { status: newCampaignStatus },
-    }),
-  ]);
-
-  // 6. Write audit log — intentionally after the transaction
-  await prisma.paymentEvent.create({
-    data: {
-      chargeId,
-      eventName: omiseEventKey,
-      status: mapChargeStatusToEnum(chargeStatus),
-      payload: job.data.rawPayload as Prisma.InputJsonValue,
-    },
+    });
+    await tx.paymentEvent.create({
+      data: {
+        chargeId,
+        eventName: omiseEventKey,
+        status: mapChargeStatusToEnum(chargeStatus),
+        payload: job.data.rawPayload as Prisma.InputJsonValue,
+      },
+    });
   });
 
   console.log(

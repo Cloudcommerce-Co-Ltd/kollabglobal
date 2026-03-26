@@ -8,7 +8,7 @@ import type { PaymentEventJobData } from "@/lib/queue/payment-queue";
 // ---------------------------------------------------------------------------
 
 const {
-  mockPaymentFindFirst,
+  mockPaymentFindUnique,
   mockPaymentUpdate,
   mockCampaignUpdate,
   mockPaymentEventCreate,
@@ -16,7 +16,7 @@ const {
   capturedProcessorHolder,
 } = vi.hoisted(() => {
   return {
-    mockPaymentFindFirst: vi.fn(),
+    mockPaymentFindUnique: vi.fn(),
     mockPaymentUpdate: vi.fn(),
     mockCampaignUpdate: vi.fn(),
     mockPaymentEventCreate: vi.fn(),
@@ -25,6 +25,14 @@ const {
     capturedProcessorHolder: { processor: null as ((job: Job<PaymentEventJobData>) => Promise<void>) | null },
   };
 });
+
+// txMock is passed to the interactive $transaction callback so that
+// tx.payment.update / tx.campaign.update / tx.paymentEvent.create hit our mocks.
+const txMock = {
+  payment: { update: mockPaymentUpdate },
+  campaign: { update: mockCampaignUpdate },
+  paymentEvent: { create: mockPaymentEventCreate },
+};
 
 // Mock BullMQ — must include both Worker and Queue since payment-queue.ts also imports Queue
 // Both must use class/function syntax (not arrow functions) to support `new`
@@ -71,7 +79,7 @@ vi.mock("ioredis", () => {
 vi.mock("@/lib/prisma", () => ({
   default: {
     payment: {
-      findFirst: mockPaymentFindFirst,
+      findUnique: mockPaymentFindUnique,
       update: mockPaymentUpdate,
     },
     campaign: {
@@ -126,23 +134,26 @@ const mockPayment = {
 describe("payment-worker processor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: $transaction invokes the callback with txMock (interactive transaction style).
+    // Individual tests that need to simulate a transaction failure override with mockRejectedValue.
+    mockTransaction.mockImplementation(async (fn: (tx: typeof txMock) => Promise<void>) => fn(txMock));
   });
 
   it("completes silently when no payment is found for chargeId", async () => {
-    mockPaymentFindFirst.mockResolvedValue(null);
+    mockPaymentFindUnique.mockResolvedValue(null);
 
     const job = makeJob({ chargeId: "chrg_unknown" });
     await capturedProcessorHolder.processor!(job);
 
-    expect(mockPaymentFindFirst).toHaveBeenCalledWith({
+    expect(mockPaymentFindUnique).toHaveBeenCalledWith({
       where: { omiseChargeId: "chrg_unknown" },
     });
     expect(mockTransaction).not.toHaveBeenCalled();
     expect(mockPaymentEventCreate).not.toHaveBeenCalled();
   });
 
-  it("skips processing when payment status is already COMPLETED (state guard)", async () => {
-    mockPaymentFindFirst.mockResolvedValue({ ...mockPayment, status: "COMPLETED" });
+  it("skips processing when payment status is already COMPLETED and chargeStatus is not reversed (state guard)", async () => {
+    mockPaymentFindUnique.mockResolvedValue({ ...mockPayment, status: "COMPLETED" });
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "successful" });
     await capturedProcessorHolder.processor!(job);
@@ -152,7 +163,7 @@ describe("payment-worker processor", () => {
   });
 
   it("skips processing when payment status is already FAILED (state guard)", async () => {
-    mockPaymentFindFirst.mockResolvedValue({ ...mockPayment, status: "FAILED" });
+    mockPaymentFindUnique.mockResolvedValue({ ...mockPayment, status: "FAILED" });
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "failed" });
     await capturedProcessorHolder.processor!(job);
@@ -162,26 +173,23 @@ describe("payment-worker processor", () => {
   });
 
   it("transitions payment to COMPLETED and campaign to PENDING on chargeStatus: successful", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
-    mockTransaction.mockResolvedValue([{}, {}]);
+    mockPaymentFindUnique.mockResolvedValue(mockPayment);
     mockPaymentEventCreate.mockResolvedValue({});
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "successful" });
     await capturedProcessorHolder.processor!(job);
 
-    // Verify payment.update was called with correct target and new status
     expect(mockPaymentUpdate).toHaveBeenCalledWith({
       where: { id: "payment_1" },
       data: { status: "COMPLETED" },
     });
-    // Verify campaign.update was called with correct target and new status
     expect(mockCampaignUpdate).toHaveBeenCalledWith({
       where: { id: "campaign_1" },
       data: { status: "PENDING" },
     });
     expect(mockTransaction).toHaveBeenCalledTimes(1);
 
-    // Audit log written after transaction
+    // Audit log written atomically inside the transaction
     expect(mockPaymentEventCreate).toHaveBeenCalledTimes(1);
     expect(mockPaymentEventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -193,8 +201,7 @@ describe("payment-worker processor", () => {
   });
 
   it("transitions payment to FAILED and campaign to CANCELLED on chargeStatus: failed", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
-    mockTransaction.mockResolvedValue([{}, {}]);
+    mockPaymentFindUnique.mockResolvedValue(mockPayment);
     mockPaymentEventCreate.mockResolvedValue({});
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "failed" });
@@ -218,8 +225,7 @@ describe("payment-worker processor", () => {
   });
 
   it("transitions payment to FAILED and campaign to CANCELLED on chargeStatus: expired", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
-    mockTransaction.mockResolvedValue([{}, {}]);
+    mockPaymentFindUnique.mockResolvedValue(mockPayment);
     mockPaymentEventCreate.mockResolvedValue({});
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "expired" });
@@ -243,18 +249,19 @@ describe("payment-worker processor", () => {
   });
 
   it("re-throws when $transaction fails, allowing BullMQ to retry the job", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
+    mockPaymentFindUnique.mockResolvedValue(mockPayment);
+    // Override the default implementation — $transaction rejects without invoking the callback
     mockTransaction.mockRejectedValue(new Error("DB connection lost"));
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "successful" });
     await expect(capturedProcessorHolder.processor!(job)).rejects.toThrow("DB connection lost");
 
-    // Audit log must NOT be written if transaction failed
+    // Since the callback was never invoked, the audit log must NOT be written
     expect(mockPaymentEventCreate).not.toHaveBeenCalled();
   });
 
-  it("does NOT call $transaction on chargeStatus: reversed, but DOES write audit PaymentEvent", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
+  it("does NOT call $transaction on PENDING chargeStatus: reversed, but DOES write audit PaymentEvent", async () => {
+    mockPaymentFindUnique.mockResolvedValue(mockPayment); // status: PENDING
     mockPaymentEventCreate.mockResolvedValue({});
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "reversed" });
@@ -272,7 +279,7 @@ describe("payment-worker processor", () => {
   });
 
   it("does NOT call $transaction on unknown chargeStatus, but DOES write audit PaymentEvent", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
+    mockPaymentFindUnique.mockResolvedValue(mockPayment);
     mockPaymentEventCreate.mockResolvedValue({});
 
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "unknown" });
@@ -290,8 +297,7 @@ describe("payment-worker processor", () => {
   });
 
   it("writes PaymentEvent audit row with correct chargeId, eventName, status, and payload", async () => {
-    mockPaymentFindFirst.mockResolvedValue(mockPayment);
-    mockTransaction.mockResolvedValue([{}, {}]);
+    mockPaymentFindUnique.mockResolvedValue(mockPayment);
     mockPaymentEventCreate.mockResolvedValue({});
 
     const rawPayload = { key: "charge.complete", data: { id: "chrg_test_123", status: "successful" } };
@@ -311,5 +317,39 @@ describe("payment-worker processor", () => {
         payload: rawPayload,
       },
     });
+  });
+
+  // Fix 3: COMPLETED → REFUNDED on reversed charge
+  it("transitions COMPLETED payment to REFUNDED atomically with audit log on chargeStatus: reversed", async () => {
+    mockPaymentFindUnique.mockResolvedValue({ ...mockPayment, status: "COMPLETED" });
+    mockPaymentEventCreate.mockResolvedValue({});
+    mockPaymentUpdate.mockResolvedValue({});
+
+    const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "reversed" });
+    await capturedProcessorHolder.processor!(job);
+
+    expect(mockTransaction).toHaveBeenCalledTimes(1);
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: "payment_1" },
+      data: { status: "REFUNDED" },
+    });
+    // Campaign status is NOT changed — CampaignStatus has no REFUNDED state
+    expect(mockCampaignUpdate).not.toHaveBeenCalled();
+    expect(mockPaymentEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        chargeId: "chrg_test_123",
+        status: "REVERSED",
+      }),
+    });
+  });
+
+  it("skips REFUNDED transition when payment is REFUNDED and chargeStatus is reversed (idempotent)", async () => {
+    mockPaymentFindUnique.mockResolvedValue({ ...mockPayment, status: "REFUNDED" });
+
+    const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "reversed" });
+    await capturedProcessorHolder.processor!(job);
+
+    expect(mockTransaction).not.toHaveBeenCalled();
+    expect(mockPaymentEventCreate).not.toHaveBeenCalled();
   });
 });
