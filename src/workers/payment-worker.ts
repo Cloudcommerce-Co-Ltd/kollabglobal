@@ -1,5 +1,6 @@
 // Standalone BullMQ worker — run via `pnpm worker` or `pnpm worker:dev`.
 // Consumes jobs from the `payment-events` queue and performs DB state transitions.
+import "dotenv/config"; // Load .env before any other imports (Next.js does this automatically; worker must do it manually)
 import { Worker, type Job } from "bullmq";
 import redis from "@/lib/redis";
 import prisma from "@/lib/prisma";
