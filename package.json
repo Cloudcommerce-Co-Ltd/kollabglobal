@@ -24,8 +24,10 @@
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "ai": "^6.0.116",
+    "bullmq": "^5.71.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "ioredis": "^5.10.1",
     "lucide-react": "^0.577.0",
     "next": "16.1.7",
     "next-auth": "^5.0.0-beta.30",
@@ -44,6 +46,8 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@bull-board/api": "^6.20.6",
+    "@bull-board/express": "^6.20.6",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
