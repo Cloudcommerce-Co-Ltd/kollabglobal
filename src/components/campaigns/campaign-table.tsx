@@ -85,10 +85,14 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
         const platforms = c.package?.platforms ?? [];
         const displayName = c.product?.productName ?? `แคมเปญ #${c.id.slice(-4)}`;
 
+        const href = c.status === 'AWAITING_PAYMENT'
+          ? `/campaigns/${c.id}/checkout`
+          : `/campaigns/${c.id}`;
+
         return (
           <Link
             key={c.id}
-            href={`/campaigns/${c.id}`}
+            href={href}
             className="block border-b border-border-ui last:border-b-0 transition-colors hover:bg-[#fafbfc]"
           >
             {/* Desktop row */}

@@ -166,7 +166,7 @@ export default async function CampaignDetailPage({
               หากคุณยังอยู่ระหว่างสแกน QR สามารถกลับไปที่หน้าชำระเงินได้
             </p>
             <Link
-              href="/campaigns/new/checkout"
+              href={`/campaigns/${id}/checkout`}
               className="inline-block rounded-xl bg-red-600 px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
             >
               กลับไปหน้าชำระเงิน

@@ -39,6 +39,7 @@ export default function CheckoutPage() {
   );
   const [chargeId, setChargeId] = useState<string | null>(storedChargeId);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(storedQrCodeUrl);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [campaignId, setCampaignId] = useState<string | null>(storedCampaignId);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -154,10 +155,11 @@ export default function CheckoutPage() {
     if (pollingRef.current) clearInterval(pollingRef.current);
 
     const timer = setTimeout(() => {
-      const dest = campaignId ? `/campaigns/${campaignId}` : '/campaigns';
-      // Clear draft session before navigating away
+      // reset() clears sessionStorage before navigating.
+      // window.location.href is used intentionally — router.push() races with
+      // the campaigns/new layout step guard after reset() clears the store.
       reset();
-      router.push(dest);
+      window.location.href = '/campaigns';
     }, 1500);
 
     return () => clearTimeout(timer);

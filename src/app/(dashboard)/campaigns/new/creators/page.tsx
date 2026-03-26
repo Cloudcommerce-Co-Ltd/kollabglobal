@@ -98,7 +98,9 @@ export default function SelectCreatorsPage() {
         const backup = data.filter((c: Creator) => c.isBackup);
         setMainCreators(main);
         setBackupCreators(backup);
-        setSelectedIds(main.slice(0, maxCreators).map(c => c.id));
+        setSelectedIds(prev =>
+          prev.length > 0 ? prev : main.slice(0, maxCreators).map(c => c.id),
+        );
       });
   }, [maxCreators]);
 
