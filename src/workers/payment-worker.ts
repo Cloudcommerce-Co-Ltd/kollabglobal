@@ -66,10 +66,21 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
     newPaymentStatus = PaymentStatus.FAILED;
     newCampaignStatus = CampaignStatus.CANCELLED;
   } else {
-    // Unknown status — log and skip (no state transition)
-    console.warn(
-      `[payment-worker] Unknown chargeStatus "${chargeStatus}" for chargeId ${chargeId}`,
-    );
+    // "reversed" or unknown status — write audit log but no state transition.
+    // Reversals are recorded for traceability; unknown statuses are flagged.
+    if (chargeStatus !== "reversed") {
+      console.warn(
+        `[payment-worker] Unknown chargeStatus "${chargeStatus}" for chargeId ${chargeId} — writing audit log only`,
+      );
+    }
+    await prisma.paymentEvent.create({
+      data: {
+        chargeId,
+        eventName: omiseEventKey,
+        status: mapChargeStatusToEnum(chargeStatus),
+        payload: job.data.rawPayload as Prisma.InputJsonValue,
+      },
+    });
     return;
   }
 
@@ -132,6 +143,7 @@ worker.on("error", (err) => {
 async function shutdown() {
   console.log("[payment-worker] Shutting down...");
   await worker.close();
+  await prisma.$disconnect();
   await redis.quit();
   process.exit(0);
 }
