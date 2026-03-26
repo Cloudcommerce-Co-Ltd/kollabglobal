@@ -169,12 +169,19 @@ describe("payment-worker processor", () => {
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "successful" });
     await capturedProcessorHolder.processor!(job);
 
+    // Verify payment.update was called with correct target and new status
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: "payment_1" },
+      data: { status: "COMPLETED" },
+    });
+    // Verify campaign.update was called with correct target and new status
+    expect(mockCampaignUpdate).toHaveBeenCalledWith({
+      where: { id: "campaign_1" },
+      data: { status: "PENDING" },
+    });
     expect(mockTransaction).toHaveBeenCalledTimes(1);
-    // The transaction is called with an array of two prisma operations
-    const transactionArgs = (mockTransaction as Mock).mock.calls[0][0] as unknown[];
-    expect(transactionArgs).toHaveLength(2);
 
-    // Also verify audit log written after transaction
+    // Audit log written after transaction
     expect(mockPaymentEventCreate).toHaveBeenCalledTimes(1);
     expect(mockPaymentEventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -193,6 +200,14 @@ describe("payment-worker processor", () => {
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "failed" });
     await capturedProcessorHolder.processor!(job);
 
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: "payment_1" },
+      data: { status: "FAILED" },
+    });
+    expect(mockCampaignUpdate).toHaveBeenCalledWith({
+      where: { id: "campaign_1" },
+      data: { status: "CANCELLED" },
+    });
     expect(mockTransaction).toHaveBeenCalledTimes(1);
     expect(mockPaymentEventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -210,6 +225,14 @@ describe("payment-worker processor", () => {
     const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "expired" });
     await capturedProcessorHolder.processor!(job);
 
+    expect(mockPaymentUpdate).toHaveBeenCalledWith({
+      where: { id: "payment_1" },
+      data: { status: "FAILED" },
+    });
+    expect(mockCampaignUpdate).toHaveBeenCalledWith({
+      where: { id: "campaign_1" },
+      data: { status: "CANCELLED" },
+    });
     expect(mockTransaction).toHaveBeenCalledTimes(1);
     expect(mockPaymentEventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -217,6 +240,17 @@ describe("payment-worker processor", () => {
         status: "EXPIRED",
       }),
     });
+  });
+
+  it("re-throws when $transaction fails, allowing BullMQ to retry the job", async () => {
+    mockPaymentFindFirst.mockResolvedValue(mockPayment);
+    mockTransaction.mockRejectedValue(new Error("DB connection lost"));
+
+    const job = makeJob({ chargeId: "chrg_test_123", chargeStatus: "successful" });
+    await expect(capturedProcessorHolder.processor!(job)).rejects.toThrow("DB connection lost");
+
+    // Audit log must NOT be written if transaction failed
+    expect(mockPaymentEventCreate).not.toHaveBeenCalled();
   });
 
   it("does NOT call $transaction on chargeStatus: reversed, but DOES write audit PaymentEvent", async () => {

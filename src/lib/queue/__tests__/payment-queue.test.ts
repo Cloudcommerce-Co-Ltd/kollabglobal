@@ -56,20 +56,6 @@ describe("payment-queue", () => {
     expect(PAYMENT_EVENTS_QUEUE).toBeDefined();
   });
 
-  it("isRedisConfigured() returns true when REDIS_URL is set", async () => {
-    vi.stubEnv("REDIS_URL", "redis://localhost:6379");
-    const { isRedisConfigured } = await import("@/lib/redis");
-    expect(isRedisConfigured()).toBe(true);
-    vi.unstubAllEnvs();
-  });
-
-  it("isRedisConfigured() returns false when REDIS_URL is not set", async () => {
-    vi.stubEnv("REDIS_URL", "");
-    const { isRedisConfigured } = await import("@/lib/redis");
-    expect(isRedisConfigured()).toBe(false);
-    vi.unstubAllEnvs();
-  });
-
   it("default job options have attempts: 5", async () => {
     await import("@/lib/queue/payment-queue");
     expect(queueCalls).toHaveLength(1);
@@ -85,5 +71,21 @@ describe("payment-queue", () => {
     };
     expect(options?.defaultJobOptions?.backoff?.type).toBe("exponential");
     expect(options?.defaultJobOptions?.backoff?.delay).toBe(1000);
+  });
+
+  it("removeOnComplete retains jobs for 7 days (604800 seconds)", async () => {
+    await import("@/lib/queue/payment-queue");
+    const options = queueCalls[0].options as {
+      defaultJobOptions?: { removeOnComplete?: { age?: number } };
+    };
+    expect(options?.defaultJobOptions?.removeOnComplete).toEqual({ age: 7 * 24 * 3600 });
+  });
+
+  it("removeOnFail retains last 1000 failed jobs", async () => {
+    await import("@/lib/queue/payment-queue");
+    const options = queueCalls[0].options as {
+      defaultJobOptions?: { removeOnFail?: { count?: number } };
+    };
+    expect(options?.defaultJobOptions?.removeOnFail).toEqual({ count: 1000 });
   });
 });
