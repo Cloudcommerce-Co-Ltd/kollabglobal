@@ -48,4 +48,27 @@ describe('PATCH /api/campaigns/[id]/status', () => {
       },
     });
   });
+
+  it('returns 401 when unauthenticated', async () => {
+    const { auth } = await import('@/auth');
+    vi.mocked(auth).mockResolvedValueOnce(null);
+
+    const req = new Request('http://localhost', {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'ACCEPTING' }),
+    });
+    const res = await PATCH(req as any, { params: Promise.resolve({ id: 'camp-1' }) });
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 404 when campaign not found', async () => {
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
+
+    const req = new Request('http://localhost', {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'ACCEPTING' }),
+    });
+    const res = await PATCH(req as any, { params: Promise.resolve({ id: 'nonexistent' }) });
+    expect(res.status).toBe(404);
+  });
 });
