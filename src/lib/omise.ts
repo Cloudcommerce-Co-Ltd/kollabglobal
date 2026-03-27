@@ -29,7 +29,7 @@ export async function createPromptPayCharge(amountSatang: number): Promise<{
     amount: amountSatang,
     currency: "THB",
     source: source.id,
-    expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    expires_at: new Date(Date.now() + parseInt(process.env.OMISE_CHARGE_EXPIRED_DURATION ?? '900', 10) * 1000).toISOString(),
   });
 
   return {
@@ -46,6 +46,7 @@ export async function retrieveCharge(chargeId: string): Promise<{
   paid: boolean;
   amount: number;
   qrCodeUrl: string;
+  createdAt: string;
 }> {
   if (!isOmiseConfigured()) {
     throw new Error("Omise is not configured: OMISE_SECRET_KEY is missing");
@@ -61,5 +62,7 @@ export async function retrieveCharge(chargeId: string): Promise<{
     amount: charge.amount,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     qrCodeUrl: (charge as any).source?.scannable_code?.image?.download_uri ?? "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createdAt: (charge as any).created_at ?? new Date().toISOString(),
   };
 }

@@ -284,8 +284,10 @@ model Payment {
   currency      String        @default("THB")
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
-  omiseChargeId String?       @unique @map("omise_charge_id")
-  createdAt     DateTime      @default(now()) @map("created_at")
+  omiseChargeId   String?       @unique @map("omise_charge_id")
+  chargeCreatedAt DateTime?     @map("charge_created_at")
+  idempotencyKey  String?       @unique @map("idempotency_key")
+  createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)

@@ -141,7 +141,7 @@ describe("CheckoutPage", () => {
   it("shows waiting for payment status text after charge is created", async () => {
     render(<CheckoutPage />);
     await waitFor(() => {
-      expect(screen.getByText("รอการชำระเงิน")).toBeInTheDocument();
+      expect(screen.getByText(/รอการชำระเงิน/)).toBeInTheDocument();
     });
   });
 

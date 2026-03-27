@@ -24,6 +24,7 @@ vi.mock("omise", () => ({
         status: "successful",
         paid: true,
         amount: 100000,
+        created_at: "2026-03-27T07:00:52.559Z",
         source: {
           scannable_code: {
             image: {
@@ -97,8 +98,9 @@ describe("omise lib", () => {
       const after = Date.now();
       const calledWith = chargesCreate.mock.calls[0][0];
       const expiresAt = new Date(calledWith.expires_at).getTime();
-      expect(expiresAt).toBeGreaterThanOrEqual(before + 15 * 60 * 1000);
-      expect(expiresAt).toBeLessThanOrEqual(after + 15 * 60 * 1000);
+      const ttlMs = parseInt(process.env.OMISE_CHARGE_EXPIRED_DURATION ?? '900', 10) * 1000;
+      expect(expiresAt).toBeGreaterThanOrEqual(before + ttlMs);
+      expect(expiresAt).toBeLessThanOrEqual(after + ttlMs);
     });
   });
 
@@ -120,6 +122,7 @@ describe("omise lib", () => {
         paid: true,
         amount: 100000,
         qrCodeUrl: "https://example.com/qr-retrieved.png",
+        createdAt: "2026-03-27T07:00:52.559Z",
       });
     });
 

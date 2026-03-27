@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../create-charge/route";
+import { Prisma } from "@/generated/prisma/client";
 
 vi.mock("@/auth", () => ({
   auth: vi.fn(),
@@ -11,7 +12,7 @@ vi.mock("@/lib/prisma", () => ({
     campaign: { findFirst: vi.fn(), update: vi.fn() },
     campaignProduct: { create: vi.fn() },
     campaignCreator: { createMany: vi.fn() },
-    payment: { create: vi.fn(), update: vi.fn() },
+    payment: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
     $transaction: vi.fn(),
   },
 }));
@@ -22,12 +23,15 @@ vi.mock("@/lib/omise", () => ({
   retrieveCharge: vi.fn(),
 }));
 
-const makeRequest = (body: unknown) =>
+const makeRequest = (body: unknown, extraHeaders: Record<string, string> = {}) =>
   new Request("http://localhost/api/payments/create-charge", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...extraHeaders },
     body: JSON.stringify(body),
   });
+
+const makeIdempotentRequest = (body: unknown, key = "test-idempotency-key") =>
+  makeRequest(body, { "Idempotency-Key": key });
 
 const validProductData = {
   brandName: "Test Brand",
@@ -318,6 +322,12 @@ describe("POST /api/payments/create-charge", () => {
         }),
       })
     );
+    // chargeCreatedAt is set on the subsequent payment.update (after Omise charge is created)
+    expect(prisma.payment.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ chargeCreatedAt: expect.any(Date) }),
+      })
+    );
     // Standalone prisma.payment.create should NOT be called
     expect(prisma.payment.create).not.toHaveBeenCalled();
   });
@@ -357,6 +367,115 @@ describe("POST /api/payments/create-charge", () => {
 
     // Cleanup transaction should have been called
     expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+  });
+
+  it("stores idempotencyKey on Payment.create when Idempotency-Key header is sent", async () => {
+    const { auth } = await import("@/auth");
+    const prisma = (await import("@/lib/prisma")).default;
+    const { createPromptPayCharge } = await import("@/lib/omise");
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: "user_1", email: "test@example.com" },
+      expires: "2026-12-31",
+    });
+    vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
+
+    const txPaymentCreate = vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" });
+    vi.mocked(prisma.$transaction).mockImplementation(
+      async (cb: (tx: unknown) => Promise<unknown>) => {
+        const tx = {
+          campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
+          campaignProduct: { create: vi.fn().mockResolvedValue({}) },
+          campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
+          payment: { create: txPaymentCreate },
+        };
+        return cb(tx);
+      }
+    );
+    vi.mocked(createPromptPayCharge).mockResolvedValue({
+      chargeId: "chrg_test",
+      qrCodeUrl: "https://example.com/qr.png",
+      amount: EXPECTED_SATANG,
+      status: "pending",
+    });
+    vi.mocked(prisma.payment.update).mockResolvedValue({} as never);
+
+    await POST(makeIdempotentRequest(validBody, "uuid-abc-123"));
+
+    expect(txPaymentCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ idempotencyKey: "uuid-abc-123" }),
+      })
+    );
+  });
+
+  it("returns existing charge when idempotency key conflict (P2002) and winner has chargeId", async () => {
+    const { auth } = await import("@/auth");
+    const prisma = (await import("@/lib/prisma")).default;
+    const { retrieveCharge } = await import("@/lib/omise");
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: "user_1", email: "test@example.com" },
+      expires: "2026-12-31",
+    });
+    vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
+
+    const p2002 = new Prisma.PrismaClientKnownRequestError(
+      "Unique constraint failed on the fields: (`idempotency_key`)",
+      { code: "P2002", clientVersion: "7.0.0", meta: { target: ["idempotency_key"] } }
+    );
+    vi.mocked(prisma.$transaction).mockRejectedValue(p2002);
+
+    vi.mocked(prisma.payment.findUnique).mockResolvedValue({
+      id: "payment_winner",
+      campaignId: "campaign_winner",
+      omiseChargeId: "chrg_winner",
+    } as never);
+    vi.mocked(retrieveCharge).mockResolvedValue({
+      chargeId: "chrg_winner",
+      qrCodeUrl: "https://example.com/winner-qr.png",
+      status: "pending",
+      paid: false,
+      amount: EXPECTED_SATANG,
+    } as never);
+
+    const res = await POST(makeIdempotentRequest(validBody, "dup-key"));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.chargeId).toBe("chrg_winner");
+    expect(data.qrCodeUrl).toBe("https://example.com/winner-qr.png");
+    expect(data.campaignId).toBe("campaign_winner");
+  });
+
+  it("returns 409 when idempotency key conflict (P2002) and winner has not yet linked chargeId", async () => {
+    const { auth } = await import("@/auth");
+    const prisma = (await import("@/lib/prisma")).default;
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: "user_1", email: "test@example.com" },
+      expires: "2026-12-31",
+    });
+    vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
+
+    const p2002 = new Prisma.PrismaClientKnownRequestError(
+      "Unique constraint failed on the fields: (`idempotency_key`)",
+      { code: "P2002", clientVersion: "7.0.0", meta: { target: ["idempotency_key"] } }
+    );
+    vi.mocked(prisma.$transaction).mockRejectedValue(p2002);
+
+    vi.mocked(prisma.payment.findUnique).mockResolvedValue({
+      id: "payment_winner",
+      campaignId: "campaign_winner",
+      omiseChargeId: null, // winner hasn't linked yet
+    } as never);
+
+    const res = await POST(makeIdempotentRequest(validBody, "dup-key"));
+    expect(res.status).toBe(409);
+    const data = await res.json();
+    expect(data.error).toBe("Payment in progress, retry in a moment");
   });
 
   it("passes real product data to campaignProduct.create in transaction", async () => {

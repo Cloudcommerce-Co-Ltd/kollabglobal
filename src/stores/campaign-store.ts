@@ -18,6 +18,7 @@ interface CampaignCreationState {
   chargeId: string | null;
   campaignId: string | null;
   qrCodeUrl: string | null;
+  chargeCreatedAt: number | null; // unix ms — used to restore countdown after refresh
 }
 
 interface CampaignCreationActions {
@@ -27,6 +28,7 @@ interface CampaignCreationActions {
   setPackage: (data: Package) => void;
   setCreators: (data: CreatorWithPackageInfo[]) => void;
   setCheckoutData: (chargeId: string, campaignId: string, qrCodeUrl: string) => void;
+  clearCheckoutData: () => void;
   reset: () => void;
 }
 
@@ -42,6 +44,7 @@ const initialState: CampaignCreationState = {
   chargeId: null,
   campaignId: null,
   qrCodeUrl: null,
+  chargeCreatedAt: null,
 };
 
 export const useCampaignStore = create<CampaignStore>()(
@@ -55,7 +58,9 @@ export const useCampaignStore = create<CampaignStore>()(
       setPackage: (data) => set({ packageData: data }),
       setCreators: (data) => set({ selectedCreatorsData: data }),
       setCheckoutData: (chargeId, campaignId, qrCodeUrl) =>
-        set({ chargeId, campaignId, qrCodeUrl, status: "checkout" }),
+        set({ chargeId, campaignId, qrCodeUrl, chargeCreatedAt: Date.now(), status: "checkout" }),
+      clearCheckoutData: () =>
+        set({ chargeId: null, campaignId: null, qrCodeUrl: null, chargeCreatedAt: null, status: "draft" }),
       reset: () => set(initialState),
     }),
     {

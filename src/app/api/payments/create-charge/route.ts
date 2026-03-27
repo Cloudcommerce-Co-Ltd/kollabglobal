@@ -9,6 +9,7 @@ import {
   CampaignStatus,
   PaymentMethod,
   PaymentStatus,
+  Prisma,
 } from "@/generated/prisma/client";
 
 const createChargeSchema = z.object({
@@ -32,7 +33,18 @@ const createChargeSchema = z.object({
   }),
 });
 
+function isIdempotencyKeyConflict(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002" &&
+    Array.isArray((error.meta as { target?: unknown })?.target) &&
+    ((error.meta as { target: string[] }).target).includes("idempotency_key")
+  );
+}
+
 export async function POST(request: Request) {
+  const idempotencyKey = request.headers.get("Idempotency-Key") ?? null;
+
   // 1. Parse + validate body
   let body: unknown;
   try {
@@ -90,12 +102,16 @@ export async function POST(request: Request) {
     if (existingCampaign?.payment?.omiseChargeId) {
       try {
         const chargeInfo = await retrieveCharge(existingCampaign.payment.omiseChargeId);
-        return NextResponse.json({
-          chargeId: existingCampaign.payment.omiseChargeId,
-          qrCodeUrl: chargeInfo.qrCodeUrl,
-          paymentId: existingCampaign.payment.id,
-          campaignId: existingCampaign.id,
-        });
+        if (chargeInfo.status === "pending") {
+          return NextResponse.json({
+            chargeId: existingCampaign.payment.omiseChargeId,
+            qrCodeUrl: chargeInfo.qrCodeUrl,
+            paymentId: existingCampaign.payment.id,
+            campaignId: existingCampaign.id,
+          });
+        }
+        // Charge exists in Omise but is no longer pending (failed/expired) — create a new one
+        console.log("[POST /api/payments/create-charge] Existing charge is not pending, creating new charge");
       } catch {
         // Charge no longer exists in Omise (expired/deleted) — fall through to create a new one
         console.log("[POST /api/payments/create-charge] Existing charge not found in Omise, creating new charge");
@@ -103,7 +119,10 @@ export async function POST(request: Request) {
     }
 
     // 7. Create Campaign, CampaignProduct, CampaignCreators, and Payment atomically
-    const { campaign, payment } = await prisma.$transaction(async (tx) => {
+    let campaign: Awaited<ReturnType<typeof prisma.campaign.create>>;
+    let payment: Awaited<ReturnType<typeof prisma.payment.create>>;
+    try {
+    const result = await prisma.$transaction(async (tx) => {
       const campaign = await tx.campaign.create({
         data: {
           userId: userId,
@@ -148,20 +167,54 @@ export async function POST(request: Request) {
           method: PaymentMethod.QR_CODE,
           status: PaymentStatus.PENDING,
           omiseChargeId: null,
+          idempotencyKey,
         },
       });
 
       return { campaign, payment };
     });
+    campaign = result.campaign;
+    payment = result.payment;
+    } catch (txError) {
+      if (isIdempotencyKeyConflict(txError)) {
+        // Concurrent request with same key — find and return the winning request's charge
+        const existing = await prisma.payment.findUnique({
+          where: { idempotencyKey: idempotencyKey! },
+          include: { campaign: true },
+        });
+        if (!existing?.omiseChargeId) {
+          // Winner hasn't linked the chargeId yet — tell client to retry
+          return NextResponse.json(
+            { error: "Payment in progress, retry in a moment" },
+            { status: 409 }
+          );
+        }
+        try {
+          const chargeInfo = await retrieveCharge(existing.omiseChargeId);
+          return NextResponse.json({
+            chargeId: existing.omiseChargeId,
+            qrCodeUrl: chargeInfo.qrCodeUrl,
+            paymentId: existing.id,
+            campaignId: existing.campaignId,
+          });
+        } catch {
+          return NextResponse.json(
+            { error: "Payment in progress, retry in a moment" },
+            { status: 409 }
+          );
+        }
+      }
+      throw txError;
+    }
 
     // 8. Create Omise PromptPay charge — outside transaction so failures can be handled
     try {
       const charge = await createPromptPayCharge(totalSatang);
 
-      // 9. Link charge to payment record
+      // 9. Link charge to payment record and record when the charge was created
       await prisma.payment.update({
         where: { id: payment.id },
-        data: { omiseChargeId: charge.chargeId },
+        data: { omiseChargeId: charge.chargeId, chargeCreatedAt: new Date() },
       });
 
       return NextResponse.json({

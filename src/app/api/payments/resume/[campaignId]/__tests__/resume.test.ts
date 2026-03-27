@@ -95,8 +95,12 @@ describe("GET /api/payments/resume/[campaignId]", () => {
   it("returns existing chargeId and qrCodeUrl when Omise charge is still pending", async () => {
     const prisma = (await import("@/lib/prisma")).default;
     const { retrieveCharge } = await import("@/lib/omise");
-    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign as never);
-    vi.mocked(retrieveCharge).mockResolvedValue({ status: "pending", paid: false, amount: 500000, qrCodeUrl: "https://qr.example.com/qr.png" } as never);
+    const dbChargeCreatedAt = new Date(Date.now() - 5 * 60 * 1000); // 5 min ago
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue({
+      ...mockCampaign,
+      payment: { ...mockCampaign.payment, chargeCreatedAt: dbChargeCreatedAt },
+    } as never);
+    vi.mocked(retrieveCharge).mockResolvedValue({ status: "pending", paid: false, amount: 500000, qrCodeUrl: "https://qr.example.com/qr.png", createdAt: new Date().toISOString() } as never);
 
     const { request, params } = makeRequest("campaign_1");
     const res = await GET(request, { params });
@@ -105,25 +109,31 @@ describe("GET /api/payments/resume/[campaignId]", () => {
     expect(data.chargeId).toBe("chrg_test_123");
     expect(data.qrCodeUrl).toBe("https://qr.example.com/qr.png");
     expect(data.campaignId).toBe("campaign_1");
+    // chargeCreatedAt comes from DB — not from Omise API
+    expect(data.chargeCreatedAt).toBe(dbChargeCreatedAt.getTime());
   });
 
   it("creates a new charge when existing Omise charge is expired", async () => {
     const prisma = (await import("@/lib/prisma")).default;
     const { retrieveCharge, createPromptPayCharge } = await import("@/lib/omise");
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign as never);
-    vi.mocked(retrieveCharge).mockResolvedValue({ status: "expired", paid: false, amount: 0, qrCodeUrl: "" } as never);
+    vi.mocked(retrieveCharge).mockResolvedValue({ status: "expired", paid: false, amount: 0, qrCodeUrl: "", createdAt: new Date().toISOString() } as never);
     vi.mocked(createPromptPayCharge).mockResolvedValue({ chargeId: "chrg_new_456", qrCodeUrl: "https://qr.example.com/new.png", amount: 500000, status: "pending" });
     vi.mocked(prisma.payment.update).mockResolvedValue({} as never);
 
+    const before = Date.now();
     const { request, params } = makeRequest("campaign_1");
     const res = await GET(request, { params });
+    const after = Date.now();
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.chargeId).toBe("chrg_new_456");
     expect(data.qrCodeUrl).toBe("https://qr.example.com/new.png");
+    expect(data.chargeCreatedAt).toBeGreaterThanOrEqual(before);
+    expect(data.chargeCreatedAt).toBeLessThanOrEqual(after);
     expect(prisma.payment.update).toHaveBeenCalledWith({
       where: { id: "pay_1" },
-      data: { omiseChargeId: "chrg_new_456" },
+      data: expect.objectContaining({ omiseChargeId: "chrg_new_456", status: "PENDING" }),
     });
   });
 
@@ -135,11 +145,15 @@ describe("GET /api/payments/resume/[campaignId]", () => {
     vi.mocked(createPromptPayCharge).mockResolvedValue({ chargeId: "chrg_new_789", qrCodeUrl: "https://qr.example.com/new2.png", amount: 500000, status: "pending" });
     vi.mocked(prisma.payment.update).mockResolvedValue({} as never);
 
+    const before = Date.now();
     const { request, params } = makeRequest("campaign_1");
     const res = await GET(request, { params });
+    const after = Date.now();
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.chargeId).toBe("chrg_new_789");
+    expect(data.chargeCreatedAt).toBeGreaterThanOrEqual(before);
+    expect(data.chargeCreatedAt).toBeLessThanOrEqual(after);
   });
 
   it("creates a new charge when payment has no omiseChargeId", async () => {
@@ -152,18 +166,22 @@ describe("GET /api/payments/resume/[campaignId]", () => {
     vi.mocked(createPromptPayCharge).mockResolvedValue({ chargeId: "chrg_fresh_111", qrCodeUrl: "https://qr.example.com/fresh.png", amount: 500000, status: "pending" });
     vi.mocked(prisma.payment.update).mockResolvedValue({} as never);
 
+    const before = Date.now();
     const { request, params } = makeRequest("campaign_1");
     const res = await GET(request, { params });
+    const after = Date.now();
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.chargeId).toBe("chrg_fresh_111");
+    expect(data.chargeCreatedAt).toBeGreaterThanOrEqual(before);
+    expect(data.chargeCreatedAt).toBeLessThanOrEqual(after);
   });
 
   it("response includes package, product, and creators for display", async () => {
     const prisma = (await import("@/lib/prisma")).default;
     const { retrieveCharge } = await import("@/lib/omise");
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign as never);
-    vi.mocked(retrieveCharge).mockResolvedValue({ status: "pending", paid: false, amount: 500000, qrCodeUrl: "https://qr.example.com/qr.png" } as never);
+    vi.mocked(retrieveCharge).mockResolvedValue({ status: "pending", paid: false, amount: 500000, qrCodeUrl: "https://qr.example.com/qr.png", createdAt: new Date().toISOString() } as never);
 
     const { request, params } = makeRequest("campaign_1");
     const res = await GET(request, { params });

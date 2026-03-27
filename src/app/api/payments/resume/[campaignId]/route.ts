@@ -43,6 +43,7 @@ export async function GET(
 
   let chargeId: string;
   let qrCodeUrl: string;
+  let chargeCreatedAt: number;
 
   if (payment?.omiseChargeId) {
     // Try to reuse the existing charge
@@ -51,41 +52,52 @@ export async function GET(
       if (existing.status === "pending") {
         chargeId = payment.omiseChargeId;
         qrCodeUrl = existing.qrCodeUrl;
+        // Use the DB-persisted timestamp — authoritative and avoids another Omise call
+        chargeCreatedAt = payment.chargeCreatedAt
+          ? payment.chargeCreatedAt.getTime()
+          : Date.now();
       } else {
-        // Charge is expired or failed — create a fresh one
+        // Charge is expired or failed — create a fresh one and reset payment status
         const fresh = await createPromptPayCharge(totalSatang);
+        const now = new Date();
         await prisma.payment.update({
           where: { id: payment.id },
-          data: { omiseChargeId: fresh.chargeId },
+          data: { omiseChargeId: fresh.chargeId, chargeCreatedAt: now, status: "PENDING" },
         });
         chargeId = fresh.chargeId;
         qrCodeUrl = fresh.qrCodeUrl;
+        chargeCreatedAt = now.getTime();
       }
     } catch {
-      // Charge not found in Omise — create a fresh one
+      // Charge not found in Omise — create a fresh one and reset payment status
       const fresh = await createPromptPayCharge(totalSatang);
+      const now = new Date();
       await prisma.payment.update({
         where: { id: payment.id },
-        data: { omiseChargeId: fresh.chargeId },
+        data: { omiseChargeId: fresh.chargeId, chargeCreatedAt: now, status: "PENDING" },
       });
       chargeId = fresh.chargeId;
       qrCodeUrl = fresh.qrCodeUrl;
+      chargeCreatedAt = now.getTime();
     }
   } else {
     // No charge yet — create one
     const fresh = await createPromptPayCharge(totalSatang);
+    const now = new Date();
     await prisma.payment.update({
       where: { id: payment!.id },
-      data: { omiseChargeId: fresh.chargeId },
+      data: { omiseChargeId: fresh.chargeId, chargeCreatedAt: now, status: "PENDING" },
     });
     chargeId = fresh.chargeId;
     qrCodeUrl = fresh.qrCodeUrl;
+    chargeCreatedAt = now.getTime();
   }
 
   return NextResponse.json({
     campaignId: campaign.id,
     chargeId,
     qrCodeUrl,
+    chargeCreatedAt,
     package: {
       name: campaign.package?.name,
       numCreators: campaign.package?.numCreators,

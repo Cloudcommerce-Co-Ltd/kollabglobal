@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
   CreditCard,
@@ -8,14 +8,17 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  Clock,
+  RefreshCw,
 } from 'lucide-react';
+import { useQrPayment } from '@/hooks/use-qr-payment';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { VAT_RATE, SERVICE_FEE_RATE } from '@/lib/package-utils';
 
-type PaymentStatus = 'idle' | 'creating' | 'pending' | 'completed' | 'failed';
+type PaymentStatus = 'idle' | 'creating' | 'pending' | 'expired' | 'completed' | 'failed';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,7 +31,9 @@ export default function CheckoutPage() {
     chargeId: storedChargeId,
     campaignId: storedCampaignId,
     qrCodeUrl: storedQrCodeUrl,
+    chargeCreatedAt: storedChargeCreatedAt,
     setCheckoutData,
+    clearCheckoutData,
     reset,
   } = useCampaignStore();
 
@@ -41,7 +46,31 @@ export default function CheckoutPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(storedQrCodeUrl);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [campaignId, setCampaignId] = useState<string | null>(storedCampaignId);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const idempotencyKey = useRef(crypto.randomUUID());
+
+  const onStatusChange = useCallback((status: 'pending' | 'expired' | 'completed' | 'failed') => {
+    setPaymentStatus(status);
+    if (status === 'failed') clearCheckoutData();
+  }, [clearCheckoutData]);
+
+  const onRecreate = useCallback(
+    (data: { chargeId: string; qrCodeUrl: string; chargeCreatedAt: number }) => {
+      setChargeId(data.chargeId);
+      setQrCodeUrl(data.qrCodeUrl);
+      if (storedCampaignId) {
+        setCheckoutData(data.chargeId, storedCampaignId, data.qrCodeUrl);
+      }
+    },
+    [storedCampaignId, setCheckoutData],
+  );
+
+  const { secondsRemaining, recreateQr, isRecreating } = useQrPayment({
+    chargeId: paymentStatus === 'pending' || paymentStatus === 'expired' ? chargeId : null,
+    campaignId: storedCampaignId,
+    chargeCreatedAt: storedChargeCreatedAt,
+    onStatusChange,
+    onRecreate,
+  });
 
   const packageName = packageData?.name ?? '—';
   const numCreators = packageData?.numCreators ?? 0;
@@ -49,11 +78,16 @@ export default function CheckoutPage() {
   const vat = Math.round(basePrice * VAT_RATE);
   const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
   const total = basePrice + vat + serviceFee;
+  const formatCountdown = (secs: number) => {
+    const m = String(Math.floor(secs / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   const numPosts = packageData
     ? (packageData.deliverables.length ?? 1) * packageData.numCreators
     : 0;
   const campaignType = productData?.isService ? 'บริการ' : 'สินค้า';
-  const duration = '30 วัน';
 
   // Auto-create charge on mount — skipped if we already have a chargeId from persisted store
   useEffect(() => {
@@ -77,7 +111,10 @@ export default function CheckoutPage() {
       try {
         const res = await fetch('/api/payments/create-charge', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey.current,
+          },
           signal: controller.signal,
           body: JSON.stringify({
             countryId: countryData!.id,
@@ -125,34 +162,9 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Poll status when pending
-  useEffect(() => {
-    if (paymentStatus !== 'pending' || !chargeId) return;
-
-    pollingRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/payments/${chargeId}/status`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.status === 'successful') {
-          setPaymentStatus('completed');
-        } else if (data.status === 'failed' || data.status === 'expired') {
-          setPaymentStatus('failed');
-        }
-      } catch {
-        // continue polling on network errors
-      }
-    }, 3000);
-
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [paymentStatus, chargeId]);
-
   // Auto-redirect on success
   useEffect(() => {
     if (paymentStatus !== 'completed') return;
-    if (pollingRef.current) clearInterval(pollingRef.current);
 
     const timer = setTimeout(() => {
       // reset() clears sessionStorage before navigating.
@@ -199,7 +211,6 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-2.5">
                 {[
                   ['แพ็กเกจ', packageName],
-                  ['ระยะเวลา', duration],
                   ['จำนวนโพสต์', `${numPosts} โพสต์`],
                   ['ประเภทแคมเปญ', campaignType],
                 ].map(([label, value]) => (
@@ -353,6 +364,9 @@ export default function CheckoutPage() {
                           className="size-full rounded-xl object-contain"
                         />
                       )}
+                    {paymentStatus === 'expired' && (
+                      <Clock size={48} className="text-[#bbb]" />
+                    )}
                     {paymentStatus === 'failed' && (
                       <XCircle size={48} color="#ef4444" />
                     )}
@@ -363,8 +377,25 @@ export default function CheckoutPage() {
                     {paymentStatus === 'pending' && (
                       <span className="flex items-center justify-center gap-1.5">
                         <Loader2 size={13} className="animate-spin" />
-                        รอการชำระเงิน
+                        รอการชำระเงิน — หมดอายุใน {formatCountdown(secondsRemaining)}
                       </span>
+                    )}
+                    {paymentStatus === 'expired' && (
+                      <div className="flex flex-col items-center gap-2">
+                        <span>QR Code หมดอายุแล้ว</span>
+                        <button
+                          onClick={recreateQr}
+                          disabled={isRecreating}
+                          className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-brand bg-transparent px-3 py-1.5 text-[13px] font-semibold text-brand disabled:opacity-50"
+                        >
+                          {isRecreating ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : (
+                            <RefreshCw size={13} />
+                          )}
+                          สร้าง QR ใหม่
+                        </button>
+                      </div>
                     )}
                     {paymentStatus === 'completed' && (
                       <span className="flex items-center justify-center gap-1.5 text-brand">

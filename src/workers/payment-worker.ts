@@ -15,6 +15,7 @@ import {
   type PaymentEventJobData,
   type OmiseChargeStatus,
 } from "@/lib/queue/payment-queue";
+import { paymentDlq } from "@/lib/queue/dead-letter-queue";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -155,8 +156,38 @@ worker.on("completed", (job) => {
   console.log(`[payment-worker] Job ${job.id} completed`);
 });
 
-worker.on("failed", (job, err) => {
+worker.on("failed", async (job, err) => {
   console.error(`[payment-worker] Job ${job?.id} failed:`, err.message);
+
+  if (!job) return;
+
+  const maxAttempts = job.opts.attempts ?? 5;
+  if (job.attemptsMade < maxAttempts) return; // not the final attempt
+
+  const { chargeId, omiseEventKey } = job.data;
+  const originalJobId = job.id ?? "unknown";
+  const failureReason = err.message;
+  const attemptsMade = job.attemptsMade;
+
+  console.log(
+    JSON.stringify({
+      level: "error",
+      event: "payment_dlq",
+      chargeId,
+      omiseEventKey,
+      failureReason,
+      attemptsMade,
+      originalJobId,
+    })
+  );
+
+  await paymentDlq.add("dead-letter", {
+    ...job.data,
+    originalJobId,
+    failureReason,
+    attemptsMade,
+    failedAt: Date.now(),
+  });
 });
 
 worker.on("error", (err) => {
