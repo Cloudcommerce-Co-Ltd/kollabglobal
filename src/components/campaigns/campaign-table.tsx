@@ -44,19 +44,37 @@ function getCreatorCounts(creators: CampaignListItem['creators']) {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand-light">
-        <Plus size={24} className="text-brand" />
+    <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+      <svg width="140" height="140" viewBox="0 0 110 110" fill="none">
+        <circle cx="55" cy="55" r="40" className="fill-brand-light stroke-brand" strokeWidth="2.5" />
+        <line x1="15" y1="55" x2="95" y2="55" className="stroke-brand" strokeWidth="1" strokeDasharray="6 4" opacity="0.6" />
+        <line x1="20" y1="37" x2="90" y2="37" className="stroke-brand" strokeWidth="1" strokeDasharray="6 4" opacity="0.6" />
+        <line x1="20" y1="73" x2="90" y2="73" className="stroke-brand" strokeWidth="1" strokeDasharray="6 4" opacity="0.6" />
+        <ellipse cx="55" cy="55" rx="18" ry="40" className="stroke-brand" strokeWidth="1" strokeDasharray="6 4" fill="none" opacity="0.6" />
+        <line x1="55" y1="38" x2="55" y2="23" className="stroke-brand" strokeWidth="2" />
+        <circle cx="55" cy="23" r="4" fill="white" className="stroke-brand" strokeWidth="2" />
+        <circle cx="55" cy="38" r="7" className="fill-brand" />
+        <line x1="76" y1="47" x2="76" y2="34" className="stroke-accent-brand" strokeWidth="1.8" />
+        <circle cx="76" cy="34" r="3.5" fill="white" className="stroke-accent-brand" strokeWidth="1.8" />
+        <circle cx="76" cy="47" r="5.5" className="fill-accent-brand" opacity="0.85" />
+        <line x1="36" y1="63" x2="36" y2="50" className="stroke-secondary-brand" strokeWidth="1.8" />
+        <circle cx="36" cy="50" r="3.5" fill="white" className="stroke-secondary-brand" strokeWidth="1.8" />
+        <circle cx="36" cy="63" r="5.5" className="fill-secondary-brand" opacity="0.8" />
+      </svg>
+
+      <div>
+        <p className="mb-2 text-[17px] font-bold text-dark">ยังไม่มีแคมเปญ</p>
+        <p className="max-w-65 text-[14px] leading-relaxed text-muted-text">
+          เลือกตลาดและเริ่มโปรโมทแบรนด์<br />ผ่านครีเอเตอร์ทั่วโลก
+        </p>
       </div>
-      <p className="mb-1 text-[16px] font-semibold text-dark">ยังไม่มีแคมเปญ</p>
-      <p className="mb-5 text-[13px] text-muted-text">
-        สร้างแคมเปญแรกของคุณเพื่อเริ่มต้น
-      </p>
+
       <Link
         href="/campaigns/new/country?new=1"
-        className="rounded-[10px] bg-brand px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-90"
+        className="mt-1 flex items-center gap-2 rounded-[10px] bg-linear-to-br from-brand to-secondary-brand px-7 py-3 text-[15px] font-semibold text-white hover:opacity-90"
       >
-        สร้างแคมเปญใหม่
+        <Plus size={15} strokeWidth={2.5} />
+        สร้างแคมเปญแรก
       </Link>
     </div>
   );
@@ -64,11 +82,7 @@ function EmptyState() {
 
 export function CampaignTable({ campaigns }: CampaignTableProps) {
   if (campaigns.length === 0) {
-    return (
-      <div className="rounded-[14px] border border-border-ui bg-white">
-        <EmptyState />
-      </div>
-    );
+    return <EmptyState />;
   }
 
   return (
