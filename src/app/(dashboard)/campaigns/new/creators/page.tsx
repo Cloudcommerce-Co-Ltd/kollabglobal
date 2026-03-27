@@ -6,7 +6,6 @@ import ReactCountryFlag from 'react-country-flag';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCampaignStore } from '@/stores/campaign-store';
-import { Creator } from '@/types';
 import type { CreatorWithPackageInfo } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -16,7 +15,7 @@ function CreatorCard({
   isDisabled,
   onToggle,
 }: {
-  creator: Creator;
+  creator: CreatorWithPackageInfo;
   isSelected: boolean;
   isDisabled: boolean;
   onToggle: (id: string) => void;
@@ -92,7 +91,7 @@ export default function SelectCreatorsPage() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>(
     selectedCreatorsData && selectedCreatorsData.length > 0
-      ? selectedCreatorsData.map((c: Creator) => c.id)
+      ? selectedCreatorsData.map((c: CreatorWithPackageInfo) => c.id)
       : [],
   );
   const [mainCreators, setMainCreators] = useState<CreatorWithPackageInfo[]>([]);
@@ -102,7 +101,10 @@ export default function SelectCreatorsPage() {
     const packageId = packageData?.id;
     if (!packageId) return;
     fetch(`/api/creators?packageId=${packageId}`)
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Failed to fetch creators: ${r.status}`);
+        return r.json();
+      })
       .then((data: CreatorWithPackageInfo[]) => {
         const main = data.filter((c: CreatorWithPackageInfo) => !c.isBackup);
         const backup = data.filter((c: CreatorWithPackageInfo) => c.isBackup);
@@ -111,8 +113,11 @@ export default function SelectCreatorsPage() {
         setSelectedIds(prev =>
           prev.length > 0 ? prev : main.slice(0, maxCreators).map(c => c.id),
         );
+      })
+      .catch((err) => {
+        console.error('Failed to load creators:', err);
       });
-  }, [maxCreators, packageData]);
+  }, [maxCreators, packageData?.id, packageData?.numCreators]);
 
   const allCreators = [...mainCreators, ...backupCreators];
 
@@ -172,7 +177,7 @@ export default function SelectCreatorsPage() {
                 !isSelected && selectedIds.length >= maxCreators;
               return (
                 <CreatorCard
-                  key={i}
+                  key={creator.id}
                   creator={creator}
                   isSelected={isSelected}
                   isDisabled={isDisabled}

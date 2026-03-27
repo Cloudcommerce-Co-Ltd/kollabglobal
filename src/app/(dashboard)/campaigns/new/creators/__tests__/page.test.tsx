@@ -66,6 +66,7 @@ beforeEach(() => {
   mockPush.mockClear();
   mockReplace.mockClear();
   global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve(MOCK_CREATORS),
   } as unknown as Response);
 });
