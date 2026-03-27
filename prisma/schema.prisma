@@ -43,10 +43,11 @@ model User {
   email         String?    @unique
   emailVerified DateTime?  @map("email_verified")
   image         String?
-  accounts      Account[]
-  sessions      Session[]
-  campaigns     Campaign[]
-  payments      Payment[]
+  accounts       Account[]
+  sessions       Session[]
+  campaigns      Campaign[]
+  payments       Payment[]
+  statusChanges  CampaignStatusLog[]
 
   @@map("users")
 }
@@ -214,10 +215,11 @@ model Campaign {
   user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   country  Country           @relation(fields: [countryId], references: [id])
   package  Package           @relation(fields: [packageId], references: [id])
-  products CampaignProduct[]
-  brief    CampaignBrief?
-  creators CampaignCreator[]
-  payment  Payment?
+  products   CampaignProduct[]
+  brief      CampaignBrief?
+  creators   CampaignCreator[]
+  payment    Payment?
+  statusLogs CampaignStatusLog[]
 
   @@map("campaigns")
 }
@@ -303,4 +305,20 @@ model PaymentEvent {
 
   @@index([chargeId])
   @@map("payment_events")
+}
+
+// Append-only audit log for campaign status transitions
+model CampaignStatusLog {
+  id         String         @id @default(cuid())
+  campaignId String         @map("campaign_id")
+  fromStatus CampaignStatus @map("from_status")
+  toStatus   CampaignStatus @map("to_status")
+  changedBy  String?        @map("changed_by")
+  note       String?
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [changedBy], references: [id])
+
+  @@map("campaign_status_logs")
 }
