@@ -38,12 +38,23 @@ export async function PATCH(
     );
   }
 
-  const updated = await prisma.campaign.update({
-    where: { id },
-    data: {
-      status: targetStatus,
-      ...(targetStatus === "COMPLETED" ? { liveAt: new Date() } : {}),
-    },
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.campaign.update({
+      where: { id },
+      data: {
+        status: targetStatus,
+        ...(targetStatus === "COMPLETED" ? { liveAt: new Date() } : {}),
+      },
+    });
+    await tx.campaignStatusLog.create({
+      data: {
+        campaignId: id,
+        fromStatus: campaign.status,
+        toStatus: targetStatus,
+        changedBy: session.user.id,
+      },
+    });
+    return result;
   });
 
   return NextResponse.json(updated);

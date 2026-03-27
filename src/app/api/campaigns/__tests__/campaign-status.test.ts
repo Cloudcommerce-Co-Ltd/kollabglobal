@@ -5,6 +5,8 @@ vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
   default: {
     campaign: { findFirst: vi.fn(), update: vi.fn() },
+    campaignStatusLog: { create: vi.fn() },
+    $transaction: vi.fn(),
   },
 }));
 
@@ -43,7 +45,11 @@ function makeParams(id = "campaign-123") {
 }
 
 describe("PATCH /api/campaigns/[id]/status", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(prisma));
+    vi.mocked(prisma.campaignStatusLog.create).mockResolvedValue({} as any);
+  });
 
   it("returns 401 when not authenticated", async () => {
     mockAuth.mockResolvedValue(null);
