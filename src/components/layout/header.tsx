@@ -18,7 +18,7 @@ export function Header({ user }: HeaderProps) {
         <Image
           src={logoNameImg}
           alt="KOLLAB Global"
-          className="w-[90px] h-auto"
+          className="w-22.5 h-auto"
           sizes="90px"
         />
       </Link>

@@ -21,7 +21,7 @@ export default async function CampaignBriefPage({
   const targetLang = {
     code: campaign.country?.languageCode ?? 'en',
     name: campaign.country?.languageName ?? 'English',
-    flag: campaign.country?.flag ?? '🇺🇸',
+    countryCode: campaign.country?.countryCode ?? 'US',
   };
 
   return (

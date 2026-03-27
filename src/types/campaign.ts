@@ -24,7 +24,7 @@ export interface CampaignListItem {
   promotionType: PromotionType;
   status: CampaignStatus;
   createdAt: string;
-  country: { id: number; name: string; flag: string } | null;
+  country: { id: number; name: string; countryCode: string } | null;
   package: {
     id: number;
     name: string;
@@ -51,7 +51,7 @@ export interface CampaignCreatorWithRelation {
     engagement: string;
     reach: string;
     avatar: string;
-    countryFlag: string;
+    countryCode: string | null;
     platform: string | null;
     socialHandle: string | null;
   };
@@ -68,7 +68,7 @@ export interface CampaignWithRelations {
   country?: {
     id: number;
     name: string;
-    flag: string;
+    countryCode: string;
     languageCode: string;
     languageName: string;
   } | null;

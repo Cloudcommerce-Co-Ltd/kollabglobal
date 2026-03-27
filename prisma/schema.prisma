@@ -126,7 +126,7 @@ model Category {
 model Country {
   id            Int        @id @default(autoincrement())
   name          String
-  flag          String
+  countryCode   String     @map("country_code")
   region        String     @default("global")
   languageCode  String     @default("en") @map("language_code")
   languageName  String     @default("English") @map("language_name")
@@ -172,7 +172,7 @@ model Creator {
   engagement    String
   reach         String
   avatar        String
-  countryFlag   String            @map("country_flag")
+  countryCode   String?           @map("country_code")
   countryId     Int?              @map("country_id")
   country       Country?          @relation(fields: [countryId], references: [id])
   isBackup      Boolean           @default(false) @map("is_backup")

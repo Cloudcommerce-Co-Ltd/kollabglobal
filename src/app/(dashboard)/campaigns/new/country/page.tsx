@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 import { useCampaignStore } from '@/stores/campaign-store';
 import type { Country } from '@/types';
 
@@ -115,8 +116,16 @@ export default function SelectCountryPage() {
                         : 'border-border-ui bg-white'
                     }`}
                   >
-                    <div className="flex size-13 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand-light to-secondary-brand-light text-[30px]">
-                      {c.flag}
+                    <div className="flex size-13 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand-light to-secondary-brand-light">
+                      {c.countryCode && c.countryCode !== 'XX' ? (
+                        <ReactCountryFlag
+                          countryCode={c.countryCode}
+                          svg
+                          className="w-7! h-7! rounded-sm"
+                        />
+                      ) : (
+                        <span className="text-[22px]">🌏</span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <div

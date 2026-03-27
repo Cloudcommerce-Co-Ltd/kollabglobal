@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight, Plus } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 import { CAMPAIGN_STATUS_CONFIG } from '@/lib/constants';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import type { CampaignListItem } from '@/types/campaign';
@@ -35,9 +36,9 @@ function CampaignIcon({ product }: { product: CampaignListItem['product'] }) {
 function getCreatorCounts(creators: CampaignListItem['creators']) {
   const total = creators.length;
   const accepted = creators.filter(
-    (c) => c.status === 'ACCEPTED' || c.status === 'COMPLETED'
+    c => c.status === 'ACCEPTED' || c.status === 'COMPLETED',
   ).length;
-  const pending = creators.filter((c) => c.status === 'PENDING').length;
+  const pending = creators.filter(c => c.status === 'PENDING').length;
   return { accepted, total, pending };
 }
 
@@ -48,7 +49,9 @@ function EmptyState() {
         <Plus size={24} className="text-brand" />
       </div>
       <p className="mb-1 text-[16px] font-semibold text-dark">ยังไม่มีแคมเปญ</p>
-      <p className="mb-5 text-[13px] text-muted-text">สร้างแคมเปญแรกของคุณเพื่อเริ่มต้น</p>
+      <p className="mb-5 text-[13px] text-muted-text">
+        สร้างแคมเปญแรกของคุณเพื่อเริ่มต้น
+      </p>
       <Link
         href="/campaigns/new/country?new=1"
         className="rounded-[10px] bg-brand px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-90"
@@ -79,15 +82,17 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
         <div />
       </div>
 
-      {campaigns.map((c) => {
+      {campaigns.map(c => {
         const statusCfg = CAMPAIGN_STATUS_CONFIG[c.status];
         const { accepted, total, pending } = getCreatorCounts(c.creators);
         const platforms = c.package?.platforms ?? [];
-        const displayName = c.product?.productName ?? `แคมเปญ #${c.id.slice(-4)}`;
+        const displayName =
+          c.product?.productName ?? `แคมเปญ #${c.id.slice(-4)}`;
 
-        const href = c.status === 'AWAITING_PAYMENT'
-          ? `/campaigns/${c.id}/checkout`
-          : `/campaigns/${c.id}`;
+        const href =
+          c.status === 'AWAITING_PAYMENT'
+            ? `/campaigns/${c.id}/checkout`
+            : `/campaigns/${c.id}`;
 
         return (
           <Link
@@ -118,7 +123,7 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
                     <span>{c.package?.numCreators ?? total} ครีเอเตอร์</span>
                     {platforms.length > 0 && (
                       <span className="flex items-center gap-1">
-                        {platforms.map((p) => (
+                        {platforms.map(p => (
                           <PlatformIcon key={p} platform={p} size={13} />
                         ))}
                       </span>
@@ -131,7 +136,11 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
               <div className="flex justify-center items-center gap-1.5 text-[13px] text-dark">
                 {c.country ? (
                   <>
-                    <span>{c.country.flag}</span>
+                    <ReactCountryFlag
+                      countryCode={c.country.countryCode}
+                      svg
+                      className="w-4! h-4!"
+                    />
                     <span className="truncate">{c.country.name}</span>
                   </>
                 ) : (
@@ -141,7 +150,9 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
 
               {/* Column 3: Status pill */}
               <div className="text-center">
-                <span className={`rounded-full px-3 py-1 text-[12px] font-semibold ${statusCfg.pillClass}`}>
+                <span
+                  className={`rounded-full px-3 py-1 text-[12px] font-semibold ${statusCfg.pillClass}`}
+                >
                   {statusCfg.label}
                 </span>
               </div>
@@ -181,14 +192,32 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 text-[12px] text-muted-text">
-                      {c.country ? `${c.country.flag} ${c.country.name} • ` : ''}{c.package?.numCreators ?? total} ครีเอเตอร์ • {accepted}/{c.package?.numCreators ?? total} ตอบรับ
+                    <div className="mt-0.5 flex items-center gap-1 text-[12px] text-muted-text">
+                      {c.country && (
+                        <>
+                          <ReactCountryFlag
+                            countryCode={c.country.countryCode}
+                            svg
+                            className="w-3.5! h-3.5! rounded-sm"
+                          />
+                          <span>{c.country.name} •</span>
+                        </>
+                      )}
+                      <span>
+                        {c.package?.numCreators ?? total} ครีเอเตอร์ •{' '}
+                        {accepted}/{c.package?.numCreators ?? total} ตอบรับ
+                      </span>
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-muted-text mt-0.5 shrink-0" />
+                  <ChevronRight
+                    size={16}
+                    className="text-muted-text mt-0.5 shrink-0"
+                  />
                 </div>
                 <div className="mt-1.5">
-                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${statusCfg.pillClass}`}>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${statusCfg.pillClass}`}
+                  >
                     {statusCfg.label}
                   </span>
                 </div>

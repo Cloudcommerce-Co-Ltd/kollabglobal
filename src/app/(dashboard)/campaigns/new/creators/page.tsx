@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCampaignStore } from '@/stores/campaign-store';
@@ -20,59 +21,66 @@ function CreatorCard({
   onToggle: (id: string) => void;
 }) {
   return (
+    <div
+      onClick={() => !isDisabled && onToggle(creator.id)}
+      className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${
+        isSelected ? 'border-brand' : 'border-border-ui'
+      } ${isDisabled ? 'opacity-45' : ''}`}
+    >
+      {/* Checkmark */}
       <div
-        onClick={() => !isDisabled && onToggle(creator.id)}
-        className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${
-          isSelected ? 'border-brand' : 'border-border-ui'
-        } ${isDisabled ? 'opacity-45' : ''}`}
+        className={`absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full border-2 ${
+          isSelected ? 'border-brand bg-brand' : 'border-border-ui bg-white'
+        }`}
       >
-        {/* Checkmark */}
-        <div
-          className={`absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full border-2 ${
-            isSelected
-              ? 'border-brand bg-brand'
-              : 'border-border-ui bg-white'
-          }`}
-        >
-          {isSelected && <Check size={11} color="#fff" />}
-        </div>
-
-        {/* Avatar */}
-        <div className="relative mb-2 inline-block">
-          <div className="relative m-1.5 size-11 overflow-hidden rounded-full bg-brand-light flex items-center justify-center">
-            <span className="text-sm font-bold text-brand">{creator.name.charAt(0)}</span>
-            {creator.avatar && (
-              <Image
-                src={creator.avatar}
-                alt={creator.name}
-                fill
-                className="rounded-full object-cover"
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                unoptimized
-              />
-            )}
-          </div>
-          <span className="absolute bottom-0 right-0 flex size-4.25 items-center justify-center rounded-full text-[18px]">
-            {creator.countryFlag}
-          </span>
-        </div>
-
-        <div className="text-sm font-semibold text-dark mb-2">
-          {creator.name}
-        </div>
-
-        <div className="w-full flex flex-col gap-1">
-          <span className="w-full flex justify-between rounded-[5px] bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">
-            <p>Engagement</p>
-            <p>{creator.engagement}</p>
-          </span>
-          <span className="w-full flex justify-between rounded-[5px] bg-secondary-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-secondary-brand">
-            <p>Reach</p>
-            <p>{creator.reach}</p>
-          </span>
-        </div>
+        {isSelected && <Check size={11} color="#fff" />}
       </div>
-    );
+
+      {/* Avatar */}
+      <div className="relative mb-2 inline-block">
+        <div className="relative m-1.5 size-11 overflow-hidden rounded-full bg-brand-light flex items-center justify-center">
+          <span className="text-sm font-bold text-brand">
+            {creator.name.charAt(0)}
+          </span>
+          {creator.avatar && (
+            <Image
+              src={creator.avatar}
+              alt={creator.name}
+              fill
+              className="rounded-full object-cover"
+              onError={e => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+              unoptimized
+            />
+          )}
+        </div>
+        {creator.countryCode && (
+          <span className="absolute bottom-0 right-0 flex size-4.25 items-center justify-center overflow-hidden">
+            <ReactCountryFlag
+              countryCode={creator.countryCode}
+              svg
+              className="w-full! h-full!"
+            />
+          </span>
+        )}
+      </div>
+
+      <div className="text-sm font-semibold text-dark">{creator.name}</div>
+      <div className="mb-2 text-xs text-muted-text">{creator.niche}</div>
+
+      <div className="w-full flex flex-col gap-1">
+        <span className="w-full flex justify-between rounded-[5px] bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">
+          <p>Engagement</p>
+          <p>{creator.engagement}</p>
+        </span>
+        <span className="w-full flex justify-between rounded-[5px] bg-secondary-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-secondary-brand">
+          <p>Reach</p>
+          <p>{creator.reach}</p>
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function SelectCreatorsPage() {
@@ -152,9 +160,7 @@ export default function SelectCreatorsPage() {
             <span className="rounded-[8px] bg-brand px-2.5 py-0.5 text-xs font-bold text-white">
               แนะนำ
             </span>
-            <span className="text-sm font-semibold text-dark">
-              Top Picks
-            </span>
+            <span className="text-sm font-semibold text-dark">Top Picks</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {mainCreators.slice(0, maxCreators).map((creator, i) => {
@@ -195,7 +201,7 @@ export default function SelectCreatorsPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {backupCreators.map((creator) => {
+              {backupCreators.map(creator => {
                 const isSelected = selectedIds.includes(creator.id);
                 const isDisabled =
                   !isSelected && selectedIds.length >= maxCreators;

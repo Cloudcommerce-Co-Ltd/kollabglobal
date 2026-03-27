@@ -18,7 +18,7 @@ export default async function CampaignsPage() {
     status: c.status,
     createdAt: c.createdAt.toISOString(),
     country: c.country
-      ? { id: c.country.id, name: c.country.name, flag: c.country.flag }
+      ? { id: c.country.id, name: c.country.name, countryCode: c.country.countryCode }
       : null,
     package: c.package
       ? { id: c.package.id, name: c.package.name, numCreators: c.package.numCreators, platforms: c.package.platforms }

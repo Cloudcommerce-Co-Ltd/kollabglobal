@@ -14,6 +14,7 @@ import {
   Target,
   Package,
 } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 import { isBriefContentFilled, canPublishBrief } from '@/lib/brief-utils';
 import {
   fetchCampaign,
@@ -57,7 +58,7 @@ export default function CreateBriefPage({
   const [targetLang, setTargetLang] = useState<{
     code: string;
     name: string;
-    flag: string;
+    countryCode: string;
   } | null>(null);
   const [translateError, setTranslateError] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -78,9 +79,9 @@ export default function CreateBriefPage({
           ? {
               code: data.country.languageCode,
               name: data.country.languageName,
-              flag: data.country.flag,
+              countryCode: data.country.countryCode,
             }
-          : { code: 'en', name: 'English', flag: '🇺🇸' };
+          : { code: 'en', name: 'English', countryCode: 'US' };
         setTargetLang(lang);
         setLoading(false);
       })
@@ -543,9 +544,21 @@ export default function CreateBriefPage({
                 </div>
                 <div>
                   <h3 className="m-0 text-lg font-bold text-dark">
-                    {needsTranslation
-                      ? `แปล Brief → ${targetLang?.name} ${targetLang?.flag}`
-                      : 'Translation'}
+                    {needsTranslation ? (
+                      <span className="flex items-center gap-1.5">
+                        แปล Brief →
+                        {targetLang?.countryCode && (
+                          <ReactCountryFlag
+                            countryCode={targetLang.countryCode}
+                            svg
+                            className="w-4! h-4! rounded-sm"
+                          />
+                        )}
+                        {targetLang?.name}
+                      </span>
+                    ) : (
+                      'Translation'
+                    )}
                   </h3>
                   {!needsTranslation && (
                     <div className="mt-0.5 text-[13px] text-muted-text">

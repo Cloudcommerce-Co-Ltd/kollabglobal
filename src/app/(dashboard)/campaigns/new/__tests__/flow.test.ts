@@ -17,7 +17,7 @@ const mkPackage = (id: number): Package => ({
 
 const mkCreator = (id: string): Creator => ({
   id, name: id, niche: 'Food', engagement: '5%',
-  reach: '100K', avatar: '👩', countryFlag: '🇹🇭', isBackup: false,
+  reach: '100K', avatar: '👩', countryCode: 'TH', isBackup: false,
   platform: null, socialHandle: null, portfolioUrl: null,
 });
 

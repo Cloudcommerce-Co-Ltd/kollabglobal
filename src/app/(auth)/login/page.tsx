@@ -8,7 +8,7 @@ export default function LoginPage() {
       <div className="animate-fade-up w-full max-w-105">
         {/* Logo + brand */}
         <div className="text-center mb-9">
-          <div className="animate-float inline-flex items-center gap-1.5 mb-3">
+          <div className="inline-flex items-center gap-1.5 mb-3">
             <Image
               src={logoNameImg}
               alt="KOLLAB Global"
