@@ -40,7 +40,7 @@ describe('GET /api/countries', () => {
     for (const country of data) {
       expect(country).toHaveProperty('id');
       expect(country).toHaveProperty('name');
-      expect(country).toHaveProperty('flag');
+      expect(country).toHaveProperty('countryCode');
       expect(country.isActive).toBe(true);
     }
   });

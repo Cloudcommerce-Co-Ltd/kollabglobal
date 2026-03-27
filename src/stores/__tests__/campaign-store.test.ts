@@ -1,0 +1,129 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { useCampaignStore } from '../campaign-store';
+import type { Country, Package, Creator } from '@/types';
+
+const COUNTRY_TH: Country = {
+  id: 1, name: 'Thailand', countryCode: 'TH', region: 'asia', languageCode: 'th', languageName: 'Thai',
+  creatorsAvail: 1500, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+};
+
+const COUNTRY_SG: Country = {
+  id: 99, name: 'Singapore', countryCode: 'SG', region: 'global', languageCode: 'en', languageName: 'English',
+  creatorsAvail: 800, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
+  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+};
+
+const PKG_STARTER: Package = {
+  id: 1, name: 'Starter', tagline: 'Starter package', badge: null,
+  numCreators: 5, price: 12500, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
+  estReach: null, estEngagement: null,
+};
+
+const PKG_POPULAR: Package = {
+  id: 2, name: 'Popular', tagline: 'Popular package', badge: 'แนะนำ',
+  numCreators: 10, price: 33250, platforms: [], deliverables: [], cpmLabel: '', cpmSavings: '',
+  estReach: null, estEngagement: null,
+};
+
+const CREATOR_1: Creator = {
+  id: 'creator-1', name: 'Creator 1', niche: 'Food', engagement: '5%',
+  reach: '100K', avatar: '👩', countryCode: 'TH', countryId: 1, isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
+};
+
+const CREATOR_2: Creator = {
+  id: 'creator-2', name: 'Creator 2', niche: 'Beauty', engagement: '7%',
+  reach: '200K', avatar: '👨', countryCode: 'VN', countryId: 2, isBackup: false,
+  platform: null, socialHandle: null, portfolioUrl: null,
+};
+
+describe('campaign-store', () => {
+  beforeEach(() => {
+    useCampaignStore.getState().reset();
+  });
+
+  it('has correct initial state', () => {
+    const state = useCampaignStore.getState();
+    expect(state.status).toBe('idle');
+    expect(state.countryData).toBeNull();
+    expect(state.promotionType).toBeNull();
+    expect(state.productData).toBeNull();
+    expect(state.packageData).toBeNull();
+    expect(state.selectedCreatorsData).toEqual([]);
+    expect(state.chargeId).toBeNull();
+    expect(state.campaignId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
+  });
+
+  it('setCountry sets countryData and status to draft', () => {
+    useCampaignStore.getState().setCountry(COUNTRY_TH);
+    const state = useCampaignStore.getState();
+    expect(state.countryData).toEqual(COUNTRY_TH);
+    expect(state.status).toBe('draft');
+  });
+
+  it('setPromotionType sets PRODUCT', () => {
+    useCampaignStore.getState().setPromotionType('PRODUCT');
+    expect(useCampaignStore.getState().promotionType).toBe('PRODUCT');
+  });
+
+  it('setPromotionType sets SERVICE', () => {
+    useCampaignStore.getState().setPromotionType('SERVICE');
+    expect(useCampaignStore.getState().promotionType).toBe('SERVICE');
+  });
+
+  it('setProduct sets full ProductData object', () => {
+    const product = {
+      brandName: 'Test Brand',
+      productName: 'Test Product',
+      category: 'Beauty',
+      description: 'A test product',
+      sellingPoints: 'Good quality',
+      url: 'https://example.com',
+      imageUrl: 'https://example.com/img.png',
+      isService: false,
+    };
+    useCampaignStore.getState().setProduct(product);
+    expect(useCampaignStore.getState().productData).toEqual(product);
+  });
+
+  it('setPackage sets packageData', () => {
+    useCampaignStore.getState().setPackage(PKG_STARTER);
+    expect(useCampaignStore.getState().packageData).toEqual(PKG_STARTER);
+  });
+
+  it('setCreators sets selectedCreatorsData array', () => {
+    useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
+    expect(useCampaignStore.getState().selectedCreatorsData).toEqual([CREATOR_1, CREATOR_2]);
+  });
+
+  it('setCheckoutData stores charge info and sets status to checkout', () => {
+    useCampaignStore.getState().setCheckoutData('charge-abc', 'campaign-xyz', 'https://qr.code/img');
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBe('charge-abc');
+    expect(state.campaignId).toBe('campaign-xyz');
+    expect(state.qrCodeUrl).toBe('https://qr.code/img');
+    expect(state.status).toBe('checkout');
+  });
+
+  it('reset returns to initial state after mutations including checkout data', () => {
+    useCampaignStore.getState().setCountry(COUNTRY_SG);
+    useCampaignStore.getState().setPackage(PKG_POPULAR);
+    useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().reset();
+
+    const state = useCampaignStore.getState();
+    expect(state.status).toBe('idle');
+    expect(state.countryData).toBeNull();
+    expect(state.promotionType).toBeNull();
+    expect(state.productData).toBeNull();
+    expect(state.packageData).toBeNull();
+    expect(state.selectedCreatorsData).toEqual([]);
+    expect(state.chargeId).toBeNull();
+    expect(state.campaignId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
+  });
+});
