@@ -72,6 +72,7 @@ const mockCampaign = {
   duration: 30,
   createdAt: new Date(),
   updatedAt: new Date(),
+  liveAt: null,
 };
 
 function makeRequest(method: string, body?: object) {

@@ -40,7 +40,10 @@ export async function PATCH(
 
   const updated = await prisma.campaign.update({
     where: { id },
-    data: { status: targetStatus },
+    data: {
+      status: targetStatus,
+      ...(targetStatus === "COMPLETED" ? { liveAt: new Date() } : {}),
+    },
   });
 
   return NextResponse.json(updated);

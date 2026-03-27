@@ -27,6 +27,7 @@ const mockCampaign = {
   duration: 30,
   createdAt: new Date(),
   updatedAt: new Date(),
+  liveAt: null,
 };
 
 function makeRequest(body?: object) {
@@ -105,5 +106,23 @@ describe("PATCH /api/campaigns/[id]/status", () => {
     vi.mocked(prisma.campaign.update).mockResolvedValue({ ...mockCampaign, status: "ACTIVE" });
     const res = await PATCH(makeRequest({ status: "ACTIVE" }), makeParams());
     expect(res.status).toBe(200);
+  });
+
+  it("transitions ACTIVE → COMPLETED and sets liveAt", async () => {
+    mockAuth.mockResolvedValue(mockSession);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue({ ...mockCampaign, status: "ACTIVE" });
+    vi.mocked(prisma.campaign.update).mockResolvedValue({ ...mockCampaign, status: "COMPLETED" });
+    const res = await PATCH(makeRequest({ status: "COMPLETED" }), makeParams());
+    expect(res.status).toBe(200);
+    const updateCall = vi.mocked(prisma.campaign.update).mock.calls[0][0];
+    expect(updateCall.data.status).toBe("COMPLETED");
+    expect(updateCall.data.liveAt).toBeInstanceOf(Date);
+  });
+
+  it("returns 400 for illegal transition (PENDING → COMPLETED)", async () => {
+    mockAuth.mockResolvedValue(mockSession);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign);
+    const res = await PATCH(makeRequest({ status: "COMPLETED" }), makeParams());
+    expect(res.status).toBe(400);
   });
 });

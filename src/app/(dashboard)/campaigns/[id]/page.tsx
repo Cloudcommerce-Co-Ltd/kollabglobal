@@ -7,6 +7,7 @@ import {
   resolveDisplayStatus,
   getStatusBadge,
 } from '@/lib/campaign-detail-utils';
+import { computeDurationDisplay } from '@/lib/campaign-duration';
 import { CampaignIcon } from '@/components/ui/campaign-icon';
 import { PlatformIcon } from '@/components/icons/platform-icons';
 import { ActionCard } from '@/components/campaign/action-card';
@@ -34,6 +35,25 @@ export default async function CampaignDetailPage({
     // Fall through to render the awaiting_payment status UI below.
   }
   const badge = getStatusBadge(displayStatus);
+
+  // Extract deadline from brief content (deadline lives in Thai content)
+  let briefDeadline: string | null = null;
+  if (campaign.brief?.content) {
+    try {
+      const raw = campaign.brief.contentTh ?? campaign.brief.content;
+      const parsed = JSON.parse(raw) as { deadline?: string };
+      briefDeadline = parsed.deadline ?? null;
+    } catch {
+      briefDeadline = null;
+    }
+  }
+
+  const durationDisplay = computeDurationDisplay({
+    displayStatus,
+    duration: campaign.duration,
+    deadline: briefDeadline,
+    liveAt: campaign.liveAt?.toISOString() ?? null,
+  });
   const isService = campaign.product?.isService ?? false;
   const isLive = displayStatus === 'live';
   const isDomestic = campaign.country?.name === 'Thailand';
@@ -110,7 +130,9 @@ export default async function CampaignDetailPage({
                 <div className="flex items-center gap-2.5 mt-1 flex-wrap">
                   <p className="text-sm text-muted-text m-0">
                     {productName} • {creatorsCount} ครีเอเตอร์ •{' '}
-                    {campaign.duration} วัน
+                    <span className={durationDisplay.isOverdue ? 'text-red-600 font-semibold' : ''}>
+                      {durationDisplay.text}
+                    </span>
                   </p>
                   {isService && (
                     <span className="text-xs font-semibold px-2 py-0.5 rounded bg-secondary-brand-light text-secondary-brand">
@@ -148,7 +170,7 @@ export default async function CampaignDetailPage({
               totalCount={creatorsCount}
               platformCount={platforms.length}
               isLive={isLive}
-              duration={campaign.duration}
+              durationDisplay={durationDisplay}
             />
           </div>
         </div>

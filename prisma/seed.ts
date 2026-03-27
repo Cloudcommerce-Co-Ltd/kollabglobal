@@ -11,6 +11,10 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
+function futureDate(days: number): string {
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 async function main() {
   console.log('Seeding countries...');
 
@@ -794,6 +798,13 @@ async function main() {
     // Clean up dev campaigns so re-seeding always reflects fresh state
     await prisma.campaign.deleteMany({ where: { userId: devUser.id } });
 
+    // Deadlines relative to seed time so they're always in the future
+    const deadlineC2 = futureDate(34);
+    const deadlineC3 = futureDate(24);
+    const deadlineC4 = futureDate(-7); // 7 days overdue — demos เกินกำหนด state
+    const deadlineC5 = futureDate(30);
+    const deadlineC7 = futureDate(35);
+
     // Campaign 1: PENDING — Vietnam, PRODUCT
     // Payment confirmed, waiting for brand to create brief
     const c1 = await prisma.campaign.create({
@@ -846,8 +857,22 @@ async function main() {
     await prisma.campaignBrief.create({
       data: {
         campaignId: c2.id,
-        content: '## Campaign Brief: TH Brand Spa\n\nCreate content showcasing our premium spa experience. Focus on the relaxation and luxury atmosphere. Show the herbal treatments and professional staff.',
-        contentTh: '## แคมเปญสปา TH Brand\n\nสร้างคอนเทนต์แสดงประสบการณ์สปาระดับพรีเมียม เน้นบรรยากาศผ่อนคลายและความหรูหรา แสดงการบำบัดด้วยสมุนไพรและทีมผู้เชี่ยวชาญ',
+        content: JSON.stringify({
+          name: 'TH Brand Spa Campaign',
+          keys: 'Premium spa, herbal treatments, luxury relaxation',
+          dos: 'Show the premium spa atmosphere and herbal treatment process',
+          deliverables: '• 1 TikTok video (60 sec) — spa experience showcase\n• 3 Instagram Stories — behind-the-scenes',
+          disclosure: '#ad #sponsored #KOLLABGlobal #THBrandSpa',
+          deadline: deadlineC2,
+        }),
+        contentTh: JSON.stringify({
+          name: 'แคมเปญสปา TH Brand',
+          keys: 'สปาระดับพรีเมียม บำบัดด้วยสมุนไพร ผ่อนคลายหรูหรา',
+          dos: 'แสดงบรรยากาศสปาระดับพรีเมียมและขั้นตอนการบำบัดด้วยสมุนไพร',
+          deliverables: '• 1 วิดีโอ TikTok (60 วินาที) — โชว์ประสบการณ์สปา\n• 3 Instagram Stories — เบื้องหลัง',
+          disclosure: '#ad #sponsored #KOLLABGlobal #THBrandSpa',
+          deadline: deadlineC2,
+        }),
         publishedAt: new Date(),
       },
     });
@@ -885,8 +910,22 @@ async function main() {
     await prisma.campaignBrief.create({
       data: {
         campaignId: c3.id,
-        content: '## Campaign Brief: Glow Labs Vitamin C Serum\n\nCreate authentic before/after content showing the serum routine. Emphasize the brightening effect and skin texture improvement after 2 weeks.',
-        contentTh: '## แคมเปญ Glow Labs Vitamin C Serum\n\nสร้างคอนเทนต์แบบ before/after แสดงขั้นตอนการใช้เซรั่ม เน้นผลลัพธ์ที่กระจ่างใสและผิวพรรณที่ดีขึ้นใน 2 สัปดาห์',
+        content: JSON.stringify({
+          name: 'Glow Labs Vitamin C Serum Campaign',
+          keys: 'Vitamin C 20%, brightening, before/after, skin texture',
+          dos: 'Create authentic before/after content showing the serum routine over 2 weeks',
+          deliverables: '• 1 TikTok video — before/after skin transformation\n• 2 Instagram Reels — daily routine',
+          disclosure: '#ad #sponsored #KOLLABGlobal #GlowLabs',
+          deadline: deadlineC3,
+        }),
+        contentTh: JSON.stringify({
+          name: 'แคมเปญ Glow Labs Vitamin C Serum',
+          keys: 'วิตามิน C 20% กระจ่างใส before/after ผิวพรรณดีขึ้น',
+          dos: 'สร้างคอนเทนต์ before/after แสดงขั้นตอนการใช้เซรั่มเป็นเวลา 2 สัปดาห์',
+          deliverables: '• 1 วิดีโอ TikTok — การเปลี่ยนแปลงของผิว before/after\n• 2 Instagram Reels — ขั้นตอนประจำวัน',
+          disclosure: '#ad #sponsored #KOLLABGlobal #GlowLabs',
+          deadline: deadlineC3,
+        }),
         publishedAt: new Date(),
       },
     });
@@ -924,8 +963,22 @@ async function main() {
     await prisma.campaignBrief.create({
       data: {
         campaignId: c4.id,
-        content: '## Campaign Brief: SnackBox TH Durian Crisps\n\nCreate a reaction/taste test video. Show the crispy texture and authentic Thai durian flavor. Add a "first time trying durian" angle for Japanese audience.',
-        contentTh: '## แคมเปญ SnackBox TH ทุเรียนกรอบ\n\nสร้างวิดีโอทดลองชิมทุเรียนกรอบ แสดงเนื้อสัมผัสกรอบและรสชาติทุเรียนไทยแท้ เพิ่มมุม "ครั้งแรกที่ได้ลองทุเรียน" สำหรับผู้ชมญี่ปุ่น',
+        content: JSON.stringify({
+          name: 'SnackBox TH Durian Crisps Campaign',
+          keys: 'Durian crisps, Thai snack, reaction video, first-time experience',
+          dos: 'Create reaction/taste test video showing crispy texture and authentic Thai durian flavor',
+          deliverables: '• 1 TikTok video — first-time durian taste test\n• 2 Instagram Stories — unboxing and taste',
+          disclosure: '#ad #sponsored #KOLLABGlobal #SnackBoxTH',
+          deadline: deadlineC4,
+        }),
+        contentTh: JSON.stringify({
+          name: 'แคมเปญ SnackBox TH ทุเรียนกรอบ',
+          keys: 'ทุเรียนกรอบ ขนมไทย วิดีโอทดลองชิม ประสบการณ์ครั้งแรก',
+          dos: 'สร้างวิดีโอทดลองชิมทุเรียนกรอบ แสดงเนื้อสัมผัสกรอบและรสชาติทุเรียนไทยแท้',
+          deliverables: '• 1 วิดีโอ TikTok — ทดลองชิมทุเรียนครั้งแรก\n• 2 Instagram Stories — แกะกล่องและรีวิวรสชาติ',
+          disclosure: '#ad #sponsored #KOLLABGlobal #SnackBoxTH',
+          deadline: deadlineC4,
+        }),
         publishedAt: new Date(),
       },
     });
@@ -946,6 +999,7 @@ async function main() {
         packageId: 1, // Passport (5 creators)
         promotionType: 'PRODUCT',
         status: 'COMPLETED',
+        liveAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
       },
     });
     await prisma.campaignProduct.create({
@@ -963,8 +1017,22 @@ async function main() {
     await prisma.campaignBrief.create({
       data: {
         campaignId: c5.id,
-        content: '## Campaign Brief: BambooTea Green Tea\n\nCreate a morning routine video featuring our organic green tea. Show the calming ritual and highlight the zero-sugar, organic certification.',
-        contentTh: '## แคมเปญ BambooTea ชาเขียวออร์แกนิค\n\nสร้างวิดีโอ morning routine ที่มีชาเขียวออร์แกนิคของเรา แสดงช่วงเวลาผ่อนคลายและเน้น zero-sugar และใบรับรองออร์แกนิค',
+        content: JSON.stringify({
+          name: 'BambooTea Green Tea Campaign',
+          keys: 'Organic green tea, morning routine, zero-sugar, calming ritual',
+          dos: 'Create a morning routine video featuring the tea. Show the calming ritual and highlight zero-sugar, organic certification.',
+          deliverables: '• 1 TikTok video — morning routine with tea\n• 2 Instagram Stories — organic lifestyle',
+          disclosure: '#ad #sponsored #KOLLABGlobal #BambooTea',
+          deadline: deadlineC5,
+        }),
+        contentTh: JSON.stringify({
+          name: 'แคมเปญ BambooTea ชาเขียวออร์แกนิค',
+          keys: 'ชาเขียวออร์แกนิค morning routine zero-sugar ผ่อนคลาย',
+          dos: 'สร้างวิดีโอ morning routine ที่มีชาเขียวออร์แกนิค แสดงช่วงเวลาผ่อนคลายและเน้น zero-sugar และใบรับรองออร์แกนิค',
+          deliverables: '• 1 วิดีโอ TikTok — morning routine กับชาเขียว\n• 2 Instagram Stories — ไลฟ์สไตล์ออร์แกนิค',
+          disclosure: '#ad #sponsored #KOLLABGlobal #BambooTea',
+          deadline: deadlineC5,
+        }),
         publishedAt: new Date(),
       },
     });
@@ -1033,7 +1101,7 @@ async function main() {
           dos: 'DO: แสดงประสบการณ์จริงของคุณกับโปรแกรม\nDO: โชว์ผลลัพธ์ที่เห็นได้ชัด เช่น ความฟิต น้ำหนัก ความมั่นใจ\n\nDON\'T: เปรียบเทียบกับโปรแกรมอื่นโดยตรง\nDON\'T: อ้างผลลัพธ์เกินจริงหรือสัญญาผลลัพธ์ที่ไม่สมจริง',
           deliverables: '• 1 วิดีโอ TikTok (30-60 วินาที) — รีวิวประสบการณ์การเทรน โชว์ท่าออกกำลังกาย\n• 3 Instagram Stories — เบื้องหลังการเทรน พร้อม Swipe-up link\n• 1 Instagram Reel — Transformation หรือ Day-in-life กับโปรแกรม',
           disclosure: '#ad #sponsored #KOLLABGlobal #UrbanFit',
-          deadline: '2026-05-01',
+          deadline: deadlineC7,
         }),
         publishedAt: new Date(),
       },

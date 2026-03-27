@@ -194,6 +194,7 @@ model Campaign {
   duration      Int            @default(30) @map("duration")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
+  liveAt        DateTime?      @map("live_at")
 
   user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   country  Country           @relation(fields: [countryId], references: [id])
