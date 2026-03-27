@@ -94,18 +94,13 @@ export default function SelectCreatorsPage() {
     fetch('/api/creators')
       .then(r => r.json())
       .then((data: Creator[]) => {
-        const main = data.filter((c: Creator) => !c.isBackup && c.niche === packageData?.name);
+        const main = data.filter((c: Creator) => !c.isBackup);
         const backup = data.filter((c: Creator) => c.isBackup);
         setMainCreators(main);
         setBackupCreators(backup);
-        if (main.length < maxCreators) {
-          setSelectedIds([
-            ...main.slice(0, maxCreators).map(c => c.id),
-            ...backup.slice(0, maxCreators - main.length).map(c => c.id),
-          ]);
-        } else {
-          setSelectedIds(main.slice(0, maxCreators).map(c => c.id));
-        }
+        setSelectedIds(prev =>
+          prev.length > 0 ? prev : main.slice(0, maxCreators).map(c => c.id),
+        );
       });
   }, [maxCreators, packageData]);
 
