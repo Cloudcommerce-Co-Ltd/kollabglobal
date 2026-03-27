@@ -93,7 +93,6 @@ export function ShipmentCard({ creators, creatorsCount, isDomestic, onShipped }:
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-[15px] text-dark">{cc.creator.name}</div>
-                <div className="text-[13px] text-muted-text">{cc.creator.niche}</div>
               </div>
               {confirmed ? (
                 <div className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[13px] font-semibold bg-brand-light text-teal-700">

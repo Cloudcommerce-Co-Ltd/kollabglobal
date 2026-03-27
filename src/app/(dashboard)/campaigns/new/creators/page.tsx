@@ -57,10 +57,9 @@ function CreatorCard({
           </span>
         </div>
 
-        <div className="text-sm font-semibold text-dark">
+        <div className="text-sm font-semibold text-dark mb-2">
           {creator.name}
         </div>
-        <div className="mb-2 text-xs text-muted-text">{creator.niche}</div>
 
         <div className="w-full flex flex-col gap-1">
           <span className="w-full flex justify-between rounded-[5px] bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">

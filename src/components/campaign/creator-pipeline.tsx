@@ -192,7 +192,6 @@ export function CreatorPipeline({
               <div className="font-semibold text-sm text-dark truncate">
                 {cc.creator.name}
               </div>
-              <div className="text-xs text-muted-text">{cc.creator.niche}</div>
             </div>
 
             {/* Step indicators */}

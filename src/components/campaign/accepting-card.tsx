@@ -96,7 +96,6 @@ export function AcceptingCard({ creators, isService, onAllAccepted }: AcceptingC
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm text-dark">{cc.creator.name}</div>
-                <div className="text-xs text-muted-text">{cc.creator.niche}</div>
               </div>
               {cc.status === 'ACCEPTED' ? (
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-light text-teal-700">

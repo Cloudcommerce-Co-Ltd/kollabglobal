@@ -94,7 +94,7 @@ export default function SelectPackagePage() {
                   )}
                   <div
                     onClick={() => handleSelect(pkg)}
-                    className={`relative h-full flex cursor-pointer flex-col overflow-hidden rounded-[18px] border-2 transition-all ${
+                    className={`relative h-full flex cursor-pointer flex-col rounded-[18px] border-2 transition-all ${
                       isSelected
                         ? 'border-brand shadow-[0_4px_24px_color-mix(in_srgb,var(--color-brand)_12%,transparent)]'
                         : 'border-border-ui'
@@ -235,9 +235,6 @@ export default function SelectPackagePage() {
                                     {cr.name}
                                   </span>
                                 </div>
-                                <div className="mb-0.75 text-[11px] text-[#aaa]">
-                                  {cr.niche}
-                                </div>
                                 <div className="flex gap-2 text-[11px]">
                                   <span>
                                     Eng:{' '}
@@ -263,7 +260,7 @@ export default function SelectPackagePage() {
                   </div>
 
                   {/* Stats footer */}
-                  <div className="grid grid-cols-2 bg-[#f8fffe]">
+                  <div className="grid grid-cols-2 bg-[#f8fffe] rounded-b-[18px]">
                     <div className="border-r border-border-ui px-4.5 py-3.5 text-center">
                       <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.07em] text-muted-text">
                         Reach
