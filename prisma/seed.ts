@@ -285,7 +285,7 @@ async function main() {
       name: 'The Global Bridge',
       tagline: 'ขยายฐานข้ามแพลตฟอร์ม',
       badge: 'แนะนำ',
-      numCreators: 10,
+      numCreators: 9,
       price: 33250,
       platforms: ['tiktok', 'instagram'],
       deliverables: ['TikTok 1 วิดีโอ (15–60 วิ)', 'IG 1 reel + 3 stories'],
@@ -318,6 +318,7 @@ async function main() {
   console.log('Seeding creators...');
 
   // Clear existing creators (cascade-safe: CampaignCreator references are dev-only)
+  await prisma.packageCreator.deleteMany({});
   await prisma.campaignCreator.deleteMany({});
   await prisma.creator.deleteMany({});
 
@@ -755,7 +756,6 @@ async function main() {
   }
 
   console.log('Seeding package creators...');
-  await prisma.packageCreator.deleteMany({});
 
   const nicheToPackageId: Record<string, number> = {
     'The Passport': 1,
@@ -764,17 +764,20 @@ async function main() {
   };
 
   // Main creators — derive packageId from niche
-  const sortOrderCounters: Record<number, number> = { 1: 0, 2: 0, 3: 0 };
+  // sortOrders are scoped per isBackup value — all API queries must filter by isBackup first
+  const sortOrderCounters: Record<number, number> = {};
   for (const creator of mainCreators) {
     const packageId = nicheToPackageId[creator.niche];
     if (!packageId) continue;
     const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+    sortOrderCounters[packageId] = (sortOrderCounters[packageId] ?? 0);
+    const sortOrder = sortOrderCounters[packageId]++;
     await prisma.packageCreator.create({
       data: {
         packageId,
         creatorId,
         isBackup: false,
-        sortOrder: sortOrderCounters[packageId]++,
+        sortOrder,
       },
     });
   }
