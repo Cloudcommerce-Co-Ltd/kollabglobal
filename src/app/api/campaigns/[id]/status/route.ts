@@ -51,7 +51,7 @@ export async function PATCH(
         campaignId: id,
         fromStatus: campaign.status,
         toStatus: targetStatus,
-        changedBy: session.user.id,
+        changedBy: session.user!.id,
       },
     });
     return result;

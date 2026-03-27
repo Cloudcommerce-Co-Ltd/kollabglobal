@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mkCountry = (id: number): Country => ({
-  id, name: String(id), flag: '🏳️', region: 'global', languageCode: 'en', languageName: 'English',
+  id, name: String(id), countryCode: 'XX', region: 'global', languageCode: 'en', languageName: 'English',
   creatorsAvail: 0, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
@@ -70,9 +70,11 @@ beforeEach(() => {
   mockPush.mockClear();
   mockReplace.mockClear();
 
-  global.fetch = vi.fn().mockResolvedValue({
-    json: () => Promise.resolve(SAMPLE_PACKAGES),
-  } as unknown as Response);
+  global.fetch = vi.fn().mockImplementation((url: string) =>
+    url.includes('/api/package-creators')
+      ? Promise.resolve({ ok: true, json: () => Promise.resolve({ 1: [], 2: [], 3: [] }) })
+      : Promise.resolve({ ok: true, json: () => Promise.resolve(SAMPLE_PACKAGES) })
+  );
 });
 
 describe("SelectPackagePage", () => {

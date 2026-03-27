@@ -15,17 +15,17 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockSearchParams,
 }));
 
-const mkCountry = (id: number, name: string, flag: string, creatorsAvail: number, region: string): Country => ({
-  id, name, flag, region, languageCode: 'en', languageName: 'English', creatorsAvail,
+const mkCountry = (id: number, name: string, countryCode: string, creatorsAvail: number, region: string): Country => ({
+  id, name, countryCode, region, languageCode: 'en', languageName: 'English', creatorsAvail,
   avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const SAMPLE_COUNTRIES: Country[] = [
-  mkCountry(1, "Thailand", "🇹🇭", 1500, "asia"),
-  mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"),
-  mkCountry(7, "United States", "🇺🇸", 1200, "global"),
-  mkCountry(8, "United Kingdom", "🇬🇧", 650, "global"),
+  mkCountry(1, "Thailand", "TH", 1500, "asia"),
+  mkCountry(2, "Vietnam", "VN", 840, "asia"),
+  mkCountry(7, "United States", "US", 1200, "global"),
+  mkCountry(8, "United Kingdom", "GB", 650, "global"),
 ];
 
 beforeEach(() => {
@@ -97,7 +97,7 @@ describe("SelectCountryPage", () => {
 
   it("restores previously selected country from store without ?new=1", async () => {
     // Pre-populate store (simulates returning to step 1 via back button)
-    useCampaignStore.getState().setCountry(mkCountry(1, "Thailand", "🇹🇭", 1500, "asia"));
+    useCampaignStore.getState().setCountry(mkCountry(1, "Thailand", "TH", 1500, "asia"));
     mockSearchParams.get.mockReturnValue(null); // no ?new=1
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Thailand")).toBeInTheDocument());
@@ -108,7 +108,7 @@ describe("SelectCountryPage", () => {
 
   it("resets store and clears selection when ?new=1 is present", async () => {
     // Pre-populate store
-    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "🇻🇳", 840, "asia"));
+    useCampaignStore.getState().setCountry(mkCountry(2, "Vietnam", "VN", 840, "asia"));
     mockSearchParams.get.mockReturnValue("1"); // simulate ?new=1
     render(<SelectCountryPage />);
     await waitFor(() => expect(screen.getByText("Vietnam")).toBeInTheDocument());

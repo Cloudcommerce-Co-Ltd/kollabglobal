@@ -9,7 +9,10 @@
       "Bash(script:*)",
       "Bash(pnpm build:*)",
       "Bash(git -C /Users/ntpls/Github/FastShip/kollabglobal stash)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(/usr/bin/grep \"campaigns/\\\\[id\\\\]/status/__tests__\")"
     ]
   }
 }

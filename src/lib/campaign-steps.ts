@@ -1,4 +1,4 @@
-import type { Country, Package, Creator } from "@/types";
+import type { Country, Package, CreatorWithPackageInfo } from "@/types";
 import type { ProductData } from "@/types/campaign";
 
 export const STEP_ROUTES = [
@@ -22,7 +22,7 @@ interface GuardState {
   countryData: Country | null;
   productData: ProductData | null;
   packageData: Package | null;
-  selectedCreatorsData: Creator[];
+  selectedCreatorsData: CreatorWithPackageInfo[];
 }
 
 export function validateStep(

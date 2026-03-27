@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CampaignNewLayout from "../layout";
 import { useCampaignStore } from "@/stores/campaign-store";
-import type { Country, Package, Creator } from "@/types";
+import type { Country, Package, CreatorWithPackageInfo } from "@/types";
 
 const mockReplace = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
 import { usePathname } from "next/navigation";
 
 const mkCountry = (): Country => ({
-  id: 1, name: "Thailand", flag: "🇹🇭", region: "asia", languageCode: "th", languageName: "Thai",
+  id: 1, name: "Thailand", countryCode: "TH", region: "asia", languageCode: "th", languageName: "Thai",
   creatorsAvail: 1500, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
@@ -26,10 +26,10 @@ const mkPackage = (): Package => ({
   estReach: null, estEngagement: null,
 });
 
-const mkCreator = (): Creator => ({
+const mkCreator = (): CreatorWithPackageInfo => ({
   id: "c1", name: "Creator", niche: "Food", engagement: "5%",
   reach: "100K", avatar: "👩", countryCode: 'TH',
-  countryId: null, platform: null, socialHandle: null, portfolioUrl: null,
+  countryId: null, isBackup: false, sortOrder: 0, platform: null, socialHandle: null, portfolioUrl: null,
 });
 
 beforeEach(() => {

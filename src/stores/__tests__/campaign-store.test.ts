@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useCampaignStore } from '../campaign-store';
-import type { Country, Package, Creator } from '@/types';
+import type { Country, Package, CreatorWithPackageInfo } from '@/types';
 
 const COUNTRY_TH: Country = {
   id: 1, name: 'Thailand', countryCode: 'TH', region: 'asia', languageCode: 'th', languageName: 'Thai',
@@ -26,15 +26,15 @@ const PKG_POPULAR: Package = {
   estReach: null, estEngagement: null,
 };
 
-const CREATOR_1: Creator = {
+const CREATOR_1: CreatorWithPackageInfo = {
   id: 'creator-1', name: 'Creator 1', niche: 'Food', engagement: '5%',
-  reach: '100K', avatar: '👩', countryCode: 'TH', countryId: 1, isBackup: false,
+  reach: '100K', avatar: '👩', countryCode: 'TH', countryId: 1, isBackup: false, sortOrder: 0,
   platform: null, socialHandle: null, portfolioUrl: null,
 };
 
-const CREATOR_2: Creator = {
+const CREATOR_2: CreatorWithPackageInfo = {
   id: 'creator-2', name: 'Creator 2', niche: 'Beauty', engagement: '7%',
-  reach: '200K', avatar: '👨', countryCode: 'VN', countryId: 2, isBackup: false,
+  reach: '200K', avatar: '👨', countryCode: 'VN', countryId: 2, isBackup: false, sortOrder: 1,
   platform: null, socialHandle: null, portfolioUrl: null,
 };
 

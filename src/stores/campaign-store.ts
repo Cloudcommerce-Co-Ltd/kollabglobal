@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ProductData } from "@/types/campaign";
-import { Country, Creator, Package } from "@/types";
+import { Country, Package, CreatorWithPackageInfo } from "@/types";
 
 export type { ProductData };
 
@@ -13,7 +13,7 @@ interface CampaignCreationState {
   promotionType: "PRODUCT" | "SERVICE" | null;
   productData: ProductData | null;
   packageData: Package | null;
-  selectedCreatorsData: Creator[];
+  selectedCreatorsData: CreatorWithPackageInfo[];
   // Checkout state — persisted so refresh during QR polling doesn't create duplicate charge
   chargeId: string | null;
   campaignId: string | null;
@@ -25,7 +25,7 @@ interface CampaignCreationActions {
   setPromotionType: (type: "PRODUCT" | "SERVICE") => void;
   setProduct: (data: ProductData) => void;
   setPackage: (data: Package) => void;
-  setCreators: (data: Creator[]) => void;
+  setCreators: (data: CreatorWithPackageInfo[]) => void;
   setCheckoutData: (chargeId: string, campaignId: string, qrCodeUrl: string) => void;
   reset: () => void;
 }

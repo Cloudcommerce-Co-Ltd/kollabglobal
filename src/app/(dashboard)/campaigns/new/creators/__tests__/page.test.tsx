@@ -4,8 +4,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import SelectCreatorsPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
-import type { Country, Creator, Package } from "@/types";
-import type { CreatorWithPackageInfo } from '@/types';
+import type { Country, Package, CreatorWithPackageInfo } from "@/types";
 
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
@@ -44,7 +43,7 @@ const MOCK_CREATORS: CreatorWithPackageInfo[] = [
 ];
 
 const mkCountry = (id: number): Country => ({
-  id, name: String(id), flag: '🏳️', region: 'global', languageCode: 'en', languageName: 'English',
+  id, name: String(id), countryCode: 'XX', region: 'global', languageCode: 'en', languageName: 'English',
   creatorsAvail: 0, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
@@ -168,6 +167,6 @@ describe("SelectCreatorsPage", () => {
     fireEvent.click(card);
     // Store should reflect the deselection immediately
     const state = useCampaignStore.getState();
-    expect(state.selectedCreatorsData.find((c: Creator) => c.name === firstCreatorName)).toBeUndefined();
+    expect(state.selectedCreatorsData.find((c: CreatorWithPackageInfo) => c.name === firstCreatorName)).toBeUndefined();
   });
 });

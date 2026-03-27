@@ -9,12 +9,15 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 import { useCampaignStore } from "@/stores/campaign-store";
-import type { Creator, Country, Package } from "@/types";
+import type { CreatorWithPackageInfo, Country, Package } from "@/types";
 
 const MOCK_COUNTRY: Country = {
   id: 1,
   name: "Thailand",
-  flag: "🇹🇭",
+  countryCode: "TH",
+  region: "asia",
+  languageCode: "th",
+  languageName: "Thai",
   creatorsAvail: 100,
   avgEyeball: null,
   avgCPE: null,
@@ -48,7 +51,7 @@ const VAT = Math.round(BASE_PRICE * 0.07);
 const SERVICE_FEE = Math.round(BASE_PRICE * 0.03);
 const TOTAL = BASE_PRICE + VAT + SERVICE_FEE;
 
-const MOCK_CREATORS: Creator[] = Array.from({ length: 10 }, (_, i) => ({
+const MOCK_CREATORS: CreatorWithPackageInfo[] = Array.from({ length: 10 }, (_, i) => ({
   id: `creator-${i}`,
   name: `Creator ${i}`,
   niche: "The Global Bridge",
@@ -57,6 +60,8 @@ const MOCK_CREATORS: Creator[] = Array.from({ length: 10 }, (_, i) => ({
   avatar: `https://example.com/avatar-${i}.jpg`,
   countryCode: 'TH',
   countryId: null,
+  isBackup: false,
+  sortOrder: i,
   platform: null, socialHandle: null, portfolioUrl: null,
 }));
 

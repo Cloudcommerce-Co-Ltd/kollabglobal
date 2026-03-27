@@ -19,7 +19,7 @@ export async function GET(
     include: {
       country: true,
       package: true,
-      product: true,
+      products: true,
       brief: true,
       creators: { include: { creator: true } },
     },

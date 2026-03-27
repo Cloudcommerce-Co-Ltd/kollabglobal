@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useCampaignStore } from "@/stores/campaign-store";
 import { validateStep } from "@/lib/campaign-steps";
-import type { Country, Package, Creator } from "@/types";
+import type { Country, Package, CreatorWithPackageInfo } from "@/types";
 
 const mkCountry = (id: number): Country => ({
-  id, name: String(id), flag: '🏳️', region: 'global', languageCode: 'en', languageName: 'English',
+  id, name: String(id), countryCode: 'XX', region: 'global', languageCode: 'en', languageName: 'English',
   creatorsAvail: 0, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
   snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
@@ -15,9 +15,9 @@ const mkPackage = (id: number): Package => ({
   estReach: null, estEngagement: null,
 });
 
-const mkCreator = (id: string): Creator => ({
+const mkCreator = (id: string): CreatorWithPackageInfo => ({
   id, name: id, niche: 'Food', engagement: '5%',
-  reach: '100K', avatar: '👩', countryCode: 'TH', isBackup: false,
+  reach: '100K', avatar: '👩', countryCode: 'TH', countryId: null, isBackup: false, sortOrder: 0,
   platform: null, socialHandle: null, portfolioUrl: null,
 });
 
