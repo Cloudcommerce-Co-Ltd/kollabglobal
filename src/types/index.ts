@@ -27,3 +27,10 @@ export type CampaignStatus =
 export type CreatorStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
 export type PaymentMethod = "CREDIT_CARD" | "BANK_TRANSFER" | "QR_CODE";
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
+
+import type { Creator } from "@/generated/prisma/client";
+
+export interface CreatorWithPackageInfo extends Creator {
+  isBackup: boolean;
+  sortOrder: number;
+}

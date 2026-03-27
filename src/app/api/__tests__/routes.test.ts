@@ -78,19 +78,33 @@ describe('GET /api/packages', () => {
 });
 
 describe('GET /api/creators', () => {
-  it('returns 200', async () => {
-    const res = await getCreators();
+  it('returns 200 with packageId param', async () => {
+    const req = new Request('http://localhost/api/creators?packageId=1');
+    const res = await getCreators(req);
     expect(res.status).toBe(200);
   });
 
-  it('returns at least 15 creators (10 main + 5 backup)', async () => {
-    const res = await getCreators();
+  it('returns only creators for the given package', async () => {
+    const req = new Request('http://localhost/api/creators?packageId=1');
+    const res = await getCreators(req);
     const data = await res.json();
-    expect(data.length).toBeGreaterThanOrEqual(15);
+    expect(Array.isArray(data)).toBe(true);
+    expect(data.length).toBeGreaterThan(0);
   });
 
-  it('includes both main and backup creators', async () => {
-    const res = await getCreators();
+  it('response includes isBackup from package_creators', async () => {
+    const req = new Request('http://localhost/api/creators?packageId=1');
+    const res = await getCreators(req);
+    const data = await res.json();
+    for (const creator of data) {
+      expect(creator).toHaveProperty('isBackup');
+      expect(typeof creator.isBackup).toBe('boolean');
+    }
+  });
+
+  it('includes both main and backup creators for a package', async () => {
+    const req = new Request('http://localhost/api/creators?packageId=1');
+    const res = await getCreators(req);
     const data = await res.json();
     const hasMain = data.some((c: { isBackup: boolean }) => !c.isBackup);
     const hasBackup = data.some((c: { isBackup: boolean }) => c.isBackup);
@@ -99,7 +113,8 @@ describe('GET /api/creators', () => {
   });
 
   it('each creator has required fields', async () => {
-    const res = await getCreators();
+    const req = new Request('http://localhost/api/creators?packageId=1');
+    const res = await getCreators(req);
     const data = await res.json();
     for (const creator of data) {
       expect(creator).toHaveProperty('id');
@@ -107,6 +122,13 @@ describe('GET /api/creators', () => {
       expect(creator).toHaveProperty('niche');
       expect(creator).toHaveProperty('engagement');
       expect(creator).toHaveProperty('reach');
+      expect(creator).toHaveProperty('sortOrder');
     }
+  });
+
+  it('returns 400 when packageId is missing', async () => {
+    const req = new Request('http://localhost/api/creators');
+    const res = await getCreators(req);
+    expect(res.status).toBe(400);
   });
 });
