@@ -12,6 +12,7 @@ const {
   mockPaymentUpdate,
   mockCampaignUpdate,
   mockPaymentEventCreate,
+  mockCampaignStatusLogCreate,
   mockTransaction,
   capturedProcessorHolder,
 } = vi.hoisted(() => {
@@ -20,6 +21,7 @@ const {
     mockPaymentUpdate: vi.fn(),
     mockCampaignUpdate: vi.fn(),
     mockPaymentEventCreate: vi.fn(),
+    mockCampaignStatusLogCreate: vi.fn(),
     mockTransaction: vi.fn(),
     // Use an object to hold the captured processor so we can mutate it from inside vi.mock
     capturedProcessorHolder: { processor: null as ((job: Job<PaymentEventJobData>) => Promise<void>) | null },
@@ -31,6 +33,7 @@ const {
 const txMock = {
   payment: { update: mockPaymentUpdate },
   campaign: { update: mockCampaignUpdate },
+  campaignStatusLog: { create: mockCampaignStatusLogCreate },
   paymentEvent: { create: mockPaymentEventCreate },
 };
 
@@ -85,6 +88,9 @@ vi.mock("@/lib/prisma", () => ({
     campaign: {
       update: mockCampaignUpdate,
     },
+    campaignStatusLog: {
+      create: mockCampaignStatusLogCreate,
+    },
     paymentEvent: {
       create: mockPaymentEventCreate,
     },
@@ -137,6 +143,7 @@ describe("payment-worker processor", () => {
     // Default: $transaction invokes the callback with txMock (interactive transaction style).
     // Individual tests that need to simulate a transaction failure override with mockRejectedValue.
     mockTransaction.mockImplementation(async (fn: (tx: typeof txMock) => Promise<void>) => fn(txMock));
+    mockCampaignStatusLogCreate.mockResolvedValue({});
   });
 
   it("completes silently when no payment is found for chargeId", async () => {

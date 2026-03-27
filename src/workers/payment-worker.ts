@@ -114,6 +114,15 @@ async function processPaymentEvent(job: Job<PaymentEventJobData>): Promise<void>
       where: { id: payment.campaignId },
       data: { status: newCampaignStatus },
     });
+    await tx.campaignStatusLog.create({
+      data: {
+        campaignId: payment.campaignId,
+        fromStatus: CampaignStatus.AWAITING_PAYMENT,
+        toStatus: newCampaignStatus,
+        changedBy: null,
+        note: `Payment ${chargeStatus}: ${chargeId}`,
+      },
+    });
     await tx.paymentEvent.create({
       data: {
         chargeId,
