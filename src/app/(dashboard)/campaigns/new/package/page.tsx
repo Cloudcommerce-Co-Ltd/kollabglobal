@@ -94,7 +94,7 @@ export default function SelectPackagePage() {
                   )}
                   <div
                     onClick={() => handleSelect(pkg)}
-                    className={`relative flex cursor-pointer flex-col overflow-hidden rounded-[18px] border-2 transition-all ${
+                    className={`relative h-full flex cursor-pointer flex-col overflow-hidden rounded-[18px] border-2 transition-all ${
                       isSelected
                         ? 'border-brand shadow-[0_4px_24px_color-mix(in_srgb,var(--color-brand)_12%,transparent)]'
                         : 'border-border-ui'
@@ -135,7 +135,7 @@ export default function SelectPackagePage() {
                   <div
                     className={`flex items-center justify-between border-b px-4.5 py-2 ${
                       isSelected
-                        ? 'border-brand/[19%] bg-brand/[7%]'
+                        ? 'border-brand/19 bg-brand/7'
                         : 'border-border-ui bg-[#f8fffe]'
                     }`}
                   >
