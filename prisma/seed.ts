@@ -679,7 +679,7 @@ async function main() {
   const backupCreators: CreatorInput[] = [
     {
       name: 'Zaiah',
-      niche: 'ตัวสำรอง',
+      niche: 'The Passport',
       engagement: 'N/A',
       reach: 'N/A',
       avatar:
@@ -690,7 +690,7 @@ async function main() {
     },
     {
       name: 'Karina',
-      niche: 'ตัวสำรอง',
+      niche: 'The Global Bridge',
       engagement: 'N/A',
       reach: 'N/A',
       avatar:
@@ -701,7 +701,7 @@ async function main() {
     },
     {
       name: 'Lookbas',
-      niche: 'ตัวสำรอง',
+      niche: 'The Passport',
       engagement: 'N/A',
       reach: 'N/A',
       avatar:
@@ -712,7 +712,7 @@ async function main() {
     },
     {
       name: 'Nacia',
-      niche: 'ตัวสำรอง',
+      niche: 'The Global Bridge',
       engagement: 'N/A',
       reach: 'N/A',
       avatar:
@@ -723,7 +723,7 @@ async function main() {
     },
     {
       name: 'Esther',
-      niche: 'ตัวสำรอง',
+      niche: 'The World Dominator',
       engagement: 'N/A',
       reach: 'N/A',
       avatar:
@@ -739,7 +739,6 @@ async function main() {
       data: {
         id: `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`,
         ...creator,
-        isBackup: false,
         countryId: codeToCountryId[creator.countryCode] ?? null,
       },
     });
@@ -750,8 +749,55 @@ async function main() {
       data: {
         id: `backup-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`,
         ...creator,
-        isBackup: true,
         countryId: codeToCountryId[creator.countryCode] ?? null,
+      },
+    });
+  }
+
+  console.log('Seeding package creators...');
+  await prisma.packageCreator.deleteMany({});
+
+  const nicheToPackageId: Record<string, number> = {
+    'The Passport': 1,
+    'The Global Bridge': 2,
+    'The World Dominator': 3,
+  };
+
+  // Main creators — derive packageId from niche
+  const sortOrderCounters: Record<number, number> = { 1: 0, 2: 0, 3: 0 };
+  for (const creator of mainCreators) {
+    const packageId = nicheToPackageId[creator.niche];
+    if (!packageId) continue;
+    const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+    await prisma.packageCreator.create({
+      data: {
+        packageId,
+        creatorId,
+        isBackup: false,
+        sortOrder: sortOrderCounters[packageId]++,
+      },
+    });
+  }
+
+  // Backup creators — explicit package assignment
+  const backupPackageAssignment: Record<string, { packageId: number; sortOrder: number }> = {
+    'backup-zaiah':   { packageId: 1, sortOrder: 0 },
+    'backup-lookbas': { packageId: 1, sortOrder: 1 },
+    'backup-karina':  { packageId: 2, sortOrder: 0 },
+    'backup-nacia':   { packageId: 2, sortOrder: 1 },
+    'backup-esther':  { packageId: 3, sortOrder: 0 },
+  };
+
+  for (const creator of backupCreators) {
+    const creatorId = `backup-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
+    const assignment = backupPackageAssignment[creatorId];
+    if (!assignment) continue;
+    await prisma.packageCreator.create({
+      data: {
+        creatorId,
+        packageId: assignment.packageId,
+        isBackup: true,
+        sortOrder: assignment.sortOrder,
       },
     });
   }

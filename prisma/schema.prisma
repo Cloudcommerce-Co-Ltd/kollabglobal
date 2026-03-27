@@ -176,7 +176,6 @@ model Creator {
   countryCode   String?           @map("country_code")
   countryId     Int?              @map("country_id")
   country       Country?          @relation(fields: [countryId], references: [id])
-  isBackup      Boolean           @default(false) @map("is_backup")
   platform      String?
   socialHandle  String?           @map("social_handle")
   portfolioUrl  String?           @map("portfolio_url")

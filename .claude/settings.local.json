@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm exec:*)",
+      "Bash(git -C /Users/ntpls/Github/FastShip/kollabglobal add prisma/schema.prisma prisma/migrations/20260327050423_create_package_creator/ src/generated/prisma/)",
+      "Bash(git -C /Users/ntpls/Github/FastShip/kollabglobal commit -m \"feat: add package_creators join table\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(script:*)"
+    ]
+  }
+}
