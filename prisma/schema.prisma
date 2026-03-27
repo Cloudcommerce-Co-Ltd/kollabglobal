@@ -193,8 +193,8 @@ model PackageCreator {
   isBackup  Boolean @default(false) @map("is_backup")
   sortOrder Int     @default(0) @map("sort_order")
 
-  package  Package @relation(fields: [packageId], references: [id])
-  creator  Creator @relation(fields: [creatorId], references: [id])
+  package  Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  creator  Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([packageId, creatorId])
   @@map("package_creators")
