@@ -161,6 +161,7 @@ model Package {
   estReach        String?    @map("est_reach")
   estEngagement   String?    @map("est_engagement")
   campaigns       Campaign[]
+  creators        PackageCreator[]
 
   @@map("packages")
 }
@@ -180,8 +181,23 @@ model Creator {
   socialHandle  String?           @map("social_handle")
   portfolioUrl  String?           @map("portfolio_url")
   campaigns     CampaignCreator[]
+  packages      PackageCreator[]
 
   @@map("creators")
+}
+
+model PackageCreator {
+  id        String  @id @default(cuid())
+  packageId Int     @map("package_id")
+  creatorId String  @map("creator_id")
+  isBackup  Boolean @default(false) @map("is_backup")
+  sortOrder Int     @default(0) @map("sort_order")
+
+  package  Package @relation(fields: [packageId], references: [id])
+  creator  Creator @relation(fields: [creatorId], references: [id])
+
+  @@unique([packageId, creatorId])
+  @@map("package_creators")
 }
 
 model Campaign {
