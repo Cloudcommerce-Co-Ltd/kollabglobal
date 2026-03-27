@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Globe, LogOut, Plus } from 'lucide-react';
+import logoNameImg from '../../../public/images/Logo-Name.webp';
+import { LogOut, Plus } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import type { User } from 'next-auth';
 
@@ -13,16 +14,16 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <header className="border-b border-border-ui bg-white px-4 py-3 sm:px-8 sm:py-5">
-      <div className="mx-auto flex max-w-[1100px] items-center justify-between">
+      <div className="mx-auto flex max-w-275 items-center justify-between">
         {/* Left: logo + divider + page title */}
         <div className="flex items-center gap-3.5">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="bg-brand-gradient flex size-9 items-center justify-center rounded-[9px]">
-              <Globe size={18} color="#fff" />
-            </div>
-            <span className="hidden text-[18px] font-extrabold text-dark sm:inline">
-              KOLLAB <span className="text-brand">Global</span>
-            </span>
+          <Link href="/" className="flex items-center gap-1.5">
+            <Image
+              src={logoNameImg}
+              alt="KOLLAB Global"
+              className="w-25 h-auto"
+              sizes="100px"
+            />
           </Link>
 
           <div className="hidden h-6 w-px bg-border-ui sm:block" />

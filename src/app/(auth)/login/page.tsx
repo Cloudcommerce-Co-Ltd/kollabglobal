@@ -1,5 +1,6 @@
+import Image from 'next/image';
 import { signIn } from '@/auth';
-import { Globe } from 'lucide-react';
+import logoNameImg from '../../../../public/images/Logo-Name.webp';
 
 export default function LoginPage() {
   return (
@@ -7,14 +8,14 @@ export default function LoginPage() {
       <div className="animate-fade-up w-full max-w-105">
         {/* Logo + brand */}
         <div className="text-center mb-9">
-          <div className="animate-float inline-flex mb-3">
-            <div className="size-13 rounded-[14px] bg-linear-to-br from-brand to-secondary-brand flex items-center justify-center shadow-[0_8px_24px_rgba(78,205,196,0.4)]">
-              <Globe size={28} color="#fff" />
-            </div>
+          <div className="animate-float inline-flex items-center gap-1.5 mb-3">
+            <Image
+              src={logoNameImg}
+              alt="KOLLAB Global"
+              className="w-40 h-auto"
+              sizes="160px"
+            />
           </div>
-          <h1 className="text-[24px] font-extrabold text-dark mb-1 tracking-[-0.5px] sm:text-[32px]">
-            KOLLAB <span className="text-brand">Global</span>
-          </h1>
           <p className="text-[15px] text-muted-text leading-normal">
             แพลตฟอร์ม Influencer Marketing สำหรับทุกแบรนด์
           </p>
@@ -74,7 +75,7 @@ export default function LoginPage() {
           </div>*/}
         </div>
 
-        {process.env.NODE_ENV === "development" && (
+        {process.env.NODE_ENV === 'development' && (
           <div className="mt-4 rounded-[16px] border border-dashed border-amber-300 bg-amber-50 px-5 py-4">
             <p className="mb-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-amber-600">
               Dev Only
