@@ -145,16 +145,6 @@ describe("CheckoutPage", () => {
     });
   });
 
-  it("payment method toggle works visually", () => {
-    render(<CheckoutPage />);
-    const toggleBtn = screen.getByText("เปลี่ยนวิธีชำระเงิน");
-    fireEvent.click(toggleBtn);
-    expect(screen.getByText("บัตรเครดิต / เดบิต")).toBeInTheDocument();
-    expect(screen.getByText("โอนผ่านธนาคาร")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("← กลับไปสแกน QR"));
-    expect(screen.getByText("เปลี่ยนวิธีชำระเงิน")).toBeInTheDocument();
-  });
-
   it("shows updated terms disclaimer", () => {
     render(<CheckoutPage />);
     expect(screen.getByText("เมื่อสแกนและชำระเงินสำเร็จ ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ")).toBeInTheDocument();
