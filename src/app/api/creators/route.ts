@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import type { CreatorWithPackageInfo } from "@/types";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
     orderBy: [{ isBackup: "asc" }, { sortOrder: "asc" }],
   });
 
-  const creators = packageCreators.map((pc) => ({
+  const creators: CreatorWithPackageInfo[] = packageCreators.map((pc) => ({
     ...pc.creator,
     isBackup: pc.isBackup,
     sortOrder: pc.sortOrder,

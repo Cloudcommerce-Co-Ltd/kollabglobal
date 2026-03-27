@@ -1,3 +1,5 @@
+import type { Creator } from "@/generated/prisma/client";
+
 // Re-export Prisma generated types
 export type {
   User,
@@ -11,6 +13,7 @@ export type {
   CampaignBrief,
   CampaignCreator,
   Payment,
+  PackageCreator,
 } from "@/generated/prisma/client";
 
 // Client-safe enum type aliases
@@ -27,8 +30,6 @@ export type CampaignStatus =
 export type CreatorStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "COMPLETED";
 export type PaymentMethod = "CREDIT_CARD" | "BANK_TRANSFER" | "QR_CODE";
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
-
-import type { Creator } from "@/generated/prisma/client";
 
 export interface CreatorWithPackageInfo extends Creator {
   isBackup: boolean;

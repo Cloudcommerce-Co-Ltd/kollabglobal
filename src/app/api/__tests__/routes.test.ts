@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { GET as getCountries } from '../countries/route';
 import { GET as getPackages } from '../packages/route';
 import { GET as getCreators } from '../creators/route';
+import { GET as getPackageCreators } from '../package-creators/route';
 
 describe('GET /api/countries', () => {
   it('returns 200', async () => {
@@ -130,5 +131,50 @@ describe('GET /api/creators', () => {
     const req = new Request('http://localhost/api/creators');
     const res = await getCreators(req);
     expect(res.status).toBe(400);
+  });
+});
+
+describe('GET /api/package-creators', () => {
+  it('returns 200', async () => {
+    const res = await getPackageCreators();
+    expect(res.status).toBe(200);
+  });
+
+  it('returns an object keyed by packageId', async () => {
+    const res = await getPackageCreators();
+    const data = await res.json();
+    expect(typeof data).toBe('object');
+    expect(Array.isArray(data)).toBe(false);
+  });
+
+  it('each value is an array of creators', async () => {
+    const res = await getPackageCreators();
+    const data = await res.json();
+    for (const key of Object.keys(data)) {
+      expect(Array.isArray(data[key])).toBe(true);
+    }
+  });
+
+  it('only contains main creators (isBackup: false)', async () => {
+    const res = await getPackageCreators();
+    const data = await res.json();
+    for (const creators of Object.values(data) as Array<{ isBackup: boolean }[]>) {
+      for (const creator of creators) {
+        expect(creator.isBackup).toBe(false);
+      }
+    }
+  });
+
+  it('each creator has required fields', async () => {
+    const res = await getPackageCreators();
+    const data = await res.json();
+    for (const creators of Object.values(data) as any[][]) {
+      for (const creator of creators) {
+        expect(creator).toHaveProperty('id');
+        expect(creator).toHaveProperty('name');
+        expect(creator).toHaveProperty('isBackup');
+        expect(creator).toHaveProperty('sortOrder');
+      }
+    }
   });
 });
