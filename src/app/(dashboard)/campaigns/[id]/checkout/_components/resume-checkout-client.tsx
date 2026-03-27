@@ -53,7 +53,6 @@ export function ResumeCheckoutClient({
   const [chargeId, setChargeId] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [chargeCreatedAt, setChargeCreatedAt] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const onStatusChange = useCallback(
     (status: 'pending' | 'expired' | 'completed' | 'failed') => {
@@ -99,7 +98,6 @@ export function ResumeCheckoutClient({
           signal: controller.signal,
         });
         if (!res.ok) {
-          setError('ไม่สามารถโหลดข้อมูลการชำระเงินได้');
           setPaymentStatus('failed');
           return;
         }
@@ -110,7 +108,6 @@ export function ResumeCheckoutClient({
         setPaymentStatus('pending');
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
-        setError('เกิดข้อผิดพลาด กรุณาลองใหม่');
         setPaymentStatus('failed');
       }
     }
@@ -135,12 +132,11 @@ export function ResumeCheckoutClient({
       {/* Header */}
       <div className="border-b border-border-ui bg-white px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-240">
-          <Link
-            href={`/campaigns/${campaignId}`}
-            className="mb-2.5 flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-muted-text hover:text-dark transition-colors"
-          >
-            <ArrowLeft size={16} />
-            กลับไปแคมเปญ
+          <Link href={`/campaigns/${campaignId}`}>
+            <button className="mb-2.5 flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-sm font-semibold text-muted-text">
+              <ArrowLeft size={16} />
+              กลับไปแคมเปญ
+            </button>
           </Link>
           <h1 className="m-0 text-[20px] font-bold text-dark sm:text-[26px]">
             สรุปรายการ & ชำระเงิน
@@ -254,12 +250,14 @@ export function ResumeCheckoutClient({
               {/* QR Code */}
               <div
                 aria-label="QR Code"
-                className="mx-auto mb-4 flex h-64 w-64 items-center justify-center rounded-xl bg-white"
+                className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
               >
                 {paymentStatus === 'loading' && (
-                  <Loader2 size={48} className="animate-spin text-dark" />
+                  <div className="aspect-square w-full flex justify-center items-center">
+                    <Loader2 size={48} className="animate-spin text-dark" />
+                  </div>
                 )}
-                {paymentStatus === 'pending' && qrCodeUrl && (
+                {(paymentStatus === 'pending' || paymentStatus === 'completed') && qrCodeUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={qrCodeUrl}
@@ -267,19 +265,15 @@ export function ResumeCheckoutClient({
                     className="size-full rounded-xl object-contain"
                   />
                 )}
-                {paymentStatus === 'completed' && qrCodeUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={qrCodeUrl}
-                    alt="PromptPay QR Code"
-                    className="size-full rounded-xl object-contain opacity-50"
-                  />
-                )}
                 {paymentStatus === 'expired' && (
-                  <Clock size={48} className="text-[#bbb]" />
+                  <div className="aspect-square w-full flex justify-center items-center">
+                    <Clock size={48} className="text-[#bbb]" />
+                  </div>
                 )}
                 {paymentStatus === 'failed' && (
-                  <XCircle size={48} className="text-red-500" />
+                  <div className="aspect-square w-full flex justify-center items-center">
+                    <XCircle size={48} color="#ef4444" />
+                  </div>
                 )}
               </div>
 
@@ -316,13 +310,13 @@ export function ResumeCheckoutClient({
                 )}
                 {paymentStatus === 'failed' && (
                   <span className="text-red-400">
-                    {error ?? 'การชำระเงินล้มเหลว กรุณาลองใหม่'}
+                    การชำระเงินล้มเหลว กรุณาลองใหม่
                   </span>
                 )}
               </div>
 
               {/* Escrow notice */}
-              <div className="rounded-xl bg-white/10 p-3 text-[13px]">
+              <div className="mb-5 rounded-xl bg-white/10 p-3 text-[13px]">
                 🔒 ระบบ Escrow — เงินจะโอนให้ครีเอเตอร์เมื่อแคมเปญเสร็จสิ้น
               </div>
             </div>

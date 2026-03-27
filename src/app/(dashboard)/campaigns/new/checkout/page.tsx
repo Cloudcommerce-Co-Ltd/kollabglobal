@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
-  CreditCard,
-  Building2,
   Loader2,
   CheckCircle2,
   XCircle,
@@ -35,7 +33,6 @@ export default function CheckoutPage() {
     reset,
   } = useCampaignStore();
 
-  const [showAltPayment, setShowAltPayment] = useState(false);
   // Restore payment state from persisted store so refresh during QR polling doesn't restart
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(
     storedChargeId ? 'pending' : 'idle',
@@ -303,130 +300,87 @@ export default function CheckoutPage() {
           <div className="flex flex-col gap-5">
             {/* Card 4 — QR Payment */}
             <div className="rounded-2xl bg-linear-to-br from-dark to-[#333] p-7 text-white">
-              {showAltPayment ? (
-                <div>
-                  <div className="mb-5 text-[18px] font-bold">
-                    เลือกวิธีชำระเงิน
-                  </div>
-                  <div className="mb-3 flex cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-white/10 p-4 transition-all hover:bg-white/20">
-                    <CreditCard size={22} />
-                    <div>
-                      <div className="text-sm font-semibold">
-                        บัตรเครดิต / เดบิต
-                      </div>
-                      <div className="text-xs text-[#bbb]">
-                        Visa, Mastercard, JCB
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mb-5 flex cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-white/10 p-4 transition-all hover:bg-white/20">
-                    <Building2 size={22} />
-                    <div>
-                      <div className="text-sm font-semibold">โอนผ่านธนาคาร</div>
-                      <div className="text-xs text-[#bbb]">
-                        Internet Banking
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowAltPayment(false)}
-                    className="cursor-pointer border-none bg-transparent text-sm text-secondary-brand"
-                  >
-                    ← กลับไปสแกน QR
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <div className="mb-1 text-[22px] font-bold">
-                    สแกนเพื่อชำระเงิน
-                  </div>
-                  <div className="mb-5 text-[14px] text-[#bbb]">
-                    ใช้แอปธนาคารสแกน QR Code
-                  </div>
+              <div className="mb-1 text-[22px] font-bold">
+                สแกนเพื่อชำระเงิน
+              </div>
+              <div className="mb-5 text-[14px] text-[#bbb]">
+                ใช้แอปธนาคารสแกน QR Code
+              </div>
 
-                  {/* QR Code */}
-                  <div
-                    aria-label="QR Code"
-                    className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
-                  >
-                    {paymentStatus === 'creating' && (
-                      <div className="aspect-square w-full flex justify-center items-center">
-                        <Loader2 size={48} className="animate-spin text-dark" />
-                      </div>
-                    )}
-                    {(paymentStatus === 'pending' ||
-                      paymentStatus === 'completed') &&
-                      qrCodeUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={qrCodeUrl}
-                          alt="PromptPay QR Code"
-                          className="size-full rounded-xl object-contain"
-                        />
-                      )}
-                    {paymentStatus === 'expired' && (
-                      <div className="aspect-square w-full flex justify-center items-center">
-                        <Clock size={48} className="text-[#bbb]" />
-                      </div>
-                    )}
-                    {paymentStatus === 'failed' && (
-                      <div className="aspect-square w-full flex justify-center items-center">
-                        <XCircle size={48} color="#ef4444" />
-                      </div>
-                    )}
+              {/* QR Code */}
+              <div
+                aria-label="QR Code"
+                className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
+              >
+                {paymentStatus === 'creating' && (
+                  <div className="aspect-square w-full flex justify-center items-center">
+                    <Loader2 size={48} className="animate-spin text-dark" />
                   </div>
+                )}
+                {(paymentStatus === 'pending' ||
+                  paymentStatus === 'completed') &&
+                  qrCodeUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={qrCodeUrl}
+                      alt="PromptPay QR Code"
+                      className="size-full rounded-xl object-contain"
+                    />
+                  )}
+                {paymentStatus === 'expired' && (
+                  <div className="aspect-square w-full flex justify-center items-center">
+                    <Clock size={48} className="text-[#bbb]" />
+                  </div>
+                )}
+                {paymentStatus === 'failed' && (
+                  <div className="aspect-square w-full flex justify-center items-center">
+                    <XCircle size={48} color="#ef4444" />
+                  </div>
+                )}
+              </div>
 
-                  <div className="mb-5 text-center text-[13px] text-[#bbb]">
-                    {paymentStatus === 'creating' && 'กำลังสร้าง QR Code...'}
-                    {paymentStatus === 'pending' && (
-                      <span className="flex items-center justify-center gap-1.5">
+              <div className="mb-5 text-center text-[13px] text-[#bbb]">
+                {paymentStatus === 'creating' && 'กำลังสร้าง QR Code...'}
+                {paymentStatus === 'pending' && (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <Loader2 size={13} className="animate-spin" />
+                    รอการชำระเงิน — หมดอายุใน {formatCountdown(secondsRemaining)}
+                  </span>
+                )}
+                {paymentStatus === 'expired' && (
+                  <div className="flex flex-col items-center gap-2">
+                    <span>QR Code หมดอายุแล้ว</span>
+                    <button
+                      onClick={recreateQr}
+                      disabled={isRecreating}
+                      className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-brand bg-transparent px-3 py-1.5 text-[13px] font-semibold text-brand disabled:opacity-50"
+                    >
+                      {isRecreating ? (
                         <Loader2 size={13} className="animate-spin" />
-                        รอการชำระเงิน — หมดอายุใน {formatCountdown(secondsRemaining)}
-                      </span>
-                    )}
-                    {paymentStatus === 'expired' && (
-                      <div className="flex flex-col items-center gap-2">
-                        <span>QR Code หมดอายุแล้ว</span>
-                        <button
-                          onClick={recreateQr}
-                          disabled={isRecreating}
-                          className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-brand bg-transparent px-3 py-1.5 text-[13px] font-semibold text-brand disabled:opacity-50"
-                        >
-                          {isRecreating ? (
-                            <Loader2 size={13} className="animate-spin" />
-                          ) : (
-                            <RefreshCw size={13} />
-                          )}
-                          สร้าง QR ใหม่
-                        </button>
-                      </div>
-                    )}
-                    {paymentStatus === 'completed' && (
-                      <span className="flex items-center justify-center gap-1.5 text-brand">
-                        <CheckCircle2 size={13} />
-                        ชำระเงินสำเร็จ — กำลังนำทาง...
-                      </span>
-                    )}
-                    {paymentStatus === 'failed' && (
-                      <span className="text-red-400">
-                        การชำระเงินล้มเหลว กรุณาลองใหม่
-                      </span>
-                    )}
+                      ) : (
+                        <RefreshCw size={13} />
+                      )}
+                      สร้าง QR ใหม่
+                    </button>
                   </div>
+                )}
+                {paymentStatus === 'completed' && (
+                  <span className="flex items-center justify-center gap-1.5 text-brand">
+                    <CheckCircle2 size={13} />
+                    ชำระเงินสำเร็จ — กำลังนำทาง...
+                  </span>
+                )}
+                {paymentStatus === 'failed' && (
+                  <span className="text-red-400">
+                    การชำระเงินล้มเหลว กรุณาลองใหม่
+                  </span>
+                )}
+              </div>
 
-                  {/* Escrow notice */}
-                  <div className="mb-5 rounded-xl bg-white/10 p-3 text-[13px]">
-                    🔒 ระบบ Escrow — เงินจะโอนให้ครีเอเตอร์เมื่อแคมเปญเสร็จสิ้น
-                  </div>
-
-                  <button
-                    onClick={() => setShowAltPayment(true)}
-                    className="cursor-pointer border-none bg-transparent text-sm text-secondary-brand"
-                  >
-                    เปลี่ยนวิธีชำระเงิน
-                  </button>
-                </div>
-              )}
+              {/* Escrow notice */}
+              <div className="mb-5 rounded-xl bg-white/10 p-3 text-[13px]">
+                🔒 ระบบ Escrow — เงินจะโอนให้ครีเอเตอร์เมื่อแคมเปญเสร็จสิ้น
+              </div>
             </div>
 
             {/* Terms */}
