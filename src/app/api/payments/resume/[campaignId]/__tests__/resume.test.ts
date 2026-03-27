@@ -28,7 +28,7 @@ const mockCampaign = {
   userId: "user_1",
   status: "AWAITING_PAYMENT",
   package: { id: 1, name: "Starter", numCreators: 3, price: 5000, deliverables: ["Instagram Post"] },
-  product: { brandName: "TestBrand", productName: "TestProduct", isService: false, category: "Fashion" },
+  products: [{ brandName: "TestBrand", productName: "TestProduct", isService: false, category: "Fashion" }],
   creators: [
     { creator: { id: "c1", name: "Alice", avatar: null } },
     { creator: { id: "c2", name: "Bob", avatar: null } },

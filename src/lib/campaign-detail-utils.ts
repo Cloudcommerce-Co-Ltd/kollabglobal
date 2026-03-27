@@ -1,9 +1,9 @@
 export type DisplayStatus = "awaiting_payment" | "brief" | "accepting" | "ship" | "active" | "live" | "cancelled";
 
-type CampaignForStatus = { status: string; product?: { isService: boolean } | null };
+type CampaignForStatus = { status: string; products?: Array<{ isService: boolean }> | null };
 
 export function resolveDisplayStatus(campaign: CampaignForStatus): DisplayStatus {
-  const isService = campaign.product?.isService ?? false;
+  const isService = campaign.products?.[0]?.isService ?? false;
   switch (campaign.status) {
     case "AWAITING_PAYMENT":
       return "awaiting_payment";

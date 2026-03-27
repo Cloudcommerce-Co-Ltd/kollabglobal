@@ -15,9 +15,9 @@ export default async function CampaignBriefPage({
   const campaign = await getCampaignDetail(session.user.id, id);
   if (!campaign?.brief) notFound();
 
-  const isService = campaign.product?.isService ?? false;
-  const brandName = campaign.product?.brandName ?? 'KOLLAB Global';
-  const productName = campaign.product?.productName ?? 'สินค้า/บริการ';
+  const isService = campaign.products?.[0]?.isService ?? false;
+  const brandName = campaign.products?.[0]?.brandName ?? 'KOLLAB Global';
+  const productName = campaign.products?.[0]?.productName ?? 'สินค้า/บริการ';
   const targetLang = {
     code: campaign.country?.languageCode ?? 'en',
     name: campaign.country?.languageName ?? 'English',

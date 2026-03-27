@@ -6,7 +6,10 @@
       "Bash(git -C /Users/ntpls/Github/FastShip/kollabglobal commit -m \"feat: add package_creators join table\")",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(script:*)"
+      "Bash(script:*)",
+      "Bash(pnpm build:*)",
+      "Bash(git -C /Users/ntpls/Github/FastShip/kollabglobal stash)",
+      "Bash(pnpm test:*)"
     ]
   }
 }

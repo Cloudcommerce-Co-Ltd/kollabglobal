@@ -20,7 +20,7 @@ export async function GET(
     where: { id: campaignId, userId: session.user.id },
     include: {
       package: true,
-      product: true,
+      products: true,
       creators: { include: { creator: true } },
       payment: true,
     },
@@ -93,10 +93,10 @@ export async function GET(
       deliverables: campaign.package?.deliverables,
     },
     product: {
-      brandName: campaign.product?.brandName,
-      productName: campaign.product?.productName,
-      isService: campaign.product?.isService,
-      category: campaign.product?.category,
+      brandName: campaign.products?.[0]?.brandName,
+      productName: campaign.products?.[0]?.productName,
+      isService: campaign.products?.[0]?.isService,
+      category: campaign.products?.[0]?.category,
     },
     creators: campaign.creators.map((cc) => ({
       id: cc.creator.id,

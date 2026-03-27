@@ -54,14 +54,14 @@ export default async function CampaignDetailPage({
     deadline: briefDeadline,
     liveAt: campaign.liveAt?.toISOString() ?? null,
   });
-  const isService = campaign.product?.isService ?? false;
+  const isService = campaign.products?.[0]?.isService ?? false;
   const isLive = displayStatus === 'live';
   const isDomestic = campaign.country?.name === 'Thailand';
   const creators = campaign.creators ?? [];
   const platforms = campaign.package?.platforms ?? [];
   const creatorsCount = campaign.package?.numCreators ?? creators.length;
-  const brandName = campaign.product?.brandName ?? 'แคมเปญ';
-  const productName = campaign.product?.productName ?? 'สินค้า/บริการ';
+  const brandName = campaign.products?.[0]?.brandName ?? 'แคมเปญ';
+  const productName = campaign.products?.[0]?.productName ?? 'สินค้า/บริการ';
   const countryName = campaign.country?.name ?? '';
   const campaignTitle = countryName
     ? `${brandName} x ${countryName}`
@@ -122,7 +122,7 @@ export default async function CampaignDetailPage({
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <CampaignIcon product={campaign.product} size="lg" />
+              <CampaignIcon product={campaign.products?.[0] ?? null} size="lg" />
               <div>
                 <h1 className="text-2xl font-bold text-dark m-0">
                   {campaignTitle}

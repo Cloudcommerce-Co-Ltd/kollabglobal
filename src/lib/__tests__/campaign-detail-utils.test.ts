@@ -10,7 +10,7 @@ function makeCampaign(status: string, isService = false): CampaignWithRelations 
     promotionType: isService ? "SERVICE" : "PRODUCT",
     status,
     duration: 30,
-    product: isService ? { isService: true, brandName: "", productName: "", category: "", description: "", sellingPoints: "", url: "", imageUrl: null } : null,
+    products: isService ? [{ isService: true, brandName: "", productName: "", category: "", description: "", sellingPoints: "", url: "", imageUrl: null }] : [],
   };
 }
 

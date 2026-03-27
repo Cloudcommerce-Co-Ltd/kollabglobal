@@ -73,7 +73,7 @@ export default function CreateBriefPage({
         setCampaign(data);
         setForm(f => ({
           ...f,
-          name: data.product?.productName ?? '',
+          name: data.products?.[0]?.productName ?? '',
         }));
         const lang = data.country
           ? {
@@ -90,7 +90,8 @@ export default function CreateBriefPage({
       });
   }, [id, router]);
 
-  const isService = campaign?.product?.isService ?? false;
+  const product = campaign?.products?.[0] ?? null;
+  const isService = product?.isService ?? false;
   const platforms = campaign?.package?.platforms ?? [];
   const campaignDeliverables = campaign?.package?.deliverables ?? [];
 
@@ -100,11 +101,11 @@ export default function CreateBriefPage({
   const canPublish = canPublishBrief(form, needsTranslation, aiTranslated);
 
   async function fillAI() {
-    if (!campaign?.product) return;
+    if (!product || !campaign) return;
     setAiLoading(true);
     setAiError(null);
     try {
-      const data = await fillBriefAI(campaign.product, {
+      const data = await fillBriefAI(product, {
         countryName: campaign.country?.name,
         platforms,
         packageDeliverables: campaignDeliverables,
@@ -232,7 +233,7 @@ export default function CreateBriefPage({
                 />
               </div>
 
-              {campaign?.product && (
+              {product && (
                 <>
                   <div className="mb-4">
                     <label className="mb-1.5 block text-sm font-semibold text-dark">
@@ -240,7 +241,7 @@ export default function CreateBriefPage({
                     </label>
                     <input
                       type="text"
-                      value={campaign.product.brandName}
+                      value={product.brandName}
                       readOnly
                       className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
                     />
@@ -251,7 +252,7 @@ export default function CreateBriefPage({
                     </label>
                     <input
                       type="text"
-                      value={campaign.product.productName}
+                      value={product.productName}
                       readOnly
                       className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
                     />
@@ -263,10 +264,10 @@ export default function CreateBriefPage({
             {/* Right: Product Context + Deadline stacked */}
             <div className="flex flex-col gap-5 *:last:flex-1">
               {/* ข้อมูลสินค้าจากแบรนด์ */}
-              {campaign?.product &&
-                (campaign.product.description ||
-                  campaign.product.sellingPoints ||
-                  campaign.product.category) && (
+              {product &&
+                (product.description ||
+                  product.sellingPoints ||
+                  product.category) && (
                   <div className="rounded-2xl border border-brand/20 bg-linear-to-br from-brand-light to-secondary-brand-light p-5">
                     <div className="mb-3.5 flex items-center gap-2">
                       {isService ? (
@@ -279,33 +280,33 @@ export default function CreateBriefPage({
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
-                      {campaign.product.category && (
+                      {product.category && (
                         <div className="rounded-[10px] border border-border-ui bg-white p-3">
                           <div className="mb-1 text-[11px] font-semibold text-muted-text">
                             หมวดหมู่
                           </div>
                           <div className="text-sm font-semibold text-secondary-brand">
-                            {campaign.product.category}
+                            {product.category}
                           </div>
                         </div>
                       )}
-                      {campaign.product.description && (
+                      {product.description && (
                         <div className="rounded-[10px] border border-border-ui bg-white p-3">
                           <div className="mb-1 text-[11px] font-semibold text-muted-text">
                             รายละเอียด
                           </div>
                           <div className="text-[13px] leading-relaxed text-dark">
-                            {campaign.product.description}
+                            {product.description}
                           </div>
                         </div>
                       )}
-                      {campaign.product.sellingPoints && (
+                      {product.sellingPoints && (
                         <div className="col-span-2 rounded-[10px] border border-border-ui bg-white p-3">
                           <div className="mb-1 text-[11px] font-semibold text-muted-text">
                             จุดเด่น
                           </div>
                           <div className="text-[13px] font-semibold leading-relaxed text-accent-brand">
-                            {campaign.product.sellingPoints}
+                            {product.sellingPoints}
                           </div>
                         </div>
                       )}
@@ -431,7 +432,7 @@ export default function CreateBriefPage({
                   )}
                   <button
                     onClick={fillAI}
-                    disabled={aiLoading || aiFilled || !campaign?.product}
+                    disabled={aiLoading || aiFilled || !product}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg border-none px-3 py-1.5 text-xs font-semibold transition-all ${
                       aiLoading
                         ? 'cursor-wait bg-border-ui text-muted-text'

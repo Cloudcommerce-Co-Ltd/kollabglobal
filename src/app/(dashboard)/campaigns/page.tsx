@@ -23,12 +23,12 @@ export default async function CampaignsPage() {
     package: c.package
       ? { id: c.package.id, name: c.package.name, numCreators: c.package.numCreators, platforms: c.package.platforms }
       : null,
-    product: c.product
+    product: c.products[0]
       ? {
-          brandName: c.product.brandName,
-          productName: c.product.productName,
-          isService: c.product.isService,
-          imageUrl: c.product.imageUrl,
+          brandName: c.products[0].brandName,
+          productName: c.products[0].productName,
+          isService: c.products[0].isService,
+          imageUrl: c.products[0].imageUrl,
         }
       : null,
     creators: c.creators.map((cr) => ({ status: cr.status })),
