@@ -98,7 +98,7 @@ describe("omise lib", () => {
       const after = Date.now();
       const calledWith = chargesCreate.mock.calls[0][0];
       const expiresAt = new Date(calledWith.expires_at).getTime();
-      const ttlMs = parseInt(process.env.OMISE_CHARGE_EXPIRED_DURATION ?? '900', 10) * 1000;
+      const ttlMs = parseInt(process.env.OMISE_CHARGE_EXPIRED_DURATION ?? '15', 10) * 60 * 1000;
       expect(expiresAt).toBeGreaterThanOrEqual(before + ttlMs);
       expect(expiresAt).toBeLessThanOrEqual(after + ttlMs);
     });

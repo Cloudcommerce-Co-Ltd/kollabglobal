@@ -19,7 +19,7 @@ type UseQrPaymentResult = {
 };
 
 export const QR_TTL_MS =
-  parseInt(process.env.NEXT_PUBLIC_OMISE_CHARGE_EXPIRED_DURATION ?? '900', 10) * 1000;
+  parseInt(process.env.NEXT_PUBLIC_OMISE_CHARGE_EXPIRED_DURATION ?? '15', 10) * 60 * 1000;
 
 export function useQrPayment({
   chargeId,

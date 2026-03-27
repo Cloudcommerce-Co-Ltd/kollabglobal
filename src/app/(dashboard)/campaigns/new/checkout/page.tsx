@@ -14,14 +14,12 @@ import {
 import { useQrPayment } from '@/hooks/use-qr-payment';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { VAT_RATE, SERVICE_FEE_RATE } from '@/lib/package-utils';
 
 type PaymentStatus = 'idle' | 'creating' | 'pending' | 'expired' | 'completed' | 'failed';
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const {
     packageData,
     selectedCreatorsData,
@@ -352,7 +350,9 @@ export default function CheckoutPage() {
                     className="mx-auto mb-4 flex w-64 items-center justify-center rounded-xl bg-white"
                   >
                     {paymentStatus === 'creating' && (
-                      <Loader2 size={48} className="animate-spin text-dark" />
+                      <div className="aspect-square w-full flex justify-center items-center">
+                        <Loader2 size={48} className="animate-spin text-dark" />
+                      </div>
                     )}
                     {(paymentStatus === 'pending' ||
                       paymentStatus === 'completed') &&
@@ -365,10 +365,14 @@ export default function CheckoutPage() {
                         />
                       )}
                     {paymentStatus === 'expired' && (
-                      <Clock size={48} className="text-[#bbb]" />
+                      <div className="aspect-square w-full flex justify-center items-center">
+                        <Clock size={48} className="text-[#bbb]" />
+                      </div>
                     )}
                     {paymentStatus === 'failed' && (
-                      <XCircle size={48} color="#ef4444" />
+                      <div className="aspect-square w-full flex justify-center items-center">
+                        <XCircle size={48} color="#ef4444" />
+                      </div>
                     )}
                   </div>
 

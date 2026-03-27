@@ -29,7 +29,7 @@ export async function createPromptPayCharge(amountSatang: number): Promise<{
     amount: amountSatang,
     currency: "THB",
     source: source.id,
-    expires_at: new Date(Date.now() + parseInt(process.env.OMISE_CHARGE_EXPIRED_DURATION ?? '900', 10) * 1000).toISOString(),
+    expires_at: new Date(Date.now() + parseInt(process.env.OMISE_CHARGE_EXPIRED_DURATION ?? '15', 10) * 60 * 1000).toISOString(),
   });
 
   return {
