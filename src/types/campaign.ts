@@ -44,6 +44,7 @@ export interface CampaignCreatorWithRelation {
   id: string;
   status: string;
   contentStatus: string;
+  productId: string | null;
   creator: {
     id: string;
     name: string;
@@ -64,7 +65,7 @@ export interface CampaignWithRelations {
   promotionType: string;
   status: string;
   duration: number;
-  product: ProductData | null;
+  products: ProductData[];
   country?: {
     id: number;
     name: string;

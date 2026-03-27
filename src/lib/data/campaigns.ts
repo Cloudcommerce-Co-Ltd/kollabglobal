@@ -6,7 +6,7 @@ export function getUserCampaigns(userId: string) {
     include: {
       country: true,
       package: true,
-      product: true,
+      products: true,
       creators: { select: { status: true } },
     },
     orderBy: { createdAt: 'desc' },
@@ -19,7 +19,7 @@ export function getCampaignDetail(userId: string, id: string) {
     include: {
       country: true,
       package: true,
-      product: true,
+      products: true,
       brief: true,
       creators: { include: { creator: true } },
     },
