@@ -41,7 +41,7 @@ export function CampaignDashboard({ campaigns }: CampaignDashboardProps) {
         counts={counts}
         totalCount={campaigns.length}
       />
-      <div className="mx-auto max-w-275 px-4 py-5 sm:px-8">
+      <div className="max-w-290 mx-auto px-4 py-5 sm:px-8">
         <CampaignTable campaigns={sorted} />
       </div>
     </div>
