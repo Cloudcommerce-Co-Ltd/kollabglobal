@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 import SelectCreatorsPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
 import type { Country, Creator, Package } from "@/types";
+import type { CreatorWithPackageInfo } from '@/types';
 
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
@@ -13,8 +14,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 // 28 main creators + 5 backup creators
-const MOCK_CREATORS: Creator[] = [
-  ...Array.from({ length: 28 }, (_, i): Creator => ({
+const MOCK_CREATORS: CreatorWithPackageInfo[] = [
+  ...Array.from({ length: 28 }, (_, i): CreatorWithPackageInfo => ({
     id: `creator-${i}`,
     name: `Creator${i}`,
     niche: 'The Global Bridge',
@@ -22,10 +23,12 @@ const MOCK_CREATORS: Creator[] = [
     reach: 'N/A',
     avatar: '',
     countryCode: 'TH',
+    countryId: 1,
     isBackup: false,
+    sortOrder: i,
     platform: null, socialHandle: null, portfolioUrl: null,
   })),
-  ...Array.from({ length: 5 }, (_, i): Creator => ({
+  ...Array.from({ length: 5 }, (_, i): CreatorWithPackageInfo => ({
     id: `creator-backup-${i}`,
     name: `BackupCreator${i}`,
     niche: 'ตัวสำรอง',
@@ -33,7 +36,9 @@ const MOCK_CREATORS: Creator[] = [
     reach: 'N/A',
     avatar: '',
     countryCode: 'TH',
+    countryId: 1,
     isBackup: true,
+    sortOrder: i,
     platform: null, socialHandle: null, portfolioUrl: null,
   })),
 ];
@@ -143,6 +148,15 @@ describe("SelectCreatorsPage", () => {
     await waitFor(() =>
       expect(screen.getByText("5/5 คนที่เลือก • เลือกได้สูงสุด 5 คน")).toBeInTheDocument()
     );
+  });
+
+  it("fetches creators with packageId query param", async () => {
+    render(<SelectCreatorsPage />);
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/creators?packageId=')
+      );
+    });
   });
 
   it("toggle updates store immediately", async () => {

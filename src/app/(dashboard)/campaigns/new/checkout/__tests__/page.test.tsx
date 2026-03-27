@@ -56,7 +56,7 @@ const MOCK_CREATORS: Creator[] = Array.from({ length: 10 }, (_, i) => ({
   reach: "N/A",
   avatar: `https://example.com/avatar-${i}.jpg`,
   countryCode: 'TH',
-  isBackup: false,
+  countryId: null,
   platform: null, socialHandle: null, portfolioUrl: null,
 }));
 

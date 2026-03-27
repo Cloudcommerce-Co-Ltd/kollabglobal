@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { Creator } from '@/types';
+import type { CreatorWithPackageInfo } from '@/types';
 import { useRouter } from 'next/navigation';
 
 function CreatorCard({
@@ -94,15 +95,17 @@ export default function SelectCreatorsPage() {
       ? selectedCreatorsData.map((c: Creator) => c.id)
       : [],
   );
-  const [mainCreators, setMainCreators] = useState<Creator[]>([]);
-  const [backupCreators, setBackupCreators] = useState<Creator[]>([]);
+  const [mainCreators, setMainCreators] = useState<CreatorWithPackageInfo[]>([]);
+  const [backupCreators, setBackupCreators] = useState<CreatorWithPackageInfo[]>([]);
 
   useEffect(() => {
-    fetch('/api/creators')
+    const packageId = packageData?.id;
+    if (!packageId) return;
+    fetch(`/api/creators?packageId=${packageId}`)
       .then(r => r.json())
-      .then((data: Creator[]) => {
-        const main = data.filter((c: Creator) => !c.isBackup);
-        const backup = data.filter((c: Creator) => c.isBackup);
+      .then((data: CreatorWithPackageInfo[]) => {
+        const main = data.filter((c: CreatorWithPackageInfo) => !c.isBackup);
+        const backup = data.filter((c: CreatorWithPackageInfo) => c.isBackup);
         setMainCreators(main);
         setBackupCreators(backup);
         setSelectedIds(prev =>

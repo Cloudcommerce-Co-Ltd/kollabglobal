@@ -28,8 +28,8 @@ const mkPackage = (): Package => ({
 
 const mkCreator = (): Creator => ({
   id: "c1", name: "Creator", niche: "Food", engagement: "5%",
-  reach: "100K", avatar: "👩", countryCode: 'TH', isBackup: false,
-  platform: null, socialHandle: null, portfolioUrl: null,
+  reach: "100K", avatar: "👩", countryCode: 'TH',
+  countryId: null, platform: null, socialHandle: null, portfolioUrl: null,
 });
 
 beforeEach(() => {
