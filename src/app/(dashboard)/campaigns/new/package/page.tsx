@@ -7,14 +7,14 @@ import ReactCountryFlag from 'react-country-flag';
 import Image from 'next/image';
 import { useCampaignStore } from '@/stores/campaign-store';
 import { PlatformIcon } from '@/components/icons/platform-icons';
-import type { Creator, Package } from '@/types';
+import type { CreatorWithPackageInfo, Package } from '@/types';
 
 export default function SelectPackagePage() {
   const router = useRouter();
   const { countryData, packageData, setPackage } = useCampaignStore();
 
   const [packages, setPackages] = useState<Package[]>([]);
-  const [creators, setCreators] = useState<Creator[]>([]);
+  const [creatorsByPackage, setCreatorsByPackage] = useState<Record<number, CreatorWithPackageInfo[]>>({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<number | null>(
     packageData?.id ?? null,
@@ -25,10 +25,10 @@ export default function SelectPackagePage() {
     if (!countryData) return;
     Promise.all([
       fetch('/api/packages').then(r => r.json()),
-      fetch('/api/creators').then(r => r.json()),
-    ]).then(([pkgData, crData]: [Package[], Creator[]]) => {
+      fetch('/api/package-creators').then(r => r.json()),
+    ]).then(([pkgData, crData]: [Package[], Record<number, CreatorWithPackageInfo[]>]) => {
       setPackages(pkgData);
-      setCreators(crData.filter(c => !c.isBackup));
+      setCreatorsByPackage(crData);
       if (!packageData) {
         const popular = pkgData.find(p => p.badge !== null);
         if (popular) {
@@ -199,7 +199,7 @@ export default function SelectPackagePage() {
                         ครีเอเตอร์ตัวอย่าง
                       </div>
                       <div className="flex flex-wrap gap-0.5">
-                        {creators.slice(0, avatarCount).map((cr, i) => (
+                        {(creatorsByPackage[pkg.id] ?? []).slice(0, avatarCount).map((cr, i) => (
                           <div
                             key={cr.id}
                             className="relative"
