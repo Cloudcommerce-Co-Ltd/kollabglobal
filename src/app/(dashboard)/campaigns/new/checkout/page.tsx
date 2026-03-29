@@ -13,7 +13,6 @@ import { useQrPayment } from '@/hooks/use-qr-payment';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCampaignStore } from '@/stores/campaign-store';
-import { VAT_RATE, SERVICE_FEE_RATE } from '@/lib/package-utils';
 
 type PaymentStatus = 'idle' | 'creating' | 'pending' | 'expired' | 'completed' | 'failed';
 
@@ -70,9 +69,7 @@ export default function CheckoutPage() {
   const packageName = packageData?.name ?? '—';
   const numCreators = packageData?.numCreators ?? 0;
   const basePrice = packageData?.price ?? 0;
-  const vat = Math.round(basePrice * VAT_RATE);
-  const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
-  const total = basePrice + vat + serviceFee;
+  const total = basePrice;
   const formatCountdown = (secs: number) => {
     const m = String(Math.floor(secs / 60)).padStart(2, '0');
     const s = String(secs % 60).padStart(2, '0');
@@ -269,20 +266,6 @@ export default function CheckoutPage() {
                   <span className="text-sm text-muted-text">ค่าแพ็กเกจ</span>
                   <span className="text-sm font-semibold text-dark">
                     ฿{basePrice.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-text">VAT (7%)</span>
-                  <span className="text-sm font-semibold text-dark">
-                    ฿{vat.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-text">
-                    ค่าบริการ (3%)
-                  </span>
-                  <span className="text-sm font-semibold text-dark">
-                    ฿{serviceFee.toLocaleString()}
                   </span>
                 </div>
               </div>

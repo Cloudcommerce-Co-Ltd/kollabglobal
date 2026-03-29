@@ -47,9 +47,7 @@ const MOCK_PACKAGE: Package = {
 };
 
 const BASE_PRICE = MOCK_PACKAGE.price;
-const VAT = Math.round(BASE_PRICE * 0.07);
-const SERVICE_FEE = Math.round(BASE_PRICE * 0.03);
-const TOTAL = BASE_PRICE + VAT + SERVICE_FEE;
+const TOTAL = BASE_PRICE;
 
 const MOCK_CREATORS: CreatorWithPackageInfo[] = Array.from({ length: 10 }, (_, i) => ({
   id: `creator-${i}`,
@@ -114,14 +112,14 @@ describe("CheckoutPage", () => {
 
   it("shows price breakdown values", () => {
     render(<CheckoutPage />);
-    expect(screen.getByText(`฿${BASE_PRICE.toLocaleString()}`)).toBeInTheDocument();
-    expect(screen.getByText(`฿${VAT.toLocaleString()}`)).toBeInTheDocument();
-    expect(screen.getByText(`฿${SERVICE_FEE.toLocaleString()}`)).toBeInTheDocument();
+    // base price appears twice: once in the package line, once as total
+    expect(screen.getAllByText(`฿${BASE_PRICE.toLocaleString()}`).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows total price", () => {
+  it("shows total price (equals base price — net, no VAT/fees)", () => {
     render(<CheckoutPage />);
-    expect(screen.getByText(`฿${TOTAL.toLocaleString()}`)).toBeInTheDocument();
+    const totals = screen.getAllByText(`฿${TOTAL.toLocaleString()}`);
+    expect(totals.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders QR placeholder area", () => {

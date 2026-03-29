@@ -53,7 +53,7 @@ const validBody = {
   productData: validProductData,
 };
 
-// Package with numCreators=10, price=33250 (total) → vat=2328, fee=998 → total=36576 → satang=3657600
+// Package with numCreators=10, price=33250 (net, no VAT/fees) → satang=3325000
 const mockPackage = {
   id: 2,
   numCreators: 10,
@@ -69,7 +69,7 @@ const mockPackage = {
   estEngagement: null,
 };
 
-const EXPECTED_SATANG = 3657600; // (33250 + 2328 + 998) * 100
+const EXPECTED_SATANG = 3325000; // 33250 * 100 (net price)
 
 describe("POST /api/payments/create-charge", () => {
   beforeEach(async () => {

@@ -12,7 +12,6 @@ import {
 import { useQrPayment } from '@/hooks/use-qr-payment';
 import Image from 'next/image';
 import Link from 'next/link';
-import { VAT_RATE, SERVICE_FEE_RATE } from '@/lib/package-utils';
 
 type PaymentStatus = 'loading' | 'pending' | 'expired' | 'completed' | 'failed';
 
@@ -82,9 +81,7 @@ export function ResumeCheckoutClient({
   };
 
   const basePrice = packageData.price;
-  const vat = Math.round(basePrice * VAT_RATE);
-  const serviceFee = Math.round(basePrice * SERVICE_FEE_RATE);
-  const total = basePrice + vat + serviceFee;
+  const total = basePrice;
   const numPosts = (packageData.deliverables.length ?? 1) * packageData.numCreators;
   const campaignType = productData.isService ? 'บริการ' : 'สินค้า';
 
@@ -214,18 +211,6 @@ export function ResumeCheckoutClient({
                   <span className="text-sm text-muted-text">ค่าแพ็กเกจ</span>
                   <span className="text-sm font-semibold text-dark">
                     ฿{basePrice.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-text">VAT (7%)</span>
-                  <span className="text-sm font-semibold text-dark">
-                    ฿{vat.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-text">ค่าบริการ (3%)</span>
-                  <span className="text-sm font-semibold text-dark">
-                    ฿{serviceFee.toLocaleString()}
                   </span>
                 </div>
               </div>
