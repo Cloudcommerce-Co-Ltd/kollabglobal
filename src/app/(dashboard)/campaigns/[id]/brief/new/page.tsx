@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useRef, useEffect as useEffectHook } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -25,6 +25,77 @@ import {
 import type { BriefForm, TranslatedFields } from '@/types/brief';
 import type { CampaignWithRelations } from '@/types/campaign';
 import { useEffect } from 'react';
+
+type LangOption = { code: string; name: string; countryCode: string };
+
+function LangDropdown({
+  options,
+  value,
+  onChange,
+  disabled,
+}: {
+  options: LangOption[];
+  value: LangOption | null;
+  onChange: (lang: LangOption | null) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffectHook(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => { if (!disabled) setOpen(o => !o); }}
+        className={`flex min-w-36 items-center gap-2 rounded-[10px] border-[1.5px] border-border-ui bg-white px-3 py-1.5 text-sm outline-none focus:border-brand ${
+          disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+        }`}
+      >
+        {value ? (
+          <>
+            <ReactCountryFlag countryCode={value.countryCode} svg className="w-4! h-4! rounded-sm shrink-0" />
+            <span className="flex-1 text-left">{value.name} ({value.countryCode})</span>
+          </>
+        ) : (
+          <span className="flex-1 text-left text-muted-text">-- เลือกภาษา --</span>
+        )}
+        <span className="text-muted-text">▾</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-20 mt-1 min-w-full overflow-hidden rounded-[10px] border border-border-ui bg-white shadow-lg">
+          <button
+            type="button"
+            onClick={() => { onChange(null); setOpen(false); }}
+            className="w-full px-3 py-2 text-left text-sm text-muted-text hover:bg-surface"
+          >
+            -- เลือกภาษา --
+          </button>
+          {options.map(lang => (
+            <button
+              key={lang.countryCode}
+              type="button"
+              onClick={() => { onChange(lang); setOpen(false); }}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface ${
+                value?.countryCode === lang.countryCode ? 'bg-brand-light font-semibold' : ''
+              }`}
+            >
+              <ReactCountryFlag countryCode={lang.countryCode} svg className="w-4! h-4! rounded-sm shrink-0" />
+              {lang.name} ({lang.countryCode})
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CreateBriefPage({
   params,
@@ -75,14 +146,6 @@ export default function CreateBriefPage({
           ...f,
           name: data.products?.[0]?.productName ?? '',
         }));
-        const lang = data.country
-          ? {
-              code: data.country.languageCode,
-              name: data.country.languageName,
-              countryCode: data.country.countryCode,
-            }
-          : { code: 'en', name: 'English', countryCode: 'US' };
-        setTargetLang(lang);
         setLoading(false);
       })
       .catch(() => {
@@ -95,9 +158,32 @@ export default function CreateBriefPage({
   const platforms = campaign?.package?.platforms ?? [];
   const campaignDeliverables = campaign?.package?.deliverables ?? [];
 
+  const availableLanguages = (() => {
+    if (!campaign?.creators) return [];
+    const langNames = new Intl.DisplayNames(['en'], { type: 'language' });
+    const seen = new Set<string>();
+    const langs: { code: string; name: string; countryCode: string }[] = [];
+    for (const cc of campaign.creators) {
+      const creatorCountryCode = cc.creator.countryCode;
+      if (!creatorCountryCode) continue;
+      if (seen.has(creatorCountryCode)) continue;
+      try {
+        const languageCode = new Intl.Locale(`und-${creatorCountryCode}`).maximize().language;
+        if (languageCode === 'th') continue;
+        const languageName = langNames.of(languageCode) ?? languageCode;
+        seen.add(creatorCountryCode);
+        langs.push({ code: languageCode, name: languageName, countryCode: creatorCountryCode });
+      } catch {
+        // skip creators with unresolvable country codes
+      }
+    }
+    return langs;
+  })();
+
   const isContentFilled = isBriefContentFilled(form);
   const isDeadlineFilled = !!form.deadline;
-  const needsTranslation = !!(targetLang && targetLang.code !== 'th');
+  const hasLanguageOptions = availableLanguages.length > 0;
+  const needsTranslation = hasLanguageOptions;
   const canPublish = canPublishBrief(form, needsTranslation, aiTranslated);
 
   async function fillAI() {
@@ -125,7 +211,7 @@ export default function CreateBriefPage({
   }
 
   async function handleTranslate() {
-    if (!targetLang) return;
+    if (!targetLang || aiTranslated) return;
     setTranslating(true);
     setTranslateError(null);
     try {
@@ -530,9 +616,9 @@ export default function CreateBriefPage({
                     : 'border-border-ui'
               }`}
             >
-              <div className="mb-4.5 flex items-center gap-2.5">
+              <div className="mb-4.5 flex flex-wrap items-start gap-2.5">
                 <div
-                  className={`flex size-10 items-center justify-center rounded-[10px] ${
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] ${
                     aiTranslated ? 'bg-brand-light' : 'bg-accent-brand-light'
                   }`}
                 >
@@ -543,45 +629,38 @@ export default function CreateBriefPage({
                     }
                   />
                 </div>
-                <div>
+                <div className="flex items-center gap-2">
                   <h3 className="m-0 text-lg font-bold text-dark">
-                    {needsTranslation ? (
-                      <span className="flex items-center gap-1.5">
-                        แปล Brief →
-                        {targetLang?.countryCode && (
-                          <ReactCountryFlag
-                            countryCode={targetLang.countryCode}
-                            svg
-                            className="w-4! h-4! rounded-sm"
-                          />
-                        )}
-                        {targetLang?.name}
-                      </span>
-                    ) : (
-                      'Translation'
-                    )}
+                    แปล Brief
                   </h3>
-                  {!needsTranslation && (
+                  {hasLanguageOptions ? (
+                    <LangDropdown
+                      options={availableLanguages}
+                      value={targetLang}
+                      onChange={lang => { if (!aiTranslated) setTargetLang(lang); }}
+                      disabled={aiTranslated}
+                    />
+                  ) : (
                     <div className="mt-0.5 text-[13px] text-muted-text">
-                      ครีเอเตอร์พูดภาษาไทย ไม่ต้องแปล
+                      ครีเอเตอร์ทุกคนพูดภาษาไทย ไม่ต้องแปล
                     </div>
                   )}
                 </div>
-                <div className="ml-auto flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   {aiTranslated && (
                     <div className="flex items-center gap-1.25 text-xs font-semibold text-green-600">
                       <CheckCircle size={13} />
                       แปลสำเร็จ
                     </div>
                   )}
-                  {needsTranslation && (
+                  {hasLanguageOptions && (
                     <button
                       onClick={handleTranslate}
-                      disabled={aiTranslated || translating || !isContentFilled}
+                      disabled={aiTranslated || translating || !isContentFilled || !targetLang}
                       className={`flex cursor-pointer items-center gap-1.5 rounded-lg border-none px-3 py-1.5 text-xs font-semibold transition-all ${
                         aiTranslated
                           ? 'cursor-not-allowed bg-border-ui text-muted-text'
-                          : translating || !isContentFilled
+                          : translating || !isContentFilled || !targetLang
                             ? 'cursor-not-allowed bg-[#e5e7eb] text-[#9ca3af]'
                             : 'bg-linear-to-br from-accent-brand to-[#7c5cbf] text-white'
                       }`}
@@ -607,7 +686,7 @@ export default function CreateBriefPage({
                 </div>
               </div>
 
-              {needsTranslation && (
+              {hasLanguageOptions && targetLang && (
                 <>
                   {translateError && (
                     <div className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-600">
@@ -675,12 +754,22 @@ export default function CreateBriefPage({
                 </>
               )}
 
-              {!needsTranslation && (
+              {!hasLanguageOptions && (
                 <div className="flex flex-col items-center justify-center py-8 text-center text-muted-text">
                   <CheckCircle size={32} className="mb-2 text-brand" />
                   <div className="text-sm font-semibold">ไม่ต้องแปล</div>
                   <div className="mt-1 text-xs">
-                    ครีเอเตอร์ในประเทศนี้พูดภาษาไทย
+                    ครีเอเตอร์ทุกคนพูดภาษาไทย
+                  </div>
+                </div>
+              )}
+
+              {hasLanguageOptions && !targetLang && (
+                <div className="flex flex-col items-center justify-center py-8 text-center text-muted-text">
+                  <Languages size={32} className="mb-2 text-muted-text" />
+                  <div className="text-sm font-semibold">เลือกภาษาเป้าหมายด้านบน</div>
+                  <div className="mt-1 text-xs">
+                    เพื่อแปล Brief ให้ครีเอเตอร์ต่างประเทศ
                   </div>
                 </div>
               )}
@@ -720,7 +809,9 @@ export default function CreateBriefPage({
                       ? 'กรอก Brief ก่อน'
                       : !isDeadlineFilled
                         ? 'ตั้ง Deadline ก่อน'
-                        : 'แปลภาษาก่อน'}
+                        : !targetLang
+                          ? 'เลือกภาษาและแปล Brief ก่อน'
+                          : 'แปล Brief ก่อน'}
                   </div>
                 )}
                 {canPublish && (

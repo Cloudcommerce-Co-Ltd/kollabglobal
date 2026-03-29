@@ -55,6 +55,13 @@ export interface CampaignCreatorWithRelation {
     countryCode: string | null;
     platform: string | null;
     socialHandle: string | null;
+    country?: {
+      id: number;
+      name: string;
+      countryCode: string;
+      languageCode: string;
+      languageName: string;
+    } | null;
   };
 }
 
