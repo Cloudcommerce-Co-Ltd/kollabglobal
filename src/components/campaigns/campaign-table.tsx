@@ -178,11 +178,6 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
 
               {/* Column 4: Actions */}
               <div className="flex items-center justify-end gap-2">
-                {pending > 0 && (
-                  <span className="flex size-5.5 items-center justify-center rounded-full bg-danger text-[12px] font-bold text-white">
-                    {pending}
-                  </span>
-                )}
                 <ChevronRight size={16} className="text-muted-text" />
               </div>
             </div>
