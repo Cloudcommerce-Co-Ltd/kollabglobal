@@ -20,6 +20,9 @@ export default function CampaignNewLayout({
   // server-rendered initial state (all null) triggers a spurious redirect.
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
+    // Intentional: marks client hydration complete so the step guard
+    // doesn't redirect based on empty Zustand state from SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true);
   }, []);
 

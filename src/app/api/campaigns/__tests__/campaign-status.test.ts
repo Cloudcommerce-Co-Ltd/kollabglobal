@@ -47,8 +47,10 @@ function makeParams(id = "campaign-123") {
 describe("PATCH /api/campaigns/[id]/status", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(prisma));
-    vi.mocked(prisma.campaignStatusLog.create).mockResolvedValue({} as any);
+    vi.mocked(prisma.$transaction).mockImplementation(
+      async (fn: unknown) => (fn as (tx: typeof prisma) => Promise<unknown>)(prisma)
+    );
+    vi.mocked(prisma.campaignStatusLog.create).mockResolvedValue({} as never);
   });
 
   it("returns 401 when not authenticated", async () => {

@@ -81,19 +81,19 @@ describe('POST /api/upload/presign', () => {
   })
 
   it('returns 400 when filename is missing', async () => {
-    const { filename: _, ...rest } = VALID_BODY
+    const { filename: _filename, ...rest } = VALID_BODY
     const res = await POST(makeRequest(rest) as never)
     expect(res.status).toBe(400)
   })
 
   it('returns 400 when contentType is missing', async () => {
-    const { contentType: _, ...rest } = VALID_BODY
+    const { contentType: _contentType, ...rest } = VALID_BODY
     const res = await POST(makeRequest(rest) as never)
     expect(res.status).toBe(400)
   })
 
   it('returns 400 when size is missing', async () => {
-    const { size: _, ...rest } = VALID_BODY
+    const { size: _size, ...rest } = VALID_BODY
     const res = await POST(makeRequest(rest) as never)
     expect(res.status).toBe(400)
   })

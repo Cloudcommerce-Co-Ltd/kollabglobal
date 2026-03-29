@@ -62,7 +62,7 @@ function LangDropdown({
         {value ? (
           <>
             <ReactCountryFlag countryCode={value.countryCode} svg className="w-4! h-4! rounded-sm shrink-0" />
-            <span className="flex-1 text-left">{value.name} ({value.countryCode})</span>
+            <span className="flex-1 text-left">{value.name}</span>
           </>
         ) : (
           <span className="flex-1 text-left text-muted-text">-- เลือกภาษา --</span>
@@ -88,7 +88,7 @@ function LangDropdown({
               }`}
             >
               <ReactCountryFlag countryCode={lang.countryCode} svg className="w-4! h-4! rounded-sm shrink-0" />
-              {lang.name} ({lang.countryCode})
+              {lang.name}
             </button>
           ))}
         </div>

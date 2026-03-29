@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 vi.mock('@aws-sdk/client-s3', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   S3Client: vi.fn(function () {}),
   PutObjectCommand: vi.fn(function (input: unknown) { return input }),
 }))
@@ -39,13 +38,13 @@ describe('isS3Configured', () => {
   })
 
   it('returns false when AWS_SECRET_ACCESS_KEY is missing', () => {
-    const { AWS_SECRET_ACCESS_KEY: _, ...rest } = ALL_VARS
+    const { AWS_SECRET_ACCESS_KEY: _key, ...rest } = ALL_VARS
     Object.assign(process.env, rest)
     expect(isS3Configured()).toBe(false)
   })
 
   it('returns false when AWS_S3_REGION is missing', () => {
-    const { AWS_S3_REGION: _, ...rest } = ALL_VARS
+    const { AWS_S3_REGION: _region, ...rest } = ALL_VARS
     Object.assign(process.env, rest)
     expect(isS3Configured()).toBe(false)
   })

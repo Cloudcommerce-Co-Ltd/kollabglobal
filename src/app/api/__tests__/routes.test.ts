@@ -168,7 +168,7 @@ describe('GET /api/package-creators', () => {
   it('each creator has required fields', async () => {
     const res = await getPackageCreators();
     const data = await res.json();
-    for (const creators of Object.values(data) as any[][]) {
+    for (const creators of Object.values(data) as Record<string, unknown>[][]) {
       for (const creator of creators) {
         expect(creator).toHaveProperty('id');
         expect(creator).toHaveProperty('name');

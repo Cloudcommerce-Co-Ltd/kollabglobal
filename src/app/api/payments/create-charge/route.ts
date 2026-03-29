@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     if (!pkg) {
       return NextResponse.json({ error: "Package not found" }, { status: 400 });
     }
-    const { basePrice, vat, serviceFee, total, totalSatang } = calculateTotalWithFees(pkg);
+    const { totalSatang } = calculateTotalWithFees(pkg);
 
     // 6. Idempotency — return existing pending charge if one already exists
     const existingCampaign = await prisma.campaign.findFirst({

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Job } from "bullmq";
 import type { PaymentEventJobData } from "@/lib/queue/payment-queue";
 

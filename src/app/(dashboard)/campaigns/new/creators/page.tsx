@@ -171,7 +171,7 @@ export default function SelectCreatorsPage() {
             <span className="text-sm font-semibold text-dark">Top Picks</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {mainCreators.slice(0, maxCreators).map((creator, i) => {
+            {mainCreators.slice(0, maxCreators).map((creator) => {
               const isSelected = selectedIds.includes(creator.id);
               const isDisabled =
                 !isSelected && selectedIds.length >= maxCreators;

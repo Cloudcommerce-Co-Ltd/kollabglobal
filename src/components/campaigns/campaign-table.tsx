@@ -98,7 +98,7 @@ export function CampaignTable({ campaigns }: CampaignTableProps) {
 
       {campaigns.map(c => {
         const statusCfg = CAMPAIGN_STATUS_CONFIG[c.status];
-        const { accepted, total, pending } = getCreatorCounts(c.creators);
+        const { accepted, total } = getCreatorCounts(c.creators);
         const platforms = c.package?.platforms ?? [];
         const displayName =
           c.product?.productName ?? `แคมเปญ #${c.id.slice(-4)}`;

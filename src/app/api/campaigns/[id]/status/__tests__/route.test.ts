@@ -27,16 +27,18 @@ describe('PATCH /api/campaigns/[id]/status', () => {
 
   it('creates a status log entry on valid transition', async () => {
     const mockCampaign = { id: 'camp-1', userId: 'user-1', status: 'PENDING' };
-    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign as any);
-    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(prisma));
-    vi.mocked(prisma.campaign.update).mockResolvedValue({ ...mockCampaign, status: 'ACCEPTING' } as any);
-    vi.mocked(prisma.campaignStatusLog.create).mockResolvedValue({} as any);
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign as never);
+    vi.mocked(prisma.$transaction).mockImplementation(
+      async (fn: unknown) => (fn as (tx: typeof prisma) => Promise<unknown>)(prisma)
+    );
+    vi.mocked(prisma.campaign.update).mockResolvedValue({ ...mockCampaign, status: 'ACCEPTING' } as never);
+    vi.mocked(prisma.campaignStatusLog.create).mockResolvedValue({} as never);
 
     const req = new Request('http://localhost', {
       method: 'PATCH',
       body: JSON.stringify({ status: 'ACCEPTING' }),
     });
-    const res = await PATCH(req as any, { params: Promise.resolve({ id: 'camp-1' }) });
+    const res = await PATCH(req as never, { params: Promise.resolve({ id: 'camp-1' }) });
 
     expect(res.status).toBe(200);
     expect(prisma.campaignStatusLog.create).toHaveBeenCalledWith({
@@ -57,7 +59,7 @@ describe('PATCH /api/campaigns/[id]/status', () => {
       method: 'PATCH',
       body: JSON.stringify({ status: 'ACCEPTING' }),
     });
-    const res = await PATCH(req as any, { params: Promise.resolve({ id: 'camp-1' }) });
+    const res = await PATCH(req as never, { params: Promise.resolve({ id: 'camp-1' }) });
     expect(res.status).toBe(401);
   });
 
@@ -68,7 +70,7 @@ describe('PATCH /api/campaigns/[id]/status', () => {
       method: 'PATCH',
       body: JSON.stringify({ status: 'ACCEPTING' }),
     });
-    const res = await PATCH(req as any, { params: Promise.resolve({ id: 'nonexistent' }) });
+    const res = await PATCH(req as never, { params: Promise.resolve({ id: 'nonexistent' }) });
     expect(res.status).toBe(404);
   });
 });
