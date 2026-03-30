@@ -44,5 +44,5 @@ export function computeDurationDisplay(params: {
   }
 
   const overdueDays = Math.abs(diffDays);
-  return { text: `เกินกำหนด ${overdueDays} วัน`, label: "(เกินกำหนด)", isOverdue: true };
+  return { text: `เกินกำหนด ${overdueDays} วัน`, isOverdue: true };
 }

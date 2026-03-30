@@ -62,7 +62,6 @@ describe("computeDurationDisplay", () => {
       });
       expect(result.isOverdue).toBe(true);
       expect(result.text).toMatch(/^เกินกำหนด \d+ วัน$/);
-      expect(result.label).toBe("(เกินกำหนด)");
     });
 
     it("shows 1 day remaining when deadline is today (end-of-day still future)", () => {
