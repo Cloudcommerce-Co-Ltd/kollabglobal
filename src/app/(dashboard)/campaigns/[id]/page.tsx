@@ -260,7 +260,7 @@ export default async function CampaignDetailPage({
         )}
 
         {displayStatus === 'brief' && (
-          <div className="mt-5">
+          <div className="mt-5 opacity-50 pointer-events-none select-none grayscale">
             <CreatorPipeline
               creators={serializedCampaign.creators}
               isService={isService}
