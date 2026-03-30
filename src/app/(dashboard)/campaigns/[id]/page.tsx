@@ -226,6 +226,7 @@ export default async function CampaignDetailPage({
               displayStatus={displayStatus}
               serializedCampaign={serializedCampaign}
               isService={isService}
+              campaignStatus={campaign.status}
             />
           </div>
         )}
@@ -240,6 +241,7 @@ export default async function CampaignDetailPage({
               isService={isService}
               isDomestic={isDomestic}
               creatorsCount={creatorsCount}
+              campaignStatus={campaign.status}
             />
           </div>
         )}
@@ -252,18 +254,18 @@ export default async function CampaignDetailPage({
               isService={isService}
               isLive={isLive}
               displayStatus={displayStatus}
+              campaignStatus={campaign.status}
             />
           </div>
         )}
 
-        {(displayStatus === 'brief' ||
-          displayStatus === 'accepting' ||
-          displayStatus === 'ship') && (
+        {displayStatus === 'brief' && (
           <div className="mt-5">
             <CreatorPipeline
               creators={serializedCampaign.creators}
               isService={isService}
               displayStatus={displayStatus}
+              campaignStatus={campaign.status}
             />
           </div>
         )}

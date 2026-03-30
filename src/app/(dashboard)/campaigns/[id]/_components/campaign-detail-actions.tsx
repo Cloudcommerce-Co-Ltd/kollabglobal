@@ -1,8 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { AcceptingCard } from '@/components/campaign/accepting-card';
-import { ShipmentCard } from '@/components/campaign/shipment-card';
+import { CreatorPipeline } from '@/components/campaign/creator-pipeline';
 import type { CampaignCreatorWithRelation } from '@/types/campaign';
 
 interface CampaignDetailActionsProps {
@@ -14,6 +13,7 @@ interface CampaignDetailActionsProps {
   isService: boolean;
   isDomestic?: boolean;
   creatorsCount?: number;
+  campaignStatus: string;
 }
 
 export function CampaignDetailActions({
@@ -23,6 +23,7 @@ export function CampaignDetailActions({
   isService,
   isDomestic = false,
   creatorsCount = 0,
+  campaignStatus,
 }: CampaignDetailActionsProps) {
   const router = useRouter();
   const creators = serializedCampaign.creators ?? [];
@@ -45,19 +46,25 @@ export function CampaignDetailActions({
 
   if (displayStatus === 'accepting') {
     return (
-      <AcceptingCard
+      <CreatorPipeline
         creators={creators}
         isService={isService}
+        displayStatus={displayStatus}
+        campaignStatus={campaignStatus}
         onAllAccepted={handleAllAccepted}
       />
     );
   }
 
+  // displayStatus === 'ship'
   return (
-    <ShipmentCard
+    <CreatorPipeline
       creators={creators}
-      creatorsCount={creatorsCount}
+      isService={isService}
+      displayStatus={displayStatus}
+      campaignStatus={campaignStatus}
       isDomestic={isDomestic}
+      creatorsCount={creatorsCount}
       onShipped={handleShipped}
     />
   );

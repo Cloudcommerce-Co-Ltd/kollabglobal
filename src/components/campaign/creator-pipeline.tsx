@@ -2,16 +2,33 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Package, FileText, Video, Send, CheckCircle } from 'lucide-react';
+import {
+  Package,
+  FileText,
+  CheckCircle,
+  Users,
+  Truck,
+  ChevronRight,
+} from 'lucide-react';
 import type { CampaignCreatorWithRelation } from '@/types/campaign';
 
-type FilterKey = 'all' | 'creating' | 'waiting' | 'ship_pending' | 'done';
+/* ─── Step semantics ──────────────────────────────────────────────────── */
+// 3-dot pipeline:
+//   Dot 1  ตอบรับ        — PENDING (yellow) → ACCEPTED (green)
+//   Dot 2  รับสินค้า      — product: PENDING (yellow) → received (green)
+//                          service: auto-green (icon = FileText instead of Package)
+//   Dot 3  โพสต์         — working (yellow) → POSTED (green)
+/* ─────────────────────────────────────────────────────────────────────── */
+
 type StepState = 'done' | 'active' | 'pending';
+
+/** Filter keys — "active" state means the creator's CURRENT (yellow) step */
+type FilterKey = 'all' | 'waiting_accept' | 'waiting_ship' | 'working' | 'done';
 
 function stepCls(s: StepState) {
   if (s === 'done') return 'bg-green-50 border-green-500 text-green-500';
   if (s === 'active')
-    return 'bg-[#e8f0fa] border-secondary-brand text-secondary-brand';
+    return 'bg-amber-50 border-amber-400 text-amber-500';
   return 'bg-gray-100 border-gray-200 text-gray-300';
 }
 
@@ -21,37 +38,82 @@ function connectorCls(a: StepState, b: StepState) {
     : 'bg-gray-200';
 }
 
+/**
+ * Derive the 3-step states for a creator.
+ *
+ * For **product** campaigns the campaign-level status tells us about shipment:
+ *   - Campaign in ACCEPTING / AWAITING_SHIPMENT → shipment not done yet
+ *   - Campaign in ACTIVE / COMPLETED → shipment done
+ *
+ * For **service** campaigns dot 2 is always green.
+ */
 function getStepStates(
   cc: CampaignCreatorWithRelation,
+  isService: boolean,
+  campaignStatus: string,
   isLive: boolean,
-): StepState[] {
-  if (isLive || cc.contentStatus === 'POSTED')
-    return ['done', 'done', 'done', 'done'];
-  if (cc.contentStatus === 'SUBMITTED')
-    return ['done', 'done', 'active', 'pending'];
-  if (cc.contentStatus === 'CREATING')
-    return ['done', 'active', 'pending', 'pending'];
-  if (cc.status === 'ACCEPTED')
-    return ['done', 'pending', 'pending', 'pending'];
-  return ['active', 'pending', 'pending', 'pending'];
+): [StepState, StepState, StepState] {
+  // Live → all green, no yellow
+  if (isLive) return ['done', 'done', 'done'];
+
+  // Dot 1 — accepted?
+  const accepted = cc.status === 'ACCEPTED' || cc.status === 'COMPLETED';
+  const dot1: StepState = accepted ? 'done' : 'active';
+
+  if (!accepted) return [dot1, 'pending', 'pending'];
+
+  // Dot 2 — shipment / service
+  let dot2: StepState;
+  if (isService) {
+    dot2 = 'done'; // service → auto-green
+  } else {
+    // product: green once campaign reaches ACTIVE or beyond
+    const shipped =
+      campaignStatus === 'ACTIVE' || campaignStatus === 'COMPLETED';
+    dot2 = shipped ? 'done' : 'active';
+  }
+
+  if (dot2 !== 'done') return [dot1, dot2, 'pending'];
+
+  // Dot 3 — content
+  if (cc.contentStatus === 'POSTED') return ['done', 'done', 'done'];
+  if (
+    cc.contentStatus === 'CREATING' ||
+    cc.contentStatus === 'SUBMITTED'
+  )
+    return ['done', 'done', 'active'];
+  // accepted + shipped but not started content yet → dot3 active
+  return ['done', 'done', 'active'];
 }
 
-function getCreatorLabel(
+/** Human-readable label of a creator's current yellow step (for filtering) */
+function getCurrentStep(
   cc: CampaignCreatorWithRelation,
+  isService: boolean,
+  campaignStatus: string,
   isLive: boolean,
-): string {
-  if (isLive || cc.contentStatus === 'POSTED') return 'โพสต์ครบ';
-  if (cc.contentStatus === 'SUBMITTED') return 'กำลังสร้าง';
-  if (cc.contentStatus === 'CREATING') return 'กำลังสร้าง';
-  if (cc.status === 'ACCEPTED') return 'กำลังสร้าง';
-  return 'รอสร้าง';
+): FilterKey {
+  const ss = getStepStates(cc, isService, campaignStatus, isLive);
+  if (ss[0] === 'active') return 'waiting_accept';
+  if (ss[1] === 'active') return 'waiting_ship';
+  if (ss[2] === 'active') return 'working';
+  return 'done';
 }
+
+/* ─── Component ───────────────────────────────────────────────────────── */
 
 interface CreatorPipelineProps {
   creators: CampaignCreatorWithRelation[];
   isService: boolean;
   isLive?: boolean;
   displayStatus: string;
+  /** campaign.status from the database (e.g. ACCEPTING, ACTIVE) */
+  campaignStatus: string;
+  onAllAccepted?: (targetStatus: 'AWAITING_SHIPMENT' | 'ACTIVE') => void;
+  /** Shipment props — only needed when displayStatus === 'ship' */
+  isDomestic?: boolean;
+  creatorsCount?: number;
+  onShipped?: () => Promise<void>;
 }
 
 export function CreatorPipeline({
@@ -59,82 +121,190 @@ export function CreatorPipeline({
   isService,
   isLive = false,
   displayStatus,
+  campaignStatus,
+  onAllAccepted,
+  isDomestic = false,
+  creatorsCount = 0,
+  onShipped,
 }: CreatorPipelineProps) {
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [shipConfirmed, setShipConfirmed] = useState(false);
+  const [shipLoading, setShipLoading] = useState(false);
 
-  const stepIcons = isService
-    ? [FileText, Video, Send, CheckCircle]
-    : [Package, Video, Send, CheckCircle];
+  // Step icons — service uses FileText for dot 2 instead of Package
+  const stepIcons = [
+    CheckCircle, // dot 1: accepted
+    isService ? FileText : Package, // dot 2: shipment / service
+    CheckCircle, // dot 3: posted
+  ];
 
-  if (displayStatus !== 'active' && displayStatus !== 'live') {
-    const msg =
-      displayStatus === 'brief'
-        ? 'สร้าง Brief'
-        : displayStatus === 'accepting'
-          ? 'ครีเอเตอร์ทุกคนตอบรับ'
-          : 'ส่งสินค้า';
-    return (
-      <div className="bg-white rounded-2xl p-5 opacity-40 border border-border-ui">
-        <div className="font-bold text-muted-text mb-1">Creator Pipeline</div>
-        <div className="text-sm text-muted-text">จะแสดงเมื่อ{msg}แล้ว</div>
-      </div>
-    );
+  const stepLabels = [
+    'ตอบรับ',
+    isService ? 'บริการ' : 'รับสินค้า',
+    'โพสต์',
+  ];
+
+  // ── Accepting header ──
+  const isAccepting = displayStatus === 'accepting';
+  const isShipping = displayStatus === 'ship';
+  const total = creators.length;
+  const accepted = creators.filter(
+    c => c.status === 'ACCEPTED' || c.status === 'COMPLETED',
+  ).length;
+  const allAccepted = total > 0 && accepted === total;
+
+  async function handleShipConfirm() {
+    if (!onShipped) return;
+    setShipLoading(true);
+    await onShipped();
+    setShipConfirmed(true);
+    setShipLoading(false);
   }
 
+  // ── Filter options ──
   const filterOpts: { key: FilterKey; label: string }[] = [
     { key: 'all', label: 'ทั้งหมด' },
-    ...(isLive
-      ? [{ key: 'done' as FilterKey, label: 'โพสต์ครบ' }]
-      : [
-          { key: 'creating' as FilterKey, label: 'กำลังสร้าง' },
-          { key: 'waiting' as FilterKey, label: 'รอสร้าง' },
-          ...(!isService
-            ? [{ key: 'ship_pending' as FilterKey, label: 'รอรับสินค้า' }]
-            : []),
-        ]),
+    { key: 'waiting_accept', label: 'รอตอบรับ' },
+    ...(!isService
+      ? [{ key: 'waiting_ship' as FilterKey, label: 'รอรับสินค้า' }]
+      : []),
+    { key: 'working', label: 'กำลังสร้าง' },
+    { key: 'done', label: 'เสร็จสิ้น' },
   ];
 
   function countFor(key: FilterKey) {
     if (key === 'all') return creators.length;
-    return creators.filter(c => getCreatorLabel(c, isLive) === labelForKey(key))
-      .length;
-  }
-
-  function labelForKey(key: FilterKey) {
-    if (key === 'creating') return 'กำลังสร้าง';
-    if (key === 'waiting') return 'รอสร้าง';
-    if (key === 'ship_pending') return 'รอรับสินค้า';
-    if (key === 'done') return 'โพสต์ครบ';
-    return '';
+    return creators.filter(
+      c => getCurrentStep(c, isService, campaignStatus, isLive) === key,
+    ).length;
   }
 
   const filtered =
     filter === 'all'
       ? creators
       : creators.filter(
-          c => getCreatorLabel(c, isLive) === labelForKey(filter),
+          c => getCurrentStep(c, isService, campaignStatus, isLive) === filter,
         );
+
+  /* ── Render header based on displayStatus ── */
+  function renderHeader() {
+    if (isAccepting) {
+      return (
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-warning-text">
+              <Users size={18} className="text-white" />
+            </div>
+            <div>
+              <div className="font-bold text-[17px] text-dark leading-tight">
+                รอตอบรับจากครีเอเตอร์
+              </div>
+              <div className="text-sm text-muted-text">
+                ส่ง invitation ให้ครีเอเตอร์ {total} คนแล้ว
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className={`text-xl font-extrabold ${allAccepted ? 'text-brand' : 'text-warning-text'}`}>
+                {accepted}/{total}
+              </div>
+              <div className="text-xs text-muted-text">ตอบรับแล้ว</div>
+            </div>
+            {allAccepted && onAllAccepted && (
+              <button
+                onClick={() =>
+                  onAllAccepted(
+                    isService ? 'ACTIVE' : 'AWAITING_SHIPMENT',
+                  )
+                }
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand text-white hover:opacity-90 transition-opacity"
+              >
+                ดำเนินการต่อ →
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (isShipping) {
+      return (
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${shipConfirmed ? 'bg-brand' : 'bg-danger'}`}>
+              <Truck size={18} className="text-white" />
+            </div>
+            <div>
+              <div className="font-bold text-[17px] text-dark leading-tight">
+                {shipConfirmed ? 'จัดส่งเรียบร้อยแล้ว' : 'จัดการการจัดส่งสินค้า'}
+              </div>
+              <div className="text-sm text-muted-text">
+                ส่งสินค้าให้ครีเอเตอร์ {creatorsCount || total} คน
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {isDomestic ? (
+              shipConfirmed ? (
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-bold text-sm bg-brand-light text-brand border border-brand/30">
+                  <CheckCircle size={14} />
+                  จัดส่งเรียบร้อย
+                </div>
+              ) : (
+                <button
+                  onClick={handleShipConfirm}
+                  disabled={shipLoading}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-brand hover:opacity-90 transition-opacity disabled:opacity-70"
+                >
+                  <CheckCircle size={14} />
+                  {shipLoading ? 'กำลังบันทึก...' : 'ยืนยันจัดส่งเรียบร้อย'}
+                </button>
+              )
+            ) : (
+              <a
+                href="https://connex.com/shipments"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-danger no-underline"
+              >
+                <Truck size={14} />
+                Go to Connex
+                <ChevronRight size={14} />
+              </a>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Default header (active / live / brief)
+    return (
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          <span className="font-bold text-[17px] text-dark">
+            Creator Pipeline
+          </span>
+          <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-brand/10 text-brand">
+            {creators.length} คน
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-border-ui">
-      {/* Header + tabs */}
+      {/* Header */}
       <div className="px-5 pt-3.5 border-b border-border-ui">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2.5">
-            <span className="font-bold text-[17px] text-dark">
-              Creator Pipeline
-            </span>
-            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-brand/10 text-brand">
-              {creators.length} คน
-            </span>
-          </div>
-        </div>
+        {renderHeader()}
+
         {/* Filter tabs */}
         <div className="flex">
           {filterOpts.map(opt => {
             const cnt = countFor(opt.key);
             const isActive = filter === opt.key;
-            const isShip = opt.key === 'ship_pending';
+            const isShipTab = opt.key === 'waiting_ship';
             return (
               <button
                 key={opt.key}
@@ -142,13 +312,14 @@ export function CreatorPipeline({
                 className={[
                   'px-3.5 py-2 text-[13px] bg-transparent transition-all -mb-px border-b-2',
                   isActive
-                    ? isShip
+                    ? isShipTab
                       ? 'font-bold text-orange-600 border-orange-600'
                       : 'font-bold text-brand border-brand'
                     : 'font-medium text-muted-text border-transparent',
                 ].join(' ')}
               >
-                {opt.label} <span className="text-xs opacity-80">({cnt})</span>
+                {opt.label}{' '}
+                <span className="text-xs opacity-80">({cnt})</span>
               </button>
             );
           })}
@@ -157,7 +328,7 @@ export function CreatorPipeline({
 
       {/* Creator rows */}
       {filtered.map((cc, i) => {
-        const ss = getStepStates(cc, isLive);
+        const ss = getStepStates(cc, isService, campaignStatus, isLive);
         return (
           <div
             key={cc.id}
@@ -187,23 +358,24 @@ export function CreatorPipeline({
               )}
             </div>
 
-            {/* Name + niche */}
+            {/* Name */}
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm text-dark truncate">
                 {cc.creator.name}
               </div>
             </div>
 
-            {/* Step indicators */}
+            {/* Step indicators — 3 dots */}
             <div className="ml-auto shrink-0 flex items-center gap-1">
               {stepIcons.map((Icon, j) => (
                 <div key={j} className="flex items-center gap-1">
                   <div
                     className={`w-5.5 h-5.5 rounded-full flex items-center justify-center shrink-0 border-2 ${stepCls(ss[j])}`}
+                    title={stepLabels[j]}
                   >
                     <Icon size={10} />
                   </div>
-                  {j < 3 && (
+                  {j < 2 && (
                     <div
                       className={`w-2 h-0.5 rounded ${connectorCls(ss[j], ss[j + 1])}`}
                     />
