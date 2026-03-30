@@ -1,0 +1,109 @@
+name: Deploy Staging
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  migrate:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply Prisma Migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        run: pnpm exec prisma migrate deploy
+
+  build-push-artifact:
+    runs-on: ubuntu-22.04
+    needs: [migrate]
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-southeast-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Add SHORT_SHA env property
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: |
+            BUILD_MODE=dev
+          tags: 981271204915.dkr.ecr.ap-southeast-1.amazonaws.com/kollabglobal:${{ env.SHORT_SHA }}
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: [build-push-artifact]
+    env:
+      base_dir: temp-gitops
+      kustomize_dir: apps/kollabglobal/overlays/staging
+      project_name: kollabglobal-staging
+      gitop_ref: main
+    steps:
+      - name: Add SHORT_SHA env property
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+
+      - name: Checkout GitOps Repository
+        uses: actions/checkout@v4
+        with:
+          repository: Cloudcommerce-Co-Ltd/cd
+          ref: ${{ env.gitop_ref }}
+          path: ${{ env.base_dir }}
+          token: ${{ secrets.CD_REPO_TOKEN }}
+
+      - name: Patch SHORT_SHA
+        run: |
+          cd ${{ env.base_dir }}/${{ env.kustomize_dir }}
+          sed -i -e 's/newTag: .*/newTag: "${{ env.SHORT_SHA }}"/g' kustomization.yaml
+          cat kustomization.yaml | grep ${{ env.SHORT_SHA }}
+
+      - name: Push changes
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.CD_REPO_TOKEN }}
+        with:
+          source_file: "${{ env.base_dir }}/${{ env.kustomize_dir }}/kustomization.yaml"
+          destination_repo: Cloudcommerce-Co-Ltd/cd
+          destination_branch: ${{ env.gitop_ref }}
+          destination_folder: ${{ env.kustomize_dir }}
+          user_email: "user+github-actions[bot]@users.noreply.github.com"
+          user_name: "github-actions[bot]"
+          commit_message: "Update ${{ env.project_name }} version to ${{ env.SHORT_SHA }}"

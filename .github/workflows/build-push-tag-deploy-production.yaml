@@ -1,0 +1,134 @@
+name: Deploy Production
+on:
+  release:
+    types: [published]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install AWS CLI v2 & SSM Session Plugin
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip curl jq
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+          curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+          sudo dpkg -i session-manager-plugin.deb
+
+      - name: Start SSM Port Forwarding Session to RDS (via Bastion)
+        env:
+          AWS_REGION: ap-southeast-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          BASTION_INSTANCE_ID: ${{ secrets.BASTION_INSTANCE_ID }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+        run: |
+          nohup aws ssm start-session \
+            --target "$BASTION_INSTANCE_ID" \
+            --document-name AWS-StartPortForwardingSessionToRemoteHost \
+            --parameters "{
+              \"host\": [\"$DB_HOST\"],
+              \"portNumber\": [\"5432\"],
+              \"localPortNumber\": [\"15432\"]
+            }" > ssm-session.log 2>&1 &
+          sleep 15
+          echo "==== Checking SSM session ===="
+          ps -ef | grep -i 'aws ssm' || true
+          tail -n 50 ssm-session.log || true
+          ss -ltnp | grep 15432 || true
+          nc -vz localhost 15432 || echo "Warning: port 15432 not reachable"
+
+      - name: Apply Prisma Migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: pnpm exec prisma migrate deploy
+
+  build-push-artifact:
+    runs-on: ubuntu-22.04
+    needs: [migrate]
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-southeast-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: |
+            BUILD_MODE=prod
+          tags: 981271204915.dkr.ecr.ap-southeast-1.amazonaws.com/kollabglobal:${{ github.event.release.tag_name }}
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: [build-push-artifact]
+    env:
+      base_dir: temp-gitops
+      kustomize_dir: apps/kollabglobal/overlays/production
+      project_name: kollabglobal-production
+      gitop_ref: main
+    steps:
+      - name: Checkout GitOps Repository
+        uses: actions/checkout@v4
+        with:
+          repository: Cloudcommerce-Co-Ltd/cd
+          ref: ${{ env.gitop_ref }}
+          path: ${{ env.base_dir }}
+          token: ${{ secrets.CD_REPO_TOKEN }}
+
+      - name: Patch tag version
+        run: |
+          cd ${{ env.base_dir }}/${{ env.kustomize_dir }}
+          sed -i -e 's/newTag: .*/newTag: "${{ github.event.release.tag_name }}"/g' kustomization.yaml
+          cat kustomization.yaml | grep ${{ github.event.release.tag_name }}
+
+      - name: Push changes
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.CD_REPO_TOKEN }}
+        with:
+          source_file: "${{ env.base_dir }}/${{ env.kustomize_dir }}/kustomization.yaml"
+          destination_repo: Cloudcommerce-Co-Ltd/cd
+          destination_branch: ${{ env.gitop_ref }}
+          destination_folder: ${{ env.kustomize_dir }}
+          user_email: "user+github-actions[bot]@users.noreply.github.com"
+          user_name: "github-actions[bot]"
+          commit_message: "Update ${{ env.project_name }} version to ${{ github.event.release.tag_name }}"
