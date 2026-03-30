@@ -917,20 +917,17 @@ export default function CreateBriefPage({
       <Dialog open={isOpenAIPrompt}>
         <DialogContent className="sm:max-w-xl" onClose={closeAIPromptModal}>
           <form onSubmit={async (e) => { e.preventDefault(); closeAIPromptModal(); await fillAI(); }}>
-            <DialogHeader>
-              <DialogTitle>
+            <DialogHeader className="-mx-4">
+              <DialogTitle className="px-4">
                 <div className="flex gap-2 text-xl items-center content-center">
                   <Sparkles size={28} className="text-brand" />
                   Fill brief with AI
                 </div>
               </DialogTitle>
-              <div className="w-full border border-border-ui my-2"></div>
-              <DialogDescription className="text-black text-md mb-2">
+              <div className="w-full flex border-t border-border-ui my-2"></div>
+              <DialogDescription className="text-black text-md mb-2 px-4">
                 ใส่ Prompt สำหรับ AI เพื่อกำหนดทิศทางของ Key Messages, Do&apos;s &
                 Don&apos;ts, Deliverables และ Disclosure ให้อัตโนมัติ
-                <span className="ml-1 text-[11px] font-normal text-muted-text">
-                  (ไม่บังคับ)
-                </span>
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-1 mb-4">
@@ -946,10 +943,10 @@ export default function CreateBriefPage({
               </div>
             </div>  
             <DialogFooter>
-              <DialogClose className={buttonVariants({ variant: "outline" }) + " py-5 px-6"} onClick={closeAIPromptModal}>
+              <DialogClose className={buttonVariants({ variant: "outline" }) + " py-5 px-6 cursor-pointer"} onClick={closeAIPromptModal}>
                 ยกเลิก
               </DialogClose>
-              <Button type="submit" className="bg-brand py-5 px-6">
+              <Button type="submit" className="bg-secondary-brand py-5 px-6 cursor-pointer">
                 <Sparkles size={28} />
                 สร้าง Brief
               </Button>
