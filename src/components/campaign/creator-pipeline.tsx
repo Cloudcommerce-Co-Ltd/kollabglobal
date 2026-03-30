@@ -27,8 +27,7 @@ type FilterKey = 'all' | 'waiting_accept' | 'waiting_ship' | 'working' | 'done';
 
 function stepCls(s: StepState) {
   if (s === 'done') return 'bg-green-50 border-green-500 text-green-500';
-  if (s === 'active')
-    return 'bg-amber-50 border-amber-400 text-amber-500';
+  if (s === 'active') return 'bg-amber-50 border-amber-400 text-amber-500';
   return 'bg-gray-100 border-gray-200 text-gray-300';
 }
 
@@ -77,10 +76,7 @@ function getStepStates(
 
   // Dot 3 — content
   if (cc.contentStatus === 'POSTED') return ['done', 'done', 'done'];
-  if (
-    cc.contentStatus === 'CREATING' ||
-    cc.contentStatus === 'SUBMITTED'
-  )
+  if (cc.contentStatus === 'CREATING' || cc.contentStatus === 'SUBMITTED')
     return ['done', 'done', 'active'];
   // accepted + shipped but not started content yet → dot3 active
   return ['done', 'done', 'active'];
@@ -138,11 +134,7 @@ export function CreatorPipeline({
     CheckCircle, // dot 3: posted
   ];
 
-  const stepLabels = [
-    'ตอบรับ',
-    isService ? 'บริการ' : 'รับสินค้า',
-    'โพสต์',
-  ];
+  const stepLabels = ['ตอบรับ', isService ? 'บริการ' : 'รับสินค้า', 'โพสต์'];
 
   // ── Accepting header ──
   const isAccepting = displayStatus === 'accepting';
@@ -211,61 +203,104 @@ export function CreatorPipeline({
               </div>
             </div>
           </div>
-            <div className="text-right">
-              <div className={`text-xl font-extrabold ${allAccepted ? 'text-brand' : 'text-warning-text'}`}>
-                {accepted}/{total}
-              </div>
-              <div className="text-xs text-muted-text">ตอบรับแล้ว</div>
+          <div className="text-right">
+            <div
+              className={`text-xl font-extrabold ${allAccepted ? 'text-brand' : 'text-warning-text'}`}
+            >
+              {accepted}/{total}
             </div>
+            <div className="text-xs text-muted-text">ตอบรับแล้ว</div>
+          </div>
         </div>
       );
     }
 
     if (isShipping) {
       return (
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2.5">
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${shipConfirmed ? 'bg-brand' : 'bg-danger'}`}>
-              <Truck size={18} className="text-white" />
+        <div className="">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${shipConfirmed ? 'bg-brand' : 'bg-danger'}`}
+              >
+                <Truck size={18} className="text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-[17px] text-dark leading-tight">
+                  {shipConfirmed
+                    ? 'จัดส่งเรียบร้อยแล้ว'
+                    : 'จัดการการจัดส่งสินค้า'}
+                </div>
+                <div className="text-sm text-muted-text">
+                  ส่งสินค้าให้ครีเอเตอร์ {creatorsCount || total} คน
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="font-bold text-[17px] text-dark leading-tight">
-                {shipConfirmed ? 'จัดส่งเรียบร้อยแล้ว' : 'จัดการการจัดส่งสินค้า'}
-              </div>
-              <div className="text-sm text-muted-text">
-                ส่งสินค้าให้ครีเอเตอร์ {creatorsCount || total} คน
-              </div>
+            <div className="flex items-center gap-3">
+              {isDomestic ? (
+                shipConfirmed ? (
+                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-bold text-sm bg-brand-light text-brand border border-brand/30">
+                    <CheckCircle size={14} />
+                    จัดส่งเรียบร้อย
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleShipConfirm}
+                    disabled={shipLoading}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-brand hover:opacity-90 transition-opacity disabled:opacity-70"
+                  >
+                    <CheckCircle size={14} />
+                    {shipLoading ? 'กำลังบันทึก...' : 'ดำเนินการส่งแล้ว'}
+                  </button>
+                )
+              ) : (
+                <a
+                  href="https://connex.com/shipments"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg font-semibold text-md text-white bg-danger no-underline"
+                >
+                  <Truck size={14} />
+                  Go to Connex
+                  <ChevronRight size={14} />
+                </a>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {isDomestic ? (
-              shipConfirmed ? (
-                <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-bold text-sm bg-brand-light text-brand border border-brand/30">
-                  <CheckCircle size={14} />
-                  จัดส่งเรียบร้อย
-                </div>
-              ) : (
-                <button
-                  onClick={handleShipConfirm}
-                  disabled={shipLoading}
-                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-brand hover:opacity-90 transition-opacity disabled:opacity-70"
-                >
-                  <CheckCircle size={14} />
-                  {shipLoading ? 'กำลังบันทึก...' : 'ดำเนินการส่งแล้ว'}
-                </button>
-              )
-            ) : (
-              <a
-                href="https://connex.com/shipments"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-danger no-underline"
-              >
-                <Truck size={14} />
-                Go to Connex
-                <ChevronRight size={14} />
-              </a>
-            )}
+          <div className="py-4 space-y-3">
+            {/* Card 1: Manage shipment at Connex */}
+            <div className="flex gap-3 p-4 bg-surface/50 rounded-lg border border-border-ui">
+              <div className="w-8 h-8 rounded-full bg-[#E8F1FA] flex items-center justify-center shrink-0 text-[#4A94DA] font-bold text-sm">
+                1
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-dark mb-1">
+                  จัดการ Shipment ที่ Connex
+                </h4>
+                <p className="text-xs text-muted-text leading-relaxed">
+                  ใช้แพลตฟอร์ม Connex
+                  เพื่อจัดการการจัดส่งสินค้าให้ครีเอเตอร์ทั้งหมด
+                  รวมถึงติดตามสถานะการจัดส่ง
+                </p>
+              </div>
+            </div>
+
+            {/* Card 2: Wait for creators to receive */}
+            <div className="flex gap-3 p-4 bg-surface/50 rounded-lg border border-border-ui">
+              <div className="w-8 h-8 rounded-full bg-[#F2EFFA] flex items-center justify-center shrink-0 text-[#9C7ED8] font-bold text-sm">
+                2
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-dark mb-1">
+                  รอให้ครีเอเตอร์รับสินค้า
+                </h4>
+                <p className="text-xs text-muted-text leading-relaxed">
+                  เมื่อส่งสินค้าแล้ว
+                  ระบบจะฝั่งเตสถานะเอื่อในมีครีเอเตอร์ได้รับสินค้า
+                  และพวกเขาจะเริ่มสร้างคอนเทนต์ได้
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -311,8 +346,7 @@ export function CreatorPipeline({
                     : 'font-medium text-muted-text border-transparent',
                 ].join(' ')}
               >
-                {opt.label}{' '}
-                <span className="text-xs opacity-80">({cnt})</span>
+                {opt.label} <span className="text-xs opacity-80">({cnt})</span>
               </button>
             );
           })}
