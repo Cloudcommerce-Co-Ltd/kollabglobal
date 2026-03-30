@@ -1,4 +1,4 @@
-import type { DisplayStatus } from "@/lib/campaign-detail-utils";
+import type { DisplayStatus } from '@/lib/campaign-detail-utils';
 
 export interface DurationDisplay {
   text: string;
@@ -15,17 +15,23 @@ export function computeDurationDisplay(params: {
   liveAt: string | null;
   now?: Date;
 }): DurationDisplay {
-  const { displayStatus, duration, deadline, liveAt, now = new Date() } = params;
+  const {
+    displayStatus,
+    duration,
+    deadline,
+    liveAt,
+    now = new Date(),
+  } = params;
 
-  if (displayStatus === "awaiting_payment" || displayStatus === "brief" || displayStatus === "cancelled") {
+  if (
+    displayStatus === 'awaiting_payment' ||
+    displayStatus === 'brief' ||
+    displayStatus === 'cancelled'
+  ) {
     return { text: `${duration} วัน`, isOverdue: false };
   }
 
-  if (displayStatus === "live") {
-    if (liveAt) {
-      const liveDays = Math.floor((now.getTime() - new Date(liveAt).getTime()) / MS_PER_DAY);
-      return { text: `แคมเปญ Live มา ${liveDays} วัน`, isOverdue: false };
-    }
+  if (displayStatus === 'live') {
     return { text: `${duration} วัน`, isOverdue: false };
   }
 
@@ -39,10 +45,14 @@ export function computeDurationDisplay(params: {
   const diffMs = deadlineDate.getTime() - now.getTime();
   const diffDays = Math.ceil(diffMs / MS_PER_DAY);
 
+  if (diffDays > 10) {
+    return { text: `เหลือ ${diffDays} วัน`, isOverdue: false };
+  }
+
   if (diffDays >= 0) {
-    return { text: `${diffDays} วันก่อนถึงกำหนด`, isOverdue: false };
+    return { text: `อีก ${diffDays} วัน`, isOverdue: false };
   }
 
   const overdueDays = Math.abs(diffDays);
-  return { text: `เกินกำหนด ${overdueDays} วัน`, isOverdue: true };
+  return { text: `เกิน ${overdueDays} วัน`, label: '', isOverdue: true };
 }
