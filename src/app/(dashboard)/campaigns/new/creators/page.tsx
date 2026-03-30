@@ -23,15 +23,13 @@ function CreatorCard({
   return (
     <div
       onClick={() => !isDisabled && onToggle(creator.id)}
-      className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${
-        isSelected ? 'border-brand' : 'border-border-ui'
-      } ${isDisabled ? 'opacity-45' : ''}`}
+      className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${isSelected ? 'border-brand' : 'border-border-ui'
+        } ${isDisabled ? 'opacity-45' : ''}`}
     >
       {/* Checkmark */}
       <div
-        className={`absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full border-2 ${
-          isSelected ? 'border-brand bg-brand' : 'border-border-ui bg-white'
-        }`}
+        className={`absolute right-2.5 top-2.5 flex size-5 items-center justify-center rounded-full border-2 ${isSelected ? 'border-brand bg-brand' : 'border-border-ui bg-white'
+          }`}
       >
         {isSelected && <Check size={11} color="#fff" />}
       </div>
@@ -66,8 +64,8 @@ function CreatorCard({
         )}
       </div>
 
-      <div className="text-sm font-semibold text-dark">{creator.name}</div>
-      <div className="mb-2 text-xs text-muted-text">{creator.niche}</div>
+      <div className="text-sm font-semibold text-dark mb-2">{creator.name}</div>
+      {/* <div className="mb-2 text-xs text-muted-text">{creator.niche}</div> */}
 
       <div className="w-full flex flex-col gap-1">
         <span className="w-full flex justify-between rounded-[5px] bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">
@@ -187,7 +185,7 @@ export default function SelectCreatorsPage() {
             <span className="text-sm font-semibold text-dark">Top Picks</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {mainCreators.slice(0, maxCreators).map((creator) => {
+            {mainCreators.slice(0, (packageData?.id || 1) * 5).map((creator) => {
               const isSelected = selectedIds.includes(creator.id);
               const isDisabled =
                 !isSelected && selectedIds.length >= maxCreators;
@@ -259,11 +257,10 @@ export default function SelectCreatorsPage() {
           <button
             disabled={!isComplete}
             onClick={handleNext}
-            className={`rounded-xl border-none px-6 py-2.5 text-sm font-semibold text-white transition-all ${
-              isComplete
+            className={`rounded-xl border-none px-6 py-2.5 text-sm font-semibold text-white transition-all ${isComplete
                 ? 'cursor-pointer bg-brand'
                 : 'cursor-not-allowed bg-[#ccc]'
-            }`}
+              }`}
           >
             ถัดไป — สรุปรายการ
           </button>

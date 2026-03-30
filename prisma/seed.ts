@@ -767,42 +767,42 @@ async function main() {
   // sortOrders are scoped per isBackup value — all API queries must filter by isBackup first
   const sortOrderCounters: Record<number, number> = {};
   for (const creator of mainCreators) {
-    const packageId = nicheToPackageId[creator.niche];
-    if (!packageId) continue;
+    const basePackageId = nicheToPackageId[creator.niche];
+    if (!basePackageId) continue;
     const creatorId = `main-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
-    sortOrderCounters[packageId] = (sortOrderCounters[packageId] ?? 0);
-    const sortOrder = sortOrderCounters[packageId]++;
-    await prisma.packageCreator.create({
-      data: {
-        packageId,
-        creatorId,
-        isBackup: false,
-        sortOrder,
-      },
-    });
+
+    // A creator from a lower tier package belongs to all higher tier packages too
+    const targetPackages = packages.filter(p => p.id >= basePackageId);
+
+    for (const pkg of targetPackages) {
+      sortOrderCounters[pkg.id] = (sortOrderCounters[pkg.id] ?? 0);
+      const sortOrder = sortOrderCounters[pkg.id]++;
+      await prisma.packageCreator.create({
+        data: {
+          packageId: pkg.id,
+          creatorId,
+          isBackup: false,
+          sortOrder,
+        },
+      });
+    }
   }
 
-  // Backup creators — explicit package assignment
-  const backupPackageAssignment: Record<string, { packageId: number; sortOrder: number }> = {
-    'backup-zaiah':   { packageId: 1, sortOrder: 0 },
-    'backup-lookbas': { packageId: 1, sortOrder: 1 },
-    'backup-karina':  { packageId: 2, sortOrder: 0 },
-    'backup-nacia':   { packageId: 2, sortOrder: 1 },
-    'backup-esther':  { packageId: 3, sortOrder: 0 },
-  };
-
+  // Backup creators — active in all packages
   for (const creator of backupCreators) {
     const creatorId = `backup-${creator.name.toLowerCase().replace(/[\s@]+/g, '-')}`;
-    const assignment = backupPackageAssignment[creatorId];
-    if (!assignment) continue;
-    await prisma.packageCreator.create({
-      data: {
-        creatorId,
-        packageId: assignment.packageId,
-        isBackup: true,
-        sortOrder: assignment.sortOrder,
-      },
-    });
+    for (const pkg of packages) {
+      sortOrderCounters[pkg.id] = (sortOrderCounters[pkg.id] ?? 0);
+      const sortOrder = sortOrderCounters[pkg.id]++;
+      await prisma.packageCreator.create({
+        data: {
+          packageId: pkg.id,
+          creatorId,
+          isBackup: true,
+          sortOrder,
+        },
+      });
+    }
   }
 
   // ── Categories ─────────────────────────────────────────────────────────────
