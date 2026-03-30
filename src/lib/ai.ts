@@ -23,6 +23,14 @@ export function getAIModel(modelId?: string): LanguageModel {
 
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY,
+    extraBody: {
+      plugins: [
+        {
+          id: "web",
+          max_results: 5,
+        },
+      ],
+    },
   });
   const model = modelId ?? OPENROUTER_DEFAULT_MODEL;
   return openrouter(model);
