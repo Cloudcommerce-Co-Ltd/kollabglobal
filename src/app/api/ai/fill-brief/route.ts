@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .join("\n");
 
-  const prompt = `คุณคือผู้เชี่ยวชาญด้าน Influencer Marketing ช่วยเขียน Campaign Brief สำหรับ:
+  const prompt = `คุณคือผู้เชี่ยวชาญด้าน Influencer Marketing ช่วยเขียน Campaign Brief ภาษาไทยสำหรับ:
 แบรนด์: ${brandName}
 ${entityType}: ${productName}
 หมวดหมู่: ${category}${productLines ? `\n${productLines}` : ""}

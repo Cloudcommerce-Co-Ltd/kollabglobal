@@ -196,6 +196,7 @@ export default function CreateBriefPage({
   const isService = product?.isService ?? false;
   const platforms = campaign?.package?.platforms ?? [];
   const campaignDeliverables = campaign?.package?.deliverables ?? [];
+  const aiBriefPromptMax = 500;
 
   const availableLanguages = (() => {
     if (!campaign?.creators) return [];
@@ -924,22 +925,34 @@ export default function CreateBriefPage({
                 </div>
               </DialogTitle>
               <div className="w-full border border-border-ui my-2"></div>
-              <DialogDescription className={"text-black text-md"}>
-                บอกความต้องการของแบรนด์ AI จะสร้าง Key Messages, Do&apos;s &
+              <DialogDescription className="text-black text-md mb-2">
+                ใส่ Prompt สำหรับ AI เพื่อกำหนดทิศทางของ Key Messages, Do&apos;s &
                 Don&apos;ts, Deliverables และ Disclosure ให้อัตโนมัติ
+                <span className="ml-1 text-[11px] font-normal text-muted-text">
+                  (ไม่บังคับ)
+                </span>
               </DialogDescription>
             </DialogHeader>
-            <textarea
-              value={aiBriefPrompt}
-              onChange={(e) => setAIBriefPrompt(e.target.value)}
-              placeholder="เช่น: เน้นความเป็นธรรมชาติ ออร์แกนิค ไม่ใส่สารกันบูด กลุ่มเป้าหมายคือคน รักสุขภาพอายุ 25-35 ปี ต้องการสื่อสารภาษาสบายๆ ไม่เป็นทางการ..."
-              className="w-full rounded-sm border-[1.5px] border-border-ui bg-surface/50 px-3.5 py-2.75 text-sm outline-none focus:border-brand"
-            />
+            <div className="flex flex-col gap-1 mb-4">
+              <textarea
+                value={aiBriefPrompt}
+                onChange={(e) => setAIBriefPrompt(e.target.value)}
+                maxLength={aiBriefPromptMax}
+                placeholder="เช่น: เน้นความเป็นธรรมชาติ ออร์แกนิค ไม่ใส่สารกันบูด กลุ่มเป้าหมายคือคน รักสุขภาพอายุ 25-35 ปี ต้องการสื่อสารภาษาสบายๆ ไม่เป็นทางการ..."
+                className="w-full min-h-32 rounded-sm border-[1.5px] border-border-ui bg-surface/50 px-3.5 py-2.75 text-sm outline-none focus:border-brand"
+              />
+              <div className="w-full flex justify-end">
+                <p className="text-xs">{aiBriefPrompt.length}/{aiBriefPromptMax}</p>
+              </div>
+            </div>  
             <DialogFooter>
-              <DialogClose className={buttonVariants({ variant: "outline" })} onClick={closeAIPromptModal}>
-                Cancel
+              <DialogClose className={buttonVariants({ variant: "outline" }) + " py-5 px-6"} onClick={closeAIPromptModal}>
+                ยกเลิก
               </DialogClose>
-              <Button type="submit">Generate</Button>
+              <Button type="submit" className="bg-brand py-5 px-6">
+                <Sparkles size={28} />
+                สร้าง Brief
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
