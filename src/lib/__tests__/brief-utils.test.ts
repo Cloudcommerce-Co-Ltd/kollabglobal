@@ -123,6 +123,21 @@ describe("buildFillBriefPayload", () => {
     expect(payload.platforms).toBeUndefined();
     expect(payload.packageDeliverables).toBeUndefined();
   });
+
+  it("includes userPrompt when provided", () => {
+    const payload = buildFillBriefPayload(product, {
+      userPrompt: "เน้นความเป็นธรรมชาติ",
+    });
+    expect(payload.userPrompt).toBe("เน้นความเป็นธรรมชาติ");
+  });
+
+  it("omits userPrompt when empty or undefined", () => {
+    const payload = buildFillBriefPayload(product, { userPrompt: undefined });
+    expect(payload.userPrompt).toBeUndefined();
+
+    const payload2 = buildFillBriefPayload(product, { userPrompt: "" });
+    expect(payload2.userPrompt).toBeUndefined();
+  });
 });
 
 describe("buildTranslatePayload", () => {

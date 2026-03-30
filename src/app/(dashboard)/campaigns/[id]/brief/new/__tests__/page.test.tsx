@@ -31,6 +31,7 @@ import CreateBriefPage from "../page";
 import * as briefApi from "@/lib/brief-api";
 
 const mockFetchCampaign = vi.mocked(briefApi.fetchCampaign);
+const mockFillBriefAI = vi.mocked(briefApi.fillBriefAI);
 const mockTranslateBrief = vi.mocked(briefApi.translateBrief);
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -268,6 +269,111 @@ describe("CreateBriefPage — translation one-time limit", () => {
     // Dropdown trigger should appear disabled after translation (via CSS, not HTML attr)
     const trigger = screen.getByText("English").closest("button")!;
     expect(trigger).toHaveClass("cursor-not-allowed");
+  });
+});
+
+describe("CreateBriefPage — AI prompt dialog", () => {
+  async function openAIDialog() {
+    const user = userEvent.setup();
+    renderPage();
+    await waitForLoad();
+    const aiBtn = screen.getByRole("button", { name: /ให้ AI ช่วยเขียน/i });
+    await user.click(aiBtn);
+    await waitFor(() => screen.getByText("Fill brief with AI"));
+    return user;
+  }
+
+  it("opens dialog when clicking AI button", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    await openAIDialog();
+    expect(screen.getByText("Fill brief with AI")).toBeInTheDocument();
+  });
+
+  it("closes dialog when clicking ยกเลิก", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    const user = await openAIDialog();
+    await user.click(screen.getByRole("button", { name: /ยกเลิก/i }));
+    await waitFor(() => {
+      expect(screen.queryByText("Fill brief with AI")).not.toBeInTheDocument();
+    });
+  });
+
+  it("updates character counter as user types in textarea", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    const user = await openAIDialog();
+    const textarea = screen.getByRole("textbox");
+    await user.type(textarea, "hello");
+    await waitFor(() => {
+      expect(screen.getByText("5/500")).toBeInTheDocument();
+    });
+  });
+
+  it("calls fillBriefAI with userPrompt on submit", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    mockFillBriefAI.mockResolvedValue({});
+    const user = await openAIDialog();
+    await user.type(screen.getByRole("textbox"), "เน้นออร์แกนิค");
+    await user.click(screen.getByRole("button", { name: /สร้าง Brief/i }));
+    await waitFor(() => {
+      expect(mockFillBriefAI).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userPrompt: "เน้นออร์แกนิค" })
+      );
+    });
+  });
+
+  it("populates brief fields with AI response on success", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    mockFillBriefAI.mockResolvedValue({
+      keys: "AI key message",
+      dos: "AI dos",
+      deliverables: "AI deliverables",
+      disclosure: "#ai",
+    });
+    const user = await openAIDialog();
+    await user.click(screen.getByRole("button", { name: /สร้าง Brief/i }));
+    await waitFor(() => {
+      expect(screen.queryByText("Fill brief with AI")).not.toBeInTheDocument();
+    });
+    await waitFor(() => {
+      const textboxes = screen.getAllByRole("textbox");
+      const values = textboxes.map((el) => (el as HTMLTextAreaElement).value);
+      expect(values).toEqual(expect.arrayContaining(["AI key message", "AI dos", "AI deliverables", "#ai"]));
+    });
+  });
+
+  it("shows error message on AI failure", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    mockFillBriefAI.mockRejectedValue(new Error("AI fill failed"));
+    const user = await openAIDialog();
+    await user.click(screen.getByRole("button", { name: /สร้าง Brief/i }));
+    await waitFor(() => {
+      expect(screen.getByText("AI fill ล้มเหลว กรุณาลองอีกครั้ง")).toBeInTheDocument();
+    });
+  });
+
+  it("disables AI button and shows AI Filled after successful fill", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    mockFillBriefAI.mockResolvedValue({ keys: "k", dos: "d", deliverables: "del", disclosure: "#ad" });
+    const user = await openAIDialog();
+    await user.click(screen.getByRole("button", { name: /สร้าง Brief/i }));
+    await waitFor(() => {
+      const aiBtn = screen.getByRole("button", { name: /AI Filled/i });
+      expect(aiBtn).toBeDisabled();
+    });
+  });
+
+  it("calls fillBriefAI without userPrompt when textarea is empty", async () => {
+    mockFetchCampaign.mockResolvedValue(makeCampaign([{ countryCode: "TH" }]) as never);
+    mockFillBriefAI.mockResolvedValue({});
+    const user = await openAIDialog();
+    await user.click(screen.getByRole("button", { name: /สร้าง Brief/i }));
+    await waitFor(() => {
+      expect(mockFillBriefAI).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userPrompt: undefined })
+      );
+    });
   });
 });
 
