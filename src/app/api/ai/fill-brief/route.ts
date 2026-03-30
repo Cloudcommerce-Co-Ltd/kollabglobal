@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     countryName,
     platforms,
     packageDeliverables,
+    userPrompt,
   } = parsed.data;
 
   if (!isAIConfigured()) {
@@ -83,7 +84,7 @@ ${url ? `URL: ${url}` : ""}
 ${contextLines ? `\n${contextLines}` : ""}
 ${packageDeliverables?.length ? `\nข้อกำหนด Deliverables: ต้องครอบคลุมรายการเหล่านี้ [${packageDeliverables.join(", ")}] โดยเพิ่มไอเดียการนำเสนอเข้าไปด้วย` : ""}
 
-สำคัญมาก: ห้ามใช้ Markdown ทุกชนิด (**bold**, # heading, - bullet, 1. numbered list) ใช้ข้อความธรรมดาเท่านั้น deliverables แต่ละรายการต้องอยู่บรรทัดเดียว เริ่มต้นด้วย •`;
+${userPrompt ? `\nความต้องการเพิ่มเติมจากแบรนด์: ${userPrompt}\n` : ""}สำคัญมาก: ห้ามใช้ Markdown ทุกชนิด (**bold**, # heading, - bullet, 1. numbered list) ใช้ข้อความธรรมดาเท่านั้น deliverables แต่ละรายการต้องอยู่บรรทัดเดียว เริ่มต้นด้วย •`;
 
   const briefSchema = z.object({
     keys: z

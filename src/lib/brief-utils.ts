@@ -57,6 +57,7 @@ export interface FillBriefContext {
   countryName?: string;
   platforms?: string[];
   packageDeliverables?: string[];
+  userPrompt?: string;
 }
 
 /** Builds the payload for the fill-brief AI API call. */
@@ -77,6 +78,7 @@ export function buildFillBriefPayload(
     ...(context?.packageDeliverables?.length
       ? { packageDeliverables: context.packageDeliverables }
       : {}),
+    ...(context?.userPrompt ? { userPrompt: context.userPrompt } : {}),
   };
 }
 

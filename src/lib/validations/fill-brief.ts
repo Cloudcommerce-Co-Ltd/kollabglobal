@@ -11,6 +11,7 @@ export const fillBriefSchema = z.object({
   countryName: z.string().optional(),
   platforms: z.array(z.string()).optional(),
   packageDeliverables: z.array(z.string()).optional(),
+  userPrompt: z.string().optional(),
 });
 
 export type FillBriefInput = z.infer<typeof fillBriefSchema>;
