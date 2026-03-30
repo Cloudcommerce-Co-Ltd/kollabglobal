@@ -153,7 +153,7 @@ describe("CreateBriefPage — availableLanguages", () => {
       expect(screen.getByTestId("flag-AU")).toBeInTheDocument();
       expect(screen.getByTestId("flag-GB")).toBeInTheDocument();
       // All three show "English" as the language name
-      expect(screen.getAllByText("English").length).toBeGreaterThanOrEqual(3);
+      expect(screen.getAllByText(/^English/).length).toBeGreaterThanOrEqual(3);
     });
   });
 
@@ -247,8 +247,8 @@ describe("CreateBriefPage — translation one-time limit", () => {
     await waitForLoad();
     await waitFor(() => screen.getByText("-- เลือกภาษา --"));
     openDropdown();
-    await waitFor(() => screen.getByText("English"));
-    await user.click(screen.getByText("English"));
+    await waitFor(() => screen.getByText("English (US)"));
+    await user.click(screen.getByText("English (US)"));
 
     // Fill all required brief fields
     await waitFor(() => screen.getAllByRole("textbox"));
