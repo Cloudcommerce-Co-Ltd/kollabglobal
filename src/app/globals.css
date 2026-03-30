@@ -6,9 +6,9 @@
 
 @theme inline {
   /* Brand colors */
-  --color-brand: #4ECDC4;
+  --color-brand: #50DCCD;
   --color-brand-light: #e8f8f7;
-  --color-secondary-brand: #4A90D9;
+  --color-secondary-brand: #3796FA;
   --color-secondary-brand-light: #e8f0fa;
   --color-accent-brand: #9B7ED8;
   --color-accent-brand-light: #f0ebf8;
@@ -149,10 +149,10 @@
 
 @layer utilities {
   .bg-brand-gradient {
-    background: linear-gradient(135deg, #4ECDC4, #4A90D9);
+    background: linear-gradient(135deg, #50DCCD, #3796FA);
   }
   .shadow-brand-glow {
-    box-shadow: 0 8px 28px rgba(78, 205, 196, 0.35);
+    box-shadow: 0 8px 28px rgba(80, 220, 205, 0.35);
   }
 }
 
