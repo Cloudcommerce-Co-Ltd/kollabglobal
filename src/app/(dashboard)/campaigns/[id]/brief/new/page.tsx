@@ -88,7 +88,8 @@ function LangDropdown({
               }`}
             >
               <ReactCountryFlag countryCode={lang.countryCode} svg className="w-4! h-4! rounded-sm shrink-0" />
-              {lang.name}
+              {lang.name} {lang.name.toLocaleLowerCase() === "english" &&
+                (lang.countryCode.toLocaleLowerCase() === "us" ? "(US)" : "(UK)")}
             </button>
           ))}
         </div>
