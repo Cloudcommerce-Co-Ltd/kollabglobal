@@ -363,6 +363,9 @@ export function CreatorPipeline({
               <div className="font-semibold text-sm text-dark truncate">
                 {cc.creator.name}
               </div>
+              <div className="text-xs text-muted-text">
+                ยอดการเข้าถึง {cc.creator.reach}
+              </div>
             </div>
 
             {/* Step indicators — 3 dots */}
