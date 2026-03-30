@@ -11,7 +11,7 @@ import type { CreatorWithPackageInfo, Package } from '@/types';
 
 export default function SelectPackagePage() {
   const router = useRouter();
-  const { countryData, packageData, setPackage } = useCampaignStore();
+  const { countryData, packageData, setPackage, setCreators } = useCampaignStore();
 
   const [packages, setPackages] = useState<Package[]>([]);
   const [creatorsByPackage, setCreatorsByPackage] = useState<Record<number, CreatorWithPackageInfo[]>>({});
@@ -42,6 +42,9 @@ export default function SelectPackagePage() {
   }, [countryData, setPackage]);
 
   function handleSelect(data: Package) {
+    if (packageData?.id !== data.id) {
+      setCreators([]);
+    }
     setSelected(data.id);
     setPackage(data);
   }

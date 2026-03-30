@@ -110,9 +110,10 @@ export default function SelectCreatorsPage() {
         const backup = data.filter((c: CreatorWithPackageInfo) => c.isBackup);
         setMainCreators(main);
         setBackupCreators(backup);
-        setSelectedIds(prev =>
-          prev.length > 0 ? prev : main.slice(0, maxCreators).map(c => c.id),
-        );
+        setSelectedIds(prev => {
+          const validPrev = prev.filter(id => data.some(c => c.id === id));
+          return validPrev.length > 0 ? validPrev : main.slice(0, maxCreators).map(c => c.id);
+        });
       })
       .catch((err) => {
         console.error('Failed to load creators:', err);
