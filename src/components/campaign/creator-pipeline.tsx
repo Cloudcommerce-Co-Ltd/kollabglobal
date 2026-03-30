@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Package,
@@ -153,6 +153,13 @@ export function CreatorPipeline({
   ).length;
   const allAccepted = total > 0 && accepted === total;
 
+  // Auto-transition when all accepted
+  useEffect(() => {
+    if (isAccepting && allAccepted && onAllAccepted) {
+      onAllAccepted(isService ? 'ACTIVE' : 'AWAITING_SHIPMENT');
+    }
+  }, [isAccepting, allAccepted, onAllAccepted, isService]);
+
   async function handleShipConfirm() {
     if (!onShipped) return;
     setShipLoading(true);
@@ -204,26 +211,12 @@ export function CreatorPipeline({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
             <div className="text-right">
               <div className={`text-xl font-extrabold ${allAccepted ? 'text-brand' : 'text-warning-text'}`}>
                 {accepted}/{total}
               </div>
               <div className="text-xs text-muted-text">ตอบรับแล้ว</div>
             </div>
-            {allAccepted && onAllAccepted && (
-              <button
-                onClick={() =>
-                  onAllAccepted(
-                    isService ? 'ACTIVE' : 'AWAITING_SHIPMENT',
-                  )
-                }
-                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand text-white hover:opacity-90 transition-opacity"
-              >
-                ดำเนินการต่อ →
-              </button>
-            )}
-          </div>
         </div>
       );
     }
@@ -258,7 +251,7 @@ export function CreatorPipeline({
                   className="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-brand hover:opacity-90 transition-opacity disabled:opacity-70"
                 >
                   <CheckCircle size={14} />
-                  {shipLoading ? 'กำลังบันทึก...' : 'ยืนยันจัดส่งเรียบร้อย'}
+                  {shipLoading ? 'กำลังบันทึก...' : 'ดำเนินการส่งแล้ว'}
                 </button>
               )
             ) : (

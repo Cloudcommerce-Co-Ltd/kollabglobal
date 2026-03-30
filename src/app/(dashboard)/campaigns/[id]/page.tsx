@@ -17,10 +17,14 @@ import { CampaignDetailActions } from './_components/campaign-detail-actions';
 
 export default async function CampaignDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const acceptTest = resolvedSearchParams['accept-test'] ?? resolvedSearchParams['accecpt-test'];
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
@@ -57,7 +61,18 @@ export default async function CampaignDetailPage({
   const isService = campaign.products?.[0]?.isService ?? false;
   const isLive = displayStatus === 'live';
   const isDomestic = campaign.country?.name === 'Thailand';
-  const creators = campaign.creators ?? [];
+  let creators = campaign.creators ?? [];
+
+  if (process.env.NODE_ENV === 'development' && acceptTest && typeof acceptTest === 'string') {
+    const acceptCount = parseInt(acceptTest, 10);
+    if (!isNaN(acceptCount)) {
+      creators = creators.map((c, index) => ({
+        ...c,
+        status: index < acceptCount ? 'ACCEPTED' : (c.status === 'ACCEPTED' ? 'ACCEPTED' : 'PENDING'),
+      }));
+    }
+  }
+
   const platforms = campaign.package?.platforms ?? [];
   const creatorsCount = campaign.package?.numCreators ?? creators.length;
   const brandName = campaign.products?.[0]?.brandName ?? 'แคมเปญ';
