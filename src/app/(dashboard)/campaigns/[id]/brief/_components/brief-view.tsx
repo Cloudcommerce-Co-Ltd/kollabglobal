@@ -137,7 +137,7 @@ export function BriefView({
                   {(
                     [
                       ['th', 'TH', 'ภาษาไทย'],
-                      ['tgt', targetLang.countryCode, targetLang.name],
+                      ['tgt', null, 'แปลภาษา'],
                     ] as [string, string, string][]
                   ).map(([langKey, countryCode, label]) => (
                     <button
@@ -153,12 +153,14 @@ export function BriefView({
                       {langKey === 'tgt' && translating ? (
                         'กำลังแปล...'
                       ) : (
-                        <>
-                          <ReactCountryFlag
-                            countryCode={countryCode}
-                            svg
-                            className="w-4! h-4! rounded-sm"
-                          />
+                          <>
+                          {countryCode && (
+                            <ReactCountryFlag
+                              countryCode={countryCode}
+                              svg
+                              className="w-4! h-4! rounded-sm"
+                            />
+                          )}
                           {label}
                         </>
                       )}
