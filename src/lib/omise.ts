@@ -41,6 +41,14 @@ export async function createPromptPayCharge(amountSatang: number): Promise<{
   };
 }
 
+export async function expireCharge(chargeId: string): Promise<void> {
+  if (!isOmiseConfigured()) {
+    throw new Error("Omise is not configured: OMISE_SECRET_KEY is missing");
+  }
+  const omise = Omise({ secretKey: process.env.OMISE_SECRET_KEY, publicKey: process.env.OMISE_PUBLIC_KEY });
+  await omise.charges.expire(chargeId);
+}
+
 export async function retrieveCharge(chargeId: string): Promise<{
   status: string;
   paid: boolean;

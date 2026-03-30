@@ -40,6 +40,7 @@ export default function CheckoutPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(storedQrCodeUrl);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [campaignId, setCampaignId] = useState<string | null>(storedCampaignId);
+  const [rateLimitError, setRateLimitError] = useState<{ retryAfterSecs: number } | null>(null);
   const idempotencyKey = useRef(crypto.randomUUID());
 
   const onStatusChange = useCallback((status: 'pending' | 'expired' | 'completed' | 'failed') => {
@@ -113,6 +114,9 @@ export default function CheckoutPage() {
             packageId: packageData!.id,
             promotionType: promotionType!,
             creatorIds: selectedCreatorsData.map(c => c.id),
+            // If we have a campaignId but no chargeId, the user changed wizard inputs
+            // after a charge was created — tell the server to update that campaign in-place.
+            ...(!storedChargeId && storedCampaignId ? { previousCampaignId: storedCampaignId } : {}),
             productData: {
               brandName: productData!.brandName,
               productName: productData!.productName,
@@ -130,6 +134,15 @@ export default function CheckoutPage() {
           }),
         });
 
+        if (res.status === 429) {
+          const data = await res.json();
+          if (data.error === 'RATE_LIMITED') {
+            setRateLimitError({ retryAfterSecs: data.retryAfterSecs });
+            setPaymentStatus('failed');
+            return;
+          }
+        }
+
         if (!res.ok) {
           setPaymentStatus('failed');
           return;
@@ -139,7 +152,7 @@ export default function CheckoutPage() {
         setChargeId(data.chargeId);
         setQrCodeUrl(data.qrCodeUrl);
         setCampaignId(data.campaignId);
-        // Persist to store so a page refresh can resume without re-creating the charge
+        // Persist to store so a page refresh can resume without re-creating the charge.
         setCheckoutData(data.chargeId, data.campaignId, data.qrCodeUrl);
         setPaymentStatus('pending');
       } catch (err) {
@@ -320,6 +333,7 @@ export default function CheckoutPage() {
                     <XCircle size={48} color="#ef4444" />
                   </div>
                 )}
+
               </div>
 
               <div className="mb-5 text-center text-[13px] text-[#bbb]">
@@ -353,9 +367,14 @@ export default function CheckoutPage() {
                     ชำระเงินสำเร็จ — กำลังนำทาง...
                   </span>
                 )}
-                {paymentStatus === 'failed' && (
+                {paymentStatus === 'failed' && !rateLimitError && (
                   <span className="text-red-400">
                     การชำระเงินล้มเหลว กรุณาลองใหม่
+                  </span>
+                )}
+                {paymentStatus === 'failed' && rateLimitError && (
+                  <span className="text-red-400 text-center">
+                    คุณเปลี่ยนแพ็กเกจบ่อยเกินไป กรุณารอ {Math.ceil(rateLimitError.retryAfterSecs / 60)} นาทีแล้วลองใหม่
                   </span>
                 )}
               </div>

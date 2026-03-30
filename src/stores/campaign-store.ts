@@ -52,11 +52,40 @@ export const useCampaignStore = create<CampaignStore>()(
     (set) => ({
       ...initialState,
 
-      setCountry: (data) => set({ countryData: data, status: "draft" }),
+      setCountry: (data) => set((state) => {
+        const base: Partial<CampaignCreationState> = { countryData: data, status: "draft" };
+        if (state.chargeId && state.countryData?.id !== data.id) {
+          // Keep campaignId — server will reuse the campaign in-place
+          Object.assign(base, { chargeId: null, qrCodeUrl: null, chargeCreatedAt: null, status: "draft" as const });
+        }
+        return base;
+      }),
       setPromotionType: (type) => set({ promotionType: type }),
-      setProduct: (data) => set({ productData: data }),
-      setPackage: (data) => set({ packageData: data }),
-      setCreators: (data) => set({ selectedCreatorsData: data }),
+      setProduct: (data) => set((state) => {
+        const base: Partial<CampaignCreationState> = { productData: data };
+        if (state.chargeId) {
+          Object.assign(base, { chargeId: null, qrCodeUrl: null, chargeCreatedAt: null, status: "draft" as const });
+        }
+        return base;
+      }),
+      setPackage: (data) => set((state) => {
+        const base: Partial<CampaignCreationState> = { packageData: data };
+        if (state.chargeId && state.packageData?.id !== data.id) {
+          Object.assign(base, { chargeId: null, qrCodeUrl: null, chargeCreatedAt: null, status: "draft" as const });
+        }
+        return base;
+      }),
+      setCreators: (data) => set((state) => {
+        const base: Partial<CampaignCreationState> = { selectedCreatorsData: data };
+        if (state.chargeId && data.length > 0) {
+          const currentIds = state.selectedCreatorsData.map(c => c.id).sort().join(",");
+          const newIds = data.map(c => c.id).sort().join(",");
+          if (currentIds !== newIds) {
+            Object.assign(base, { chargeId: null, qrCodeUrl: null, chargeCreatedAt: null, status: "draft" as const });
+          }
+        }
+        return base;
+      }),
       setCheckoutData: (chargeId, campaignId, qrCodeUrl) =>
         set({ chargeId, campaignId, qrCodeUrl, chargeCreatedAt: Date.now(), status: "checkout" }),
       clearCheckoutData: () =>
