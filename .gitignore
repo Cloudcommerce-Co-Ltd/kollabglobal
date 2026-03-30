@@ -43,8 +43,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma
 /src/generated/prisma
 
+# docs
 /docs/superpowers/
 .worktrees/
 
+# database
+database_metadata.json
