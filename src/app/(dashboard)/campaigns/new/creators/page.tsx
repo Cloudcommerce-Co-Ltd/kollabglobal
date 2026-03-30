@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Target } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -163,6 +163,21 @@ export default function SelectCreatorsPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-265 px-4 pb-20 pt-6 sm:px-6 lg:px-8">
+        {/* AI Recommendation Explanation */}
+        <div className="mb-5 flex items-start gap-3 rounded-xl bg-gradient-to-br from-brand-light to-accent-brand-light border border-brand/20 p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand">
+            <Target size={18} className="text-white" />
+          </div>
+          <div>
+            <div className="text-[15px] font-bold text-dark mb-0.5">
+              ทำไมถึงแนะนำครีเอเตอร์เหล่านี้?
+            </div>
+            <div className="text-sm text-muted-text leading-relaxed">
+              ระบบช่วยคัดครีเอเตอร์ที่มีแนวโน้มเหมาะสมกับแคมเปญของคุณ จากฐาน audience, engagement rate และประเภทคอนเทนต์
+            </div>
+          </div>
+        </div>
+
         {/* Recommended Section */}
         <div className="mb-6">
           <div className="mb-3 flex items-center gap-2">
