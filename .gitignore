@@ -55,3 +55,6 @@ database_metadata.json
 
 # sonarqube config
 .scannerwork
+
+# claude config
+.claude
