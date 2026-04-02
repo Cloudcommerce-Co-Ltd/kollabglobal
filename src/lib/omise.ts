@@ -4,6 +4,25 @@
 
 import Omise from "omise";
 
+/**
+ * Extended Omise ISource interface that includes the scannable_code.image.download_uri
+ * field returned by the API but not typed in the SDK.
+ */
+interface OmiseSourceWithQR extends Omise.Sources.ISource {
+  scannable_code: Omise.Sources.IScannableCode & {
+    image: Omise.Disputes.IDocument & {
+      download_uri?: string;
+    };
+  };
+}
+
+/**
+ * Extended Omise ICharge interface that uses the extended source type.
+ */
+interface OmiseChargeWithQR extends Omise.Charges.ICharge {
+  source?: OmiseSourceWithQR;
+}
+
 export const isOmiseConfigured = (): boolean =>
   !!process.env.OMISE_SECRET_KEY;
 
@@ -34,8 +53,7 @@ export async function createPromptPayCharge(amountSatang: number): Promise<{
 
   return {
     chargeId: charge.id,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    qrCodeUrl: (charge as any).source?.scannable_code?.image?.download_uri ?? "",
+    qrCodeUrl: (charge as OmiseChargeWithQR).source?.scannable_code?.image?.download_uri ?? "",
     amount: charge.amount,
     status: charge.status,
   };
@@ -68,9 +86,7 @@ export async function retrieveCharge(chargeId: string): Promise<{
     status: charge.status,
     paid: charge.paid,
     amount: charge.amount,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    qrCodeUrl: (charge as any).source?.scannable_code?.image?.download_uri ?? "",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createdAt: (charge as any).created_at ?? new Date().toISOString(),
+    qrCodeUrl: (charge as OmiseChargeWithQR).source?.scannable_code?.image?.download_uri ?? "",
+    createdAt: (charge as OmiseChargeWithQR).created_at ?? new Date().toISOString(),
   };
 }
