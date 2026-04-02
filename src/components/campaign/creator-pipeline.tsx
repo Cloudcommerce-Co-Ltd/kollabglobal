@@ -132,7 +132,7 @@ export function CreatorPipeline({
   // Step icons — service uses FileText for dot 2 instead of Package
   const stepIcons = [
     { active: Clock , done: CheckCircle }, // dot 1: accepted
-    { active: FileText , done: isService ? FileText : Package }, // dot 2: shipment / service
+    { active: isService ? FileText : Package, done: isService ? FileText : Package }, // dot 2: shipment / service
     { active: Video, done: CheckCircle }, // dot 3: posted
   ];
 
