@@ -920,7 +920,7 @@ export default function CreateBriefPage({
         </div>
       </div>
       <Dialog open={isOpenAIPrompt}>
-        <DialogContent className="sm:max-w-xl" onClose={closeAIPromptModal}>
+        <DialogContent className="sm:max-w-xl p-0" showCloseButton={false}>
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -928,38 +928,37 @@ export default function CreateBriefPage({
               await fillAI();
             }}
           >
-            <DialogHeader className="-mx-4">
-              <DialogTitle className="px-4">
+            <DialogHeader>
+              <DialogTitle className="px-6 py-4">
                 <div className="flex gap-2 text-xl items-center content-center">
-                  <Sparkles size={28} className="text-brand" />
                   Fill brief with AI
                 </div>
               </DialogTitle>
-              <div className="w-full flex border-t border-border-ui my-2"></div>
-              <DialogDescription className="text-black text-md mb-2 px-4">
-                ใส่ Prompt สำหรับ AI เพื่อกำหนดทิศทางของ Key Messages, Do&apos;s
-                & Don&apos;ts, Deliverables และ Disclosure ให้อัตโนมัติ
-              </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col gap-1 mb-4">
+            <div className="w-full flex border-t border-border-ui"></div>
+            <DialogDescription className="text-black text-base mt-6 mb-4 px-6">
+              ใส่ Prompt สำหรับ AI เพื่อกำหนดทิศทางของ Key Messages, Do&apos;s
+              & Don&apos;ts, Deliverables และ Disclosure ให้อัตโนมัติ
+            </DialogDescription>
+            <div className="flex flex-col gap-2 mb-5 px-6">
               <textarea
                 value={aiBriefPrompt}
                 onChange={(e) => setAIBriefPrompt(e.target.value)}
                 maxLength={aiBriefPromptMax}
-                placeholder="เช่น: เน้นความเป็นธรรมชาติ ออร์แกนิค ไม่ใส่สารกันบูด กลุ่มเป้าหมายคือคน รักสุขภาพอายุ 25-35 ปี ต้องการสื่อสารภาษาสบายๆ ไม่เป็นทางการ..."
-                className="w-full min-h-32 rounded-sm border-[1.5px] border-border-ui bg-surface/50 px-3.5 py-2.75 text-sm outline-none focus:border-brand"
+                placeholder="เช่น: อยากให้ brief นี้เน้นความเป็นธรรมชาติ ออร์แกนิค และอยู่ในธีม summer"
+                className="w-full min-h-32 rounded-sm border-[1.5px] border-border-ui bg-surface/50 px-3.5 py-2.75 text-base outline-none focus:border-brand"
               />
               <div className="w-full flex justify-end">
                 <p className="text-xs">
-                  {aiBriefPrompt.length}/{aiBriefPromptMax}
+                  {aiBriefPrompt.length} / {aiBriefPromptMax}
                 </p>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="px-6">
               <DialogClose
                 className={
                   buttonVariants({ variant: "outline" }) +
-                  " py-5 px-6 cursor-pointer"
+                  " py-5 px-6 cursor-pointer text-base"
                 }
                 onClick={closeAIPromptModal}
               >
@@ -967,7 +966,7 @@ export default function CreateBriefPage({
               </DialogClose>
               <Button
                 type="submit"
-                className="bg-secondary-brand py-5 px-6 cursor-pointer"
+                className="bg-brand py-5 px-6 cursor-pointer text-base"
               >
                 <Sparkles size={28} />
                 สร้าง Brief
