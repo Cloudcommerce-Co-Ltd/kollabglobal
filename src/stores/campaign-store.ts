@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ProductData } from "@/types/campaign";
 import { Country, Package, CreatorWithPackageInfo } from "@/types";
+import type { Maybe } from "@/lib/types/result";
 
 export type { ProductData };
 
@@ -9,16 +10,16 @@ type DraftStatus = "idle" | "draft" | "checkout";
 
 interface CampaignCreationState {
   status: DraftStatus;
-  countryData: Country | null;
-  promotionType: "PRODUCT" | "SERVICE" | null;
-  productData: ProductData | null;
-  packageData: Package | null;
+  countryData: Maybe<Country>;
+  promotionType: Maybe<"PRODUCT" | "SERVICE">;
+  productData: Maybe<ProductData>;
+  packageData: Maybe<Package>;
   selectedCreatorsData: CreatorWithPackageInfo[];
   // Checkout state — persisted so refresh during QR polling doesn't create duplicate charge
-  chargeId: string | null;
-  campaignId: string | null;
-  qrCodeUrl: string | null;
-  chargeCreatedAt: number | null; // unix ms — used to restore countdown after refresh
+  chargeId: Maybe<string>;
+  campaignId: Maybe<string>;
+  qrCodeUrl: Maybe<string>;
+  chargeCreatedAt: Maybe<number>; // unix ms — used to restore countdown after refresh
 }
 
 interface CampaignCreationActions {
