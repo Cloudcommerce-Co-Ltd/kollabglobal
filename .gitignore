@@ -52,3 +52,6 @@ next-env.d.ts
 
 # database
 database_metadata.json
+
+# sonarqube config
+.scannerwork

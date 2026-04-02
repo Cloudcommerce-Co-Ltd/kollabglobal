@@ -15,5 +15,27 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     exclude: ['**/node_modules/**', '**/.git/**', '.worktrees/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      reportsDirectory: './coverage',
+      exclude: [
+        '**/node_modules/**',
+        '**/.next/**',
+        '**/generated/**',
+        '**/__tests__/**',
+        '**/*.test.{ts,tsx}',
+        '**/vitest.config.ts',
+        '**/prisma/**',
+        '**/scripts/**',
+      ],
+      include: ['src/**/*.{ts,tsx}'],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+      },
+    },
   },
 });
