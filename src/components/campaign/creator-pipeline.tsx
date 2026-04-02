@@ -9,6 +9,8 @@ import {
   Users,
   Truck,
   ChevronRight,
+  Clock,
+  Video,
 } from 'lucide-react';
 import type { CampaignCreatorWithRelation } from '@/types/campaign';
 
@@ -25,13 +27,13 @@ type StepState = 'done' | 'active' | 'pending';
 /** Filter keys — "active" state means the creator's CURRENT (yellow) step */
 type FilterKey = 'all' | 'waiting_accept' | 'waiting_ship' | 'working' | 'done';
 
-function stepCls(s: StepState) {
+export function stepCls(s: StepState) {
   if (s === 'done') return 'bg-green-50 border-green-500 text-green-500';
   if (s === 'active') return 'bg-amber-50 border-amber-400 text-amber-500';
   return 'bg-gray-100 border-gray-200 text-gray-300';
 }
 
-function connectorCls(a: StepState, b: StepState) {
+export function connectorCls(a: StepState, b: StepState) {
   return a === 'done' && (b === 'done' || b === 'active')
     ? 'bg-green-500'
     : 'bg-gray-200';
@@ -46,7 +48,7 @@ function connectorCls(a: StepState, b: StepState) {
  *
  * For **service** campaigns dot 2 is always green.
  */
-function getStepStates(
+export function getStepStates(
   cc: CampaignCreatorWithRelation,
   isService: boolean,
   campaignStatus: string,
@@ -83,7 +85,7 @@ function getStepStates(
 }
 
 /** Human-readable label of a creator's current yellow step (for filtering) */
-function getCurrentStep(
+export function getCurrentStep(
   cc: CampaignCreatorWithRelation,
   isService: boolean,
   campaignStatus: string,
@@ -129,9 +131,9 @@ export function CreatorPipeline({
 
   // Step icons — service uses FileText for dot 2 instead of Package
   const stepIcons = [
-    CheckCircle, // dot 1: accepted
-    isService ? FileText : Package, // dot 2: shipment / service
-    CheckCircle, // dot 3: posted
+    { active: Clock , done: CheckCircle }, // dot 1: accepted
+    { active: FileText , done: isService ? FileText : Package }, // dot 2: shipment / service
+    { active: Video, done: CheckCircle }, // dot 3: posted
   ];
 
   const stepLabels = ['ตอบรับ', isService ? 'บริการ' : 'รับสินค้า', 'โพสต์'];
@@ -403,7 +405,11 @@ export function CreatorPipeline({
                     className={`w-5.5 h-5.5 rounded-full flex items-center justify-center shrink-0 border-2 ${stepCls(ss[j])}`}
                     title={stepLabels[j]}
                   >
-                    <Icon size={10} />
+                    {ss[j] === "done" ? (
+                      <Icon.done size={10} />
+                    ) : (
+                      <Icon.active size={10} />
+                    )}
                   </div>
                   {j < 2 && (
                     <div
