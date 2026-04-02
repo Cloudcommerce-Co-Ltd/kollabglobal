@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CheckoutPage from "../page";
 
@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 import { useCampaignStore } from "@/stores/campaign-store";
 import type { CreatorWithPackageInfo, Country, Package } from "@/types";
 
-const MOCK_COUNTRY: Country = {
+const MOCK_COUNTRY = {
   id: 1,
   name: "Thailand",
   countryCode: "TH",
@@ -22,7 +22,7 @@ const MOCK_COUNTRY: Country = {
   platforms: ["tiktok", "instagram"],
   estReach: null,
   isActive: true,
-};
+} as unknown as Country;
 
 const MOCK_PACKAGE: Package = {
   id: 2,
@@ -86,42 +86,42 @@ afterEach(() => {
 });
 
 describe("CheckoutPage", () => {
-  it("renders title สรุปรายการ & ชำระเงิน", () => {
-    render(<CheckoutPage />);
+  it("renders title สรุปรายการ & ชำระเงิน", async () => {
+    await act(async () => render(<CheckoutPage />));
     expect(screen.getByText("สรุปรายการ & ชำระเงิน")).toBeInTheDocument();
   });
 
-  it("shows package name from store", () => {
-    render(<CheckoutPage />);
+  it("shows package name from store", async () => {
+    await act(async () => render(<CheckoutPage />));
     expect(screen.getAllByText(MOCK_PACKAGE.name).length).toBeGreaterThan(0);
   });
 
-  it("shows 10 creator avatars from store", () => {
-    render(<CheckoutPage />);
+  it("shows 10 creator avatars from store", async () => {
+    await act(async () => render(<CheckoutPage />));
     for (const creator of MOCK_CREATORS) {
       expect(screen.getByTitle(creator.name)).toBeInTheDocument();
     }
   });
 
-  it("shows price breakdown values", () => {
-    render(<CheckoutPage />);
+  it("shows price breakdown values", async () => {
+    await act(async () => render(<CheckoutPage />));
     // base price appears twice: once in the package line, once as total
     expect(screen.getAllByText(`฿${BASE_PRICE.toLocaleString()}`).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows total price (equals base price — net, no VAT/fees)", () => {
-    render(<CheckoutPage />);
+  it("shows total price (equals base price — net, no VAT/fees)", async () => {
+    await act(async () => render(<CheckoutPage />));
     const totals = screen.getAllByText(`฿${TOTAL.toLocaleString()}`);
     expect(totals.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders QR placeholder area", () => {
-    render(<CheckoutPage />);
+  it("renders QR placeholder area", async () => {
+    await act(async () => render(<CheckoutPage />));
     expect(screen.getByLabelText("QR Code")).toBeInTheDocument();
   });
 
   it("shows QR code image after charge creation succeeds", async () => {
-    render(<CheckoutPage />);
+    await act(async () => render(<CheckoutPage />));
     await waitFor(() => {
       const img = screen.getByAltText("PromptPay QR Code") as HTMLImageElement;
       expect(img).toBeInTheDocument();
@@ -130,19 +130,19 @@ describe("CheckoutPage", () => {
   });
 
   it("shows waiting for payment status text after charge is created", async () => {
-    render(<CheckoutPage />);
+    await act(async () => render(<CheckoutPage />));
     await waitFor(() => {
       expect(screen.getByText(/รอการชำระเงิน/)).toBeInTheDocument();
     });
   });
 
-  it("shows updated terms disclaimer", () => {
-    render(<CheckoutPage />);
+  it("shows updated terms disclaimer", async () => {
+    await act(async () => render(<CheckoutPage />));
     expect(screen.getByText("เมื่อสแกนและชำระเงินสำเร็จ ถือว่าคุณยอมรับเงื่อนไขการใช้บริการ")).toBeInTheDocument();
   });
 
   it("calls create-charge API on mount with correct data (no amount field)", async () => {
-    render(<CheckoutPage />);
+    await act(async () => render(<CheckoutPage />));
     await waitFor(() => {
       expect(mockFetchPending).toHaveBeenCalledWith(
         "/api/payments/create-charge",
@@ -159,7 +159,7 @@ describe("CheckoutPage", () => {
 
   it("shows failure state when charge creation fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
-    render(<CheckoutPage />);
+    await act(async () => render(<CheckoutPage />));
     await waitFor(() => {
       expect(screen.getByText("การชำระเงินล้มเหลว กรุณาลองใหม่")).toBeInTheDocument();
     });

@@ -148,3 +148,51 @@ describe("GET /api/campaigns/[id]", () => {
     );
   });
 });
+
+describe("PATCH /api/campaigns/[id]", () => {
+  const mockUpdate = vi.mocked(prisma.campaign.update);
+
+  function makePatchRequest(body: any = {}) {
+    return {
+      url: "http://localhost/api/campaigns/camp-1",
+      method: "PATCH",
+      json: vi.fn().mockResolvedValue(body),
+    } as unknown as NextRequest;
+  }
+
+  it("returns 401 when not authenticated", async () => {
+    mockAuth.mockResolvedValue(null);
+    const res = await (await import("../route")).PATCH(makePatchRequest(), makeParams());
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 404 when campaign not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const res = await (await import("../route")).PATCH(makePatchRequest(), makeParams());
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 400 for invalid body schema", async () => {
+    mockFindFirst.mockResolvedValue(mockCampaignWithCreatorCountry as never);
+    // Invalid body (status must be string enum, not number)
+    const res = await (await import("../route")).PATCH(makePatchRequest({ status: 123 }), makeParams());
+    expect(res.status).toBe(400);
+  });
+
+  it("updates campaign and returns 200 on success", async () => {
+    mockFindFirst.mockResolvedValue(mockCampaignWithCreatorCountry as never);
+    const updatedMock = { ...mockCampaignWithCreatorCountry, status: "DRAFT" };
+    mockUpdate.mockResolvedValue(updatedMock as never);
+
+    const res = await (await import("../route")).PATCH(makePatchRequest({ status: "DRAFT" }), makeParams());
+    expect(res.status).toBe(200);
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: "camp-1" },
+      data: { status: "DRAFT" },
+    });
+
+    const body = await res.json();
+    expect(body.status).toBe("DRAFT");
+  });
+});

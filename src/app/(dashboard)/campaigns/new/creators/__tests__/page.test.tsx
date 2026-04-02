@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import SelectCreatorsPage from "../page";
 import { useCampaignStore } from "@/stores/campaign-store";
@@ -45,7 +45,7 @@ const MOCK_CREATORS: CreatorWithPackageInfo[] = [
 const mkCountry = (id: number): Country => ({
   id, name: String(id), countryCode: 'XX', region: 'global', languageCode: 'en', languageName: 'English',
   creatorsAvail: 0, platforms: [], estReach: null, isActive: true,
-});
+} as unknown as Country);
 
 const mkPackage = (numCreators = 10): Package => ({
   id: 2, name: 'The Global Bridge', tagline: 'ขยายฐานข้ามแพลตฟอร์ม', badge: 'แนะนำ',
@@ -70,13 +70,13 @@ beforeEach(() => {
 });
 
 describe("SelectCreatorsPage", () => {
-  it("renders title เลือกครีเอเตอร์", () => {
-    render(<SelectCreatorsPage />);
+  it("renders title เลือกครีเอเตอร์", async () => {
+    await act(async () => render(<SelectCreatorsPage />));
     expect(screen.getByText("เลือกครีเอเตอร์")).toBeInTheDocument();
   });
 
   it("renders all 10 recommended creator names", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     for (const creator of MOCK_CREATORS.slice(0, 10)) {
       await waitFor(() =>
         expect(screen.getAllByText(creator.name).length).toBeGreaterThan(0)
@@ -85,7 +85,7 @@ describe("SelectCreatorsPage", () => {
   });
 
   it("renders all 5 backup creator names", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     for (const creator of MOCK_CREATORS.slice(28, 33)) {
       await waitFor(() =>
         expect(screen.getAllByText(creator.name).length).toBeGreaterThan(0)
@@ -94,37 +94,37 @@ describe("SelectCreatorsPage", () => {
   });
 
   it("first 10 creators are pre-selected visually", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     await waitFor(() =>
       expect(screen.getByText("10/10 คนที่เลือก • เลือกได้สูงสุด 10 คน")).toBeInTheDocument()
     );
   });
 
   it("clicking selected creator deselects it", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     const firstCreatorName = MOCK_CREATORS[0].name;
     await waitFor(() => expect(screen.getAllByText(firstCreatorName).length).toBeGreaterThan(0));
     const card = screen.getByText(firstCreatorName).closest("div[class*='rounded-xl']") as HTMLElement;
-    fireEvent.click(card);
+    await act(async () => fireEvent.click(card));
     await waitFor(() =>
       expect(screen.getByText("9/10 คนที่เลือก • เลือกได้สูงสุด 10 คน")).toBeInTheDocument()
     );
   });
 
   it("shows correct selection count in footer", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     await waitFor(() =>
       expect(screen.getByText("✓ เลือกครบจำนวนแล้ว")).toBeInTheDocument()
     );
   });
 
-  it("shows CTA button ถัดไป — สรุปรายการ", () => {
-    render(<SelectCreatorsPage />);
+  it("shows CTA button ถัดไป — สรุปรายการ", async () => {
+    await act(async () => render(<SelectCreatorsPage />));
     expect(screen.getByText("ถัดไป — สรุปรายการ")).toBeInTheDocument();
   });
 
   it("shows yellow tip box for backup creators", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     await waitFor(() =>
       expect(
         screen.getByText("ครีเอเตอร์สำรองจะถูกเรียกใช้งานโดยอัตโนมัติ หากครีเอเตอร์หลักไม่ตอบรับงาน")
@@ -133,24 +133,24 @@ describe("SelectCreatorsPage", () => {
   });
 
   it("handleNext syncs selected creators to store", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     await waitFor(() =>
       expect(screen.getByText("✓ เลือกครบจำนวนแล้ว")).toBeInTheDocument()
     );
-    fireEvent.click(screen.getByText("ถัดไป — สรุปรายการ"));
+    await act(async () => fireEvent.click(screen.getByText("ถัดไป — สรุปรายการ")));
     expect(useCampaignStore.getState().selectedCreatorsData).toHaveLength(10);
   });
 
   it("uses numCreators from packageData as selection limit", async () => {
     useCampaignStore.getState().setPackage(mkPackage(5));
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     await waitFor(() =>
       expect(screen.getByText("5/5 คนที่เลือก • เลือกได้สูงสุด 5 คน")).toBeInTheDocument()
     );
   });
 
   it("fetches creators with packageId query param", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/creators?packageId=')
@@ -159,11 +159,11 @@ describe("SelectCreatorsPage", () => {
   });
 
   it("toggle updates store immediately", async () => {
-    render(<SelectCreatorsPage />);
+    await act(async () => render(<SelectCreatorsPage />));
     const firstCreatorName = MOCK_CREATORS[0].name;
     await waitFor(() => expect(screen.getAllByText(firstCreatorName).length).toBeGreaterThan(0));
     const card = screen.getByText(firstCreatorName).closest("div[class*='rounded-xl']") as HTMLElement;
-    fireEvent.click(card);
+    await act(async () => fireEvent.click(card));
     // Store should reflect the deselection immediately
     const state = useCampaignStore.getState();
     expect(state.selectedCreatorsData.find((c: CreatorWithPackageInfo) => c.name === firstCreatorName)).toBeUndefined();

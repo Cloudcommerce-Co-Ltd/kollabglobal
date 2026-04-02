@@ -48,69 +48,73 @@ beforeEach(() => {
 });
 
 describe("AddProductPage", () => {
-  it("renders promotion type selector", () => {
-    render(<AddProductPage />);
+  it("renders promotion type selector", async () => {
+    await act(async () => render(<AddProductPage />));
     expect(screen.getByText("สินค้า")).toBeInTheDocument();
     expect(screen.getByText("บริการ")).toBeInTheDocument();
   });
 
   it("shows product categories after clicking สินค้า", async () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
     expect(screen.getByText("Beauty & Skincare")).toBeInTheDocument();
   });
 
   it("shows service categories and no-shipping banner after clicking บริการ", async () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("บริการ").closest("button")!);
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("บริการ").closest("button")!));
     await waitFor(() => expect(screen.getByText("ร้านอาหาร / คาเฟ่")).toBeInTheDocument());
     expect(screen.getByText("ไม่ต้องจัดส่งสินค้า")).toBeInTheDocument();
   });
 
   it("switching from product to service resets category", async () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
-    fireEvent.click(screen.getByText("Food & Snack"));
+    await act(async () => fireEvent.click(screen.getByText("Food & Snack")));
 
-    fireEvent.click(screen.getByText("บริการ").closest("button")!);
+    await act(async () => fireEvent.click(screen.getByText("บริการ").closest("button")!));
     expect(screen.queryByText("Food & Snack")).not.toBeInTheDocument();
   });
 
-  it("CTA is disabled when required fields are empty", () => {
-    render(<AddProductPage />);
+  it("CTA is disabled when required fields are empty", async () => {
+    await act(async () => render(<AddProductPage />));
     expect(screen.getByText("ยืนยัน — ถัดไป")).toBeDisabled();
   });
 
   it("CTA is enabled when all required fields filled", async () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
 
-    fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
-      target: { value: "My Brand" },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
+        target: { value: "My Brand" },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
+        target: { value: "My Product" },
+      });
+      fireEvent.click(screen.getByText("Food & Snack"));
     });
-    fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
-      target: { value: "My Product" },
-    });
-    fireEvent.click(screen.getByText("Food & Snack"));
 
     expect(screen.getByText("ยืนยัน — ถัดไป")).not.toBeDisabled();
   });
 
   it("submit calls store actions and navigates to package page", async () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
 
-    fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
-      target: { value: "My Brand" },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
+        target: { value: "My Brand" },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
+        target: { value: "My Product" },
+      });
+      fireEvent.click(screen.getByText("Food & Snack"));
     });
-    fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
-      target: { value: "My Product" },
-    });
-    fireEvent.click(screen.getByText("Food & Snack"));
 
     await act(async () => {
       fireEvent.click(screen.getByText("ยืนยัน — ถัดไป"));
@@ -124,46 +128,49 @@ describe("AddProductPage", () => {
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/package");
   });
 
-  it("back button navigates to country page", () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("กลับไปเลือกตลาด"));
+  it("back button navigates to country page", async () => {
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("กลับไปเลือกตลาด")));
     expect(mockPush).toHaveBeenCalledWith("/campaigns/new/country");
   });
 
-  it("shipping fields visible only for product type", () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+  it("shipping fields visible only for product type", async () => {
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     expect(screen.getByText("ข้อมูลจัดส่ง")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText("บริการ").closest("button")!);
+    await act(async () => fireEvent.click(screen.getByText("บริการ").closest("button")!));
     expect(screen.queryByText("ข้อมูลจัดส่ง")).not.toBeInTheDocument();
   });
 
   it("CTA is disabled during upload", async () => {
     mockUpload.mockReturnValueOnce(new Promise(() => {})); // never resolves
 
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     await waitFor(() => expect(screen.getByText("Food & Snack")).toBeInTheDocument());
-    fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
-      target: { value: "My Brand" },
+    
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i), {
+        target: { value: "My Brand" },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
+        target: { value: "My Product" },
+      });
+      fireEvent.click(screen.getByText("Food & Snack"));
     });
-    fireEvent.change(screen.getByPlaceholderText(/มะม่วงอบแห้ง/), {
-      target: { value: "My Product" },
-    });
-    fireEvent.click(screen.getByText("Food & Snack"));
 
-    fireEvent.click(screen.getByText("ยืนยัน — ถัดไป"));
+    await act(async () => fireEvent.click(screen.getByText("ยืนยัน — ถัดไป")));
     expect(screen.getByText("ยืนยัน — ถัดไป")).toBeDisabled();
   });
 
-  it("image upload area is present", () => {
-    render(<AddProductPage />);
-    fireEvent.click(screen.getByText("สินค้า").closest("button")!);
+  it("image upload area is present", async () => {
+    await act(async () => render(<AddProductPage />));
+    await act(async () => fireEvent.click(screen.getByText("สินค้า").closest("button")!));
     expect(screen.getByText("คลิกเพื่ออัปโหลดรูป")).toBeInTheDocument();
   });
 
-  it("pre-populates form from existing store data", () => {
+  it("pre-populates form from existing store data", async () => {
     useCampaignStore.getState().setPromotionType("PRODUCT");
     useCampaignStore.getState().setProduct({
       brandName: "Existing Brand",
@@ -176,7 +183,7 @@ describe("AddProductPage", () => {
       isService: false,
     });
 
-    render(<AddProductPage />);
+    await act(async () => render(<AddProductPage />));
 
     expect(
       (screen.getByPlaceholderText(/KOLLAB|FitLife|The Table/i) as HTMLInputElement).value
