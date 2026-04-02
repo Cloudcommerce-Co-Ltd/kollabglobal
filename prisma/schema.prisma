@@ -132,15 +132,8 @@ model Country {
   languageCode  String     @default("en") @map("language_code")
   languageName  String     @default("English") @map("language_name")
   creatorsAvail Int        @default(0) @map("creators_avail")
-  avgEyeball    String?    @map("avg_eyeball")
-  avgCPE        String?    @map("avg_cpe")
-  foodBevEng    String?    @map("food_bev_eng")
-  beautyEng     String?    @map("beauty_eng")
-  snackTrend    String?    @map("snack_trend")
   platforms     String[]
-  cats          String[]
   estReach      String?    @map("est_reach")
-  estOrders     String?    @map("est_orders")
   isActive      Boolean    @default(true) @map("is_active")
   campaigns     Campaign[]
   creators      Creator[]

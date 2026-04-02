@@ -19,15 +19,8 @@ const MOCK_COUNTRY: Country = {
   languageCode: "th",
   languageName: "Thai",
   creatorsAvail: 100,
-  avgEyeball: null,
-  avgCPE: null,
-  foodBevEng: null,
-  beautyEng: null,
-  snackTrend: null,
   platforms: ["tiktok", "instagram"],
-  cats: ["food"],
   estReach: null,
-  estOrders: null,
   isActive: true,
 };
 

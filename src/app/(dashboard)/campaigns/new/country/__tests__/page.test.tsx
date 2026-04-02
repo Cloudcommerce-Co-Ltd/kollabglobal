@@ -17,8 +17,7 @@ vi.mock("next/navigation", () => ({
 
 const mkCountry = (id: number, name: string, countryCode: string, creatorsAvail: number, region: string): Country => ({
   id, name, countryCode, region, languageCode: 'en', languageName: 'English', creatorsAvail,
-  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
-  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+  platforms: [], estReach: null, isActive: true,
 });
 
 const SAMPLE_COUNTRIES: Country[] = [

@@ -17,15 +17,8 @@ const makeCountry = (id: number, name: string, creatorCount: number) => ({
   languageCode: "en",
   languageName: "English",
   creatorsAvail: 999, // hardcoded value — should be overridden by real count
-  avgEyeball: null,
-  avgCPE: null,
-  foodBevEng: null,
-  beautyEng: null,
-  snackTrend: null,
   platforms: [],
-  cats: [],
   estReach: null,
-  estOrders: null,
   isActive: true,
   _count: { creators: creatorCount },
 });

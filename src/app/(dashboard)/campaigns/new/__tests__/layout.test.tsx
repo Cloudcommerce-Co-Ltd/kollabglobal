@@ -16,8 +16,7 @@ import { usePathname } from "next/navigation";
 
 const mkCountry = (): Country => ({
   id: 1, name: "Thailand", countryCode: "TH", region: "asia", languageCode: "th", languageName: "Thai",
-  creatorsAvail: 1500, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null,
-  snackTrend: null, platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
+  creatorsAvail: 1500, platforms: [], estReach: null, isActive: true,
 });
 
 const mkPackage = (): Package => ({
