@@ -226,6 +226,10 @@ export default function CreateBriefPage({
     return langs;
   })();
 
+  const today = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
   const isContentFilled = isBriefContentFilled(form);
   const isDeadlineFilled = !!form.deadline;
   const hasLanguageOptions = availableLanguages.length > 0;
@@ -236,7 +240,7 @@ export default function CreateBriefPage({
     if (!product || !campaign) return;
     setIsOpenAIPrompt(true);
   }
-  
+
   function closeAIPromptModal() {
     setIsOpenAIPrompt(false);
   }
@@ -511,6 +515,7 @@ export default function CreateBriefPage({
                 <input
                   type="date"
                   value={form.deadline}
+                  min={today}
                   onChange={(e) =>
                     setForm({ ...form, deadline: e.target.value })
                   }
@@ -916,7 +921,13 @@ export default function CreateBriefPage({
       </div>
       <Dialog open={isOpenAIPrompt}>
         <DialogContent className="sm:max-w-xl" onClose={closeAIPromptModal}>
-          <form onSubmit={async (e) => { e.preventDefault(); closeAIPromptModal(); await fillAI(); }}>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              closeAIPromptModal();
+              await fillAI();
+            }}
+          >
             <DialogHeader className="-mx-4">
               <DialogTitle className="px-4">
                 <div className="flex gap-2 text-xl items-center content-center">
@@ -926,8 +937,8 @@ export default function CreateBriefPage({
               </DialogTitle>
               <div className="w-full flex border-t border-border-ui my-2"></div>
               <DialogDescription className="text-black text-md mb-2 px-4">
-                ใส่ Prompt สำหรับ AI เพื่อกำหนดทิศทางของ Key Messages, Do&apos;s &
-                Don&apos;ts, Deliverables และ Disclosure ให้อัตโนมัติ
+                ใส่ Prompt สำหรับ AI เพื่อกำหนดทิศทางของ Key Messages, Do&apos;s
+                & Don&apos;ts, Deliverables และ Disclosure ให้อัตโนมัติ
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-1 mb-4">
@@ -939,14 +950,25 @@ export default function CreateBriefPage({
                 className="w-full min-h-32 rounded-sm border-[1.5px] border-border-ui bg-surface/50 px-3.5 py-2.75 text-sm outline-none focus:border-brand"
               />
               <div className="w-full flex justify-end">
-                <p className="text-xs">{aiBriefPrompt.length}/{aiBriefPromptMax}</p>
+                <p className="text-xs">
+                  {aiBriefPrompt.length}/{aiBriefPromptMax}
+                </p>
               </div>
-            </div>  
+            </div>
             <DialogFooter>
-              <DialogClose className={buttonVariants({ variant: "outline" }) + " py-5 px-6 cursor-pointer"} onClick={closeAIPromptModal}>
+              <DialogClose
+                className={
+                  buttonVariants({ variant: "outline" }) +
+                  " py-5 px-6 cursor-pointer"
+                }
+                onClick={closeAIPromptModal}
+              >
                 ยกเลิก
               </DialogClose>
-              <Button type="submit" className="bg-secondary-brand py-5 px-6 cursor-pointer">
+              <Button
+                type="submit"
+                className="bg-secondary-brand py-5 px-6 cursor-pointer"
+              >
                 <Sparkles size={28} />
                 สร้าง Brief
               </Button>
