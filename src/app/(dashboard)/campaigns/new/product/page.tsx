@@ -38,12 +38,8 @@ function typeEmoji(cat: string, isService: boolean): string {
 
 export default function AddProductPage() {
   const router = useRouter();
-  const {
-    promotionType,
-    productData,
-    setPromotionType,
-    setProduct,
-  } = useCampaignStore();
+  const { promotionType, productData, setPromotionType, setProduct } =
+    useCampaignStore();
 
   const [type, setType] = useState<"product" | "service" | null>(
     promotionType === "PRODUCT"
@@ -72,12 +68,18 @@ export default function AddProductPage() {
   const [serviceCats, setServiceCats] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch('/api/categories?type=product').then(r => r.json()).then((d: { name: string }[]) => setProductCats(d.map(c => c.name)));
-    fetch('/api/categories?type=service').then(r => r.json()).then((d: { name: string }[]) => setServiceCats(d.map(c => c.name)));
+    fetch("/api/categories?type=product")
+      .then((r) => r.json())
+      .then((d: { name: string }[]) => setProductCats(d.map((c) => c.name)));
+    fetch("/api/categories?type=service")
+      .then((r) => r.json())
+      .then((d: { name: string }[]) => setServiceCats(d.map((c) => c.name)));
   }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload(productData?.imageUrl ?? undefined);
+  const { imageUrl, uploading, handleFileSelect, upload } = useImageUpload(
+    productData?.imageUrl ?? undefined,
+  );
 
   const isService = type === "service";
   const categories = isService ? serviceCats : productCats;
@@ -92,23 +94,23 @@ export default function AddProductPage() {
     if (!isValid || !type || isSubmitting) return;
     setIsSubmitting(true);
     try {
-    const storedImageUrl = await upload();
-    setPromotionType(type === "product" ? "PRODUCT" : "SERVICE");
-    setProduct({
-      brandName: brandName.trim(),
-      productName: name.trim(),
-      category,
-      description: description.trim(),
-      sellingPoints: sellingPoints.trim(),
-      url: url.trim(),
-      imageUrl: storedImageUrl ?? "",
-      isService,
-      weight: weight ? parseFloat(weight) : undefined,
-      length: length ? parseFloat(length) : undefined,
-      width: width ? parseFloat(width) : undefined,
-      height: height ? parseFloat(height) : undefined,
-    });
-    router.push("/campaigns/new/package");
+      const storedImageUrl = await upload();
+      setPromotionType(type === "product" ? "PRODUCT" : "SERVICE");
+      setProduct({
+        brandName: brandName.trim(),
+        productName: name.trim(),
+        category,
+        description: description.trim(),
+        sellingPoints: sellingPoints.trim(),
+        url: url.trim(),
+        imageUrl: storedImageUrl ?? "",
+        isService,
+        weight: weight ? Number.parseFloat(weight) : undefined,
+        length: length ? Number.parseFloat(length) : undefined,
+        width: width ? Number.parseFloat(width) : undefined,
+        height: height ? Number.parseFloat(height) : undefined,
+      });
+      router.push("/campaigns/new/package");
     } finally {
       setIsSubmitting(false);
     }
@@ -257,13 +259,13 @@ export default function AddProductPage() {
                     if (file) handleFileSelect(file);
                   }}
                 />
-                <div
+                <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className={`relative h-46 w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition-all ${
-                    imageUrl
-                      ? "border-brand"
-                      : "border-border-ui bg-[#fafbfc]"
-                  } ${!imageUrl ? "flex flex-col items-center justify-center gap-1.5" : ""}`}
+                    imageUrl ? "border-brand" : "border-border-ui bg-[#fafbfc]"
+                  } ${imageUrl ? "" : "flex flex-col items-center justify-center gap-1.5"}`}
+                  aria-label={`อัปโหลดรูป${isService ? "บริการ" : "สินค้า"}`}
                 >
                   {imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -284,7 +286,7 @@ export default function AddProductPage() {
                       </span>
                     </>
                   )}
-                </div>
+                </button>
               </div>
 
               {/* Product / Service info card */}
@@ -304,10 +306,14 @@ export default function AddProductPage() {
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                  <label
+                    htmlFor="brand-name"
+                    className="mb-1.5 block text-[13px] font-semibold text-dark"
+                  >
                     ชื่อแบรนด์ <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="brand-name"
                     type="text"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
@@ -319,11 +325,15 @@ export default function AddProductPage() {
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                  <label
+                    htmlFor="product-name"
+                    className="mb-1.5 block text-[13px] font-semibold text-dark"
+                  >
                     ชื่อ{isService ? "บริการ" : "สินค้า"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="product-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -339,9 +349,9 @@ export default function AddProductPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                  <p className="mb-1.5 block text-[13px] font-semibold text-dark">
                     หมวดหมู่ <span className="text-red-500">*</span>
-                  </label>
+                  </p>
                   <div className="flex flex-wrap gap-1.5">
                     {categories.map((cat) => {
                       const active = category === cat;
@@ -381,7 +391,10 @@ export default function AddProductPage() {
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                  <label
+                    htmlFor="product-url"
+                    className="mb-1.5 block text-[13px] font-semibold text-dark"
+                  >
                     URL {isService ? "บริการ" : "สินค้า"}{" "}
                     <span className="text-[11px] font-normal text-muted-text">
                       (ไม่บังคับ)
@@ -393,6 +406,7 @@ export default function AddProductPage() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-text"
                     />
                     <input
+                      id="product-url"
                       type="url"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
@@ -412,13 +426,17 @@ export default function AddProductPage() {
                 </div>
 
                 <div className="mb-3.5">
-                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                  <label
+                    htmlFor="product-description"
+                    className="mb-1.5 block text-[13px] font-semibold text-dark"
+                  >
                     รายละเอียด{" "}
                     <span className="text-[11px] font-normal text-muted-text">
                       สั้นๆ
                     </span>
                   </label>
                   <textarea
+                    id="product-description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder={
@@ -432,10 +450,14 @@ export default function AddProductPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                  <label
+                    htmlFor="selling-points"
+                    className="mb-1.5 block text-[13px] font-semibold text-dark"
+                  >
                     จุดเด่น / Selling Points
                   </label>
                   <textarea
+                    id="selling-points"
                     value={sellingPoints}
                     onChange={(e) => setSellingPoints(e.target.value)}
                     placeholder={
@@ -466,10 +488,14 @@ export default function AddProductPage() {
                   </p>
 
                   <div className="mb-3">
-                    <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                    <label
+                      htmlFor="shipping-weight"
+                      className="mb-1.5 block text-[13px] font-semibold text-dark"
+                    >
                       น้ำหนัก (กรัม)
                     </label>
                     <input
+                      id="shipping-weight"
                       type="number"
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
@@ -479,9 +505,9 @@ export default function AddProductPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-[13px] font-semibold text-dark">
+                    <p className="mb-1.5 block text-[13px] font-semibold text-dark">
                       ขนาด (ซม.)
-                    </label>
+                    </p>
                     <div className="grid grid-cols-3 gap-2">
                       {(
                         [
