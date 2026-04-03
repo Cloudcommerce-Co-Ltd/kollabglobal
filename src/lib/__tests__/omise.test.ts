@@ -147,4 +147,25 @@ describe("omise lib", () => {
       expect(result.qrCodeUrl).toBe("");
     });
   });
+
+  describe("expireCharge", () => {
+    it("throws when Omise is not configured", async () => {
+      vi.stubEnv("OMISE_SECRET_KEY", "");
+      const { expireCharge } = await import("@/lib/omise");
+      await expect(expireCharge("chrg_test")).rejects.toThrow("Omise is not configured");
+    });
+
+    it("calls omise charges.expire with the charge ID", async () => {
+      vi.stubEnv("OMISE_SECRET_KEY", "test_key");
+      const OmiseMock = (await import("omise")).default as unknown as ReturnType<typeof vi.fn>;
+      const expireFn = vi.fn().mockResolvedValue({});
+      OmiseMock.mockReturnValueOnce({
+        sources: { create: vi.fn() },
+        charges: { expire: expireFn },
+      });
+      const { expireCharge } = await import("@/lib/omise");
+      await expireCharge("chrg_abc");
+      expect(expireFn).toHaveBeenCalledWith("chrg_abc");
+    });
+  });
 });

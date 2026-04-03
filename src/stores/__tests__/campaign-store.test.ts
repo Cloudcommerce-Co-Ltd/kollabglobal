@@ -126,4 +126,101 @@ describe('campaign-store', () => {
     expect(state.campaignId).toBeNull();
     expect(state.qrCodeUrl).toBeNull();
   });
+
+  it('clearCheckoutData clears charge info and resets status to draft', () => {
+    useCampaignStore.getState().setCheckoutData('charge-abc', 'campaign-xyz', 'https://qr.code/img');
+    useCampaignStore.getState().clearCheckoutData();
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBeNull();
+    expect(state.campaignId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
+    expect(state.status).toBe('draft');
+  });
+});
+
+describe('campaign-store — checkout data invalidation', () => {
+  beforeEach(() => {
+    useCampaignStore.getState().reset();
+  });
+
+  it('setCountry clears checkout data when country changes and chargeId is set', () => {
+    useCampaignStore.getState().setCountry(COUNTRY_TH);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setCountry(COUNTRY_SG);
+
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
+    expect(state.countryData).toEqual(COUNTRY_SG);
+  });
+
+  it('setCountry keeps checkout data when same country is set again', () => {
+    useCampaignStore.getState().setCountry(COUNTRY_TH);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setCountry(COUNTRY_TH);
+
+    expect(useCampaignStore.getState().chargeId).toBe('charge-1');
+  });
+
+  it('setProduct clears checkout data when chargeId is set', () => {
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+    useCampaignStore.getState().setProduct({
+      brandName: 'B', productName: 'P', category: 'Food',
+      description: '', sellingPoints: '', url: '', imageUrl: '', isService: false,
+    });
+
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBeNull();
+    expect(state.qrCodeUrl).toBeNull();
+  });
+
+  it('setPackage clears checkout data when package changes and chargeId is set', () => {
+    useCampaignStore.getState().setPackage(PKG_STARTER);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setPackage(PKG_POPULAR);
+
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBeNull();
+    expect(state.packageData).toEqual(PKG_POPULAR);
+  });
+
+  it('setPackage keeps checkout data when same package is set again', () => {
+    useCampaignStore.getState().setPackage(PKG_STARTER);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setPackage(PKG_STARTER);
+
+    expect(useCampaignStore.getState().chargeId).toBe('charge-1');
+  });
+
+  it('setCreators clears checkout data when creator IDs change and chargeId is set', () => {
+    useCampaignStore.getState().setCreators([CREATOR_1]);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
+
+    const state = useCampaignStore.getState();
+    expect(state.chargeId).toBeNull();
+  });
+
+  it('setCreators keeps checkout data when same creator IDs are set', () => {
+    useCampaignStore.getState().setCreators([CREATOR_1, CREATOR_2]);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setCreators([CREATOR_2, CREATOR_1]);
+
+    expect(useCampaignStore.getState().chargeId).toBe('charge-1');
+  });
+
+  it('setCreators does not clear checkout data when empty array is set', () => {
+    useCampaignStore.getState().setCreators([CREATOR_1]);
+    useCampaignStore.getState().setCheckoutData('charge-1', 'campaign-1', 'https://qr.url');
+
+    useCampaignStore.getState().setCreators([]);
+
+    expect(useCampaignStore.getState().chargeId).toBe('charge-1');
+  });
 });

@@ -28,6 +28,14 @@ export default defineConfig({
         '**/vitest.config.ts',
         '**/prisma/**',
         '**/scripts/**',
+        // Type-only files — no executable runtime code
+        'src/types/**',
+        // NextAuth/Next.js infrastructure — not business logic
+        'src/auth.ts',
+        'src/proxy.ts',
+        // DB/Redis connection singletons — module-init branches can't be unit tested
+        'src/lib/prisma.ts',
+        'src/lib/redis.ts',
       ],
       include: ['src/**/*.{ts,tsx}'],
       thresholds: {

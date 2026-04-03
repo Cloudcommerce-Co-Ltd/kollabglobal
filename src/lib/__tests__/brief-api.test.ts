@@ -7,7 +7,7 @@ const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
 // Import after stubbing
-const { fetchCampaign, fillBriefAI, translateBrief, publishBrief } =
+const { fetchCampaign, fillBriefAI, translateBrief, publishBrief, confirmShipment, updateCampaignStatus } =
   await import("@/lib/brief-api");
 
 function mockResponse(data: unknown, ok = true, status = 200) {
@@ -97,6 +97,43 @@ describe("translateBrief", () => {
   it("throws on failure", async () => {
     mockFetch.mockReturnValue(mockResponse({}, false, 500));
     await expect(translateBrief(sampleForm, { code: "vi", name: "Vietnamese" })).rejects.toThrow("Translation failed");
+  });
+});
+
+describe("confirmShipment", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns true on success", async () => {
+    mockFetch.mockReturnValue(mockResponse({}, true, 200));
+    const result = await confirmShipment("campaign-1");
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith("/api/campaigns/campaign-1/shipment", { method: "PATCH" });
+  });
+
+  it("returns false on failure", async () => {
+    mockFetch.mockReturnValue(mockResponse({}, false, 400));
+    const result = await confirmShipment("campaign-1");
+    expect(result).toBe(false);
+  });
+});
+
+describe("updateCampaignStatus", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns true on success", async () => {
+    mockFetch.mockReturnValue(mockResponse({}, true, 200));
+    const result = await updateCampaignStatus("campaign-1", "ACTIVE");
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/campaigns/campaign-1/status",
+      expect.objectContaining({ method: "PATCH" })
+    );
+  });
+
+  it("returns false on failure", async () => {
+    mockFetch.mockReturnValue(mockResponse({}, false, 400));
+    const result = await updateCampaignStatus("campaign-1", "ACTIVE");
+    expect(result).toBe(false);
   });
 });
 

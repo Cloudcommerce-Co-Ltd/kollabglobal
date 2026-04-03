@@ -126,4 +126,21 @@ describe("POST /api/ai/translate", () => {
     const call = mockGenerateText.mock.calls[0][0];
     expect((call as { prompt: string }).prompt).toContain("Japanese");
   });
+
+  it("returns 500 with specific message when NoObjectGeneratedError is thrown", async () => {
+    mockIsAIConfigured.mockReturnValue(true);
+    const { NoObjectGeneratedError } = await import("ai");
+    mockGenerateText.mockRejectedValueOnce(new (NoObjectGeneratedError as never)("model returned nothing"));
+
+    const res = await POST(
+      makeRequest({
+        fields: sampleFields,
+        targetLang: "vi",
+        targetLangName: "Vietnamese",
+      })
+    );
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error).toBe("Failed to translate brief");
+  });
 });

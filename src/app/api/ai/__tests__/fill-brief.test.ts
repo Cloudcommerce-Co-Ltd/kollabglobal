@@ -174,6 +174,41 @@ describe("POST /api/ai/fill-brief", () => {
     expect(data.deliverables).toContain("TikTok");
   });
 
+  it("returns 500 with specific message when NoObjectGeneratedError is thrown", async () => {
+    mockIsAIConfigured.mockReturnValue(true);
+    const { NoObjectGeneratedError } = await import("ai");
+    mockGenerateText.mockRejectedValueOnce(new (NoObjectGeneratedError as never)("model returned nothing"));
+
+    const res = await POST(makeRequest(sampleInput));
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error).toBe("Failed to generate brief");
+  });
+
+  it("handles minimal input (no description, url, userPrompt) without error", async () => {
+    mockIsAIConfigured.mockReturnValue(true);
+    mockGenerateText.mockResolvedValue({
+      output: { keys: "k", dos: "d", deliverables: "del", disclosure: "disc" },
+    } as Awaited<ReturnType<typeof aiSdk.generateText>>);
+
+    const minimalInput = {
+      brandName: "Brand",
+      productName: "Product",
+      category: "Tech",
+      isService: false,
+      // no description, sellingPoints, url, userPrompt
+    };
+
+    const res = await POST(makeRequest(minimalInput));
+    expect(res.status).toBe(200);
+
+    const call = mockGenerateText.mock.calls[0][0];
+    const prompt = (call as { prompt: string }).prompt;
+    // Empty optional fields should not appear in prompt
+    expect(prompt).not.toContain("undefined");
+    expect(prompt).not.toContain("null");
+  });
+
   it("includes packageDeliverables constraint in prompt when provided", async () => {
     mockIsAIConfigured.mockReturnValue(true);
     mockGenerateText.mockResolvedValue({

@@ -73,4 +73,17 @@ describe('PATCH /api/campaigns/[id]/status', () => {
     const res = await PATCH(req as never, { params: Promise.resolve({ id: 'nonexistent' }) });
     expect(res.status).toBe(404);
   });
+
+  it('returns 400 when campaign status has no legal transitions defined', async () => {
+    // AWAITING_PAYMENT has no entry in LEGAL_TRANSITIONS — exercises the ?? [] branch
+    const mockCampaign = { id: 'camp-1', userId: 'user-1', status: 'AWAITING_PAYMENT' };
+    vi.mocked(prisma.campaign.findFirst).mockResolvedValue(mockCampaign as never);
+
+    const req = new Request('http://localhost', {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'ACCEPTING' }),
+    });
+    const res = await PATCH(req as never, { params: Promise.resolve({ id: 'camp-1' }) });
+    expect(res.status).toBe(400);
+  });
 });
