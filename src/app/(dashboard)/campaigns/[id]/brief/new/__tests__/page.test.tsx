@@ -304,7 +304,7 @@ describe("CreateBriefPage — AI prompt dialog", () => {
     const textarea = screen.getByRole("textbox");
     await user.type(textarea, "hello");
     await waitFor(() => {
-      expect(screen.getByText("5/500")).toBeInTheDocument();
+      expect(screen.getByText("5 / 500")).toBeInTheDocument();
     });
   });
 
