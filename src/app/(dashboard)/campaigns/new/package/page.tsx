@@ -19,7 +19,6 @@ export default function SelectPackagePage() {
   const [selected, setSelected] = useState<number | null>(
     packageData?.id ?? null,
   );
-  const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
     if (!countryData) return;
@@ -203,19 +202,8 @@ export default function SelectPackagePage() {
                       </div>
                       <div className="flex flex-wrap gap-0.5">
                         {(creatorsByPackage[pkg.id] ?? []).slice(0, avatarCount).map((cr, i) => (
-                          <div
-                            key={cr.id}
-                            className="relative"
-                            onMouseEnter={() => setHover(`${pkg.id}-${i}`)}
-                            onMouseLeave={() => setHover(null)}
-                          >
-                            <div
-                              className={`relative flex size-7.5 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-brand-light transition-transform ${
-                                hover === `${pkg.id}-${i}`
-                                  ? 'scale-[1.18]'
-                                  : 'scale-100'
-                              }`}
-                            >
+                          <div key={`${pkg.id}-${i}`} className="group relative">
+                            <div className="relative flex size-7.5 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-brand-light transition-transform group-hover:scale-[1.18]">
                               <span className="text-[10px] font-bold text-brand">
                                 {cr.name.charAt(0)}
                               </span>
@@ -226,65 +214,55 @@ export default function SelectPackagePage() {
                                   fill
                                   className="object-cover"
                                   onError={e => {
-                                    (
-                                      e.target as HTMLImageElement
-                                    ).style.display = 'none';
+                                    (e.target as HTMLImageElement).style.display = 'none';
                                   }}
                                   unoptimized
                                 />
                               )}
                             </div>
-                            {hover === `${pkg.id}-${i}` && (
-                              <div className="absolute bottom-9 left-1/2 z-50 min-w-37.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-dark px-2.75 py-2 text-white">
-                                <div className="mb-0.75 flex items-center gap-1.25">
-                                  <div className="relative flex size-4 items-center justify-center overflow-hidden rounded-full bg-brand-light">
-                                    <span className="text-[8px] font-bold text-brand">
-                                      {cr.name.charAt(0)}
-                                    </span>
-                                    {cr.avatar && (
-                                      <Image
-                                        src={cr.avatar}
-                                        alt={cr.name}
-                                        fill
-                                        className="object-cover"
-                                        onError={e => {
-                                          (
-                                            e.target as HTMLImageElement
-                                          ).style.display = 'none';
-                                        }}
-                                        unoptimized
-                                      />
-                                    )}
-                                  </div>
-                                  {cr.countryCode && (
-                                    <ReactCountryFlag
-                                      countryCode={cr.countryCode}
-                                      svg
-                                      className="w-3! h-3! rounded-sm"
+                            <div className="pointer-events-none absolute bottom-9 left-1/2 z-50 min-w-37.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-dark px-2.75 py-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              <div className="mb-0.75 flex items-center gap-1.25">
+                                <div className="relative flex size-4 items-center justify-center overflow-hidden rounded-full bg-brand-light">
+                                  <span className="text-[8px] font-bold text-brand">
+                                    {cr.name.charAt(0)}
+                                  </span>
+                                  {cr.avatar && (
+                                    <Image
+                                      src={cr.avatar}
+                                      alt={cr.name}
+                                      fill
+                                      className="object-cover"
+                                      onError={e => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                      }}
+                                      unoptimized
                                     />
                                   )}
-                                  <span className="text-xs font-semibold">
-                                    {cr.name}
-                                  </span>
                                 </div>
-                                <div className="flex gap-2 text-[11px]">
-                                  <span>
-                                    Eng:{' '}
-                                    <b className="text-brand">
-                                      {cr.engagement}
-                                    </b>
-                                  </span>
-                                  <span>
-                                    Reach:{' '}
-                                    <b className="text-secondary-brand">
-                                      {cr.reach}
-                                    </b>
-                                  </span>
-                                </div>
-                                <div className="absolute -bottom-1.25 left-1/2 size-2.25 -translate-x-1/2 rotate-45 bg-dark" />
+                                {cr.countryCode && (
+                                  <ReactCountryFlag
+                                    countryCode={cr.countryCode}
+                                    svg
+                                    className="w-3! h-3! rounded-sm"
+                                  />
+                                )}
+                                <span className="text-xs font-semibold">
+                                  {cr.name}
+                                </span>
                               </div>
-                            )}
-                          </ div>
+                              <div className="flex gap-2 text-[11px]">
+                                <span>
+                                  Eng:{' '}
+                                  <b className="text-brand">{cr.engagement}</b>
+                                </span>
+                                <span>
+                                  Reach:{' '}
+                                  <b className="text-secondary-brand">{cr.reach}</b>
+                                </span>
+                              </div>
+                              <div className="absolute -bottom-1.25 left-1/2 size-2.25 -translate-x-1/2 rotate-45 bg-dark" />
+                            </div>
+                          </div>
                         ))}
                         {pkg.numCreators > 8 && (
                           <div className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-border-ui text-[11px] font-bold text-muted-text">
