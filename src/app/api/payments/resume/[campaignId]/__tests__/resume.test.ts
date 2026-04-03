@@ -51,7 +51,7 @@ describe("GET /api/payments/resume/[campaignId]", () => {
 
   it("returns 401 when unauthenticated", async () => {
     const { auth } = await import("@/auth");
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as never);
 
     const { request, params } = makeRequest("campaign_1");
     const res = await GET(request, { params });

@@ -244,7 +244,7 @@ describe("useQrPayment", () => {
           onStatusChange,
           onRecreate: vi.fn(),
         }),
-      { initialProps: { chargeId: null, chargeCreatedAt: null } }
+      { initialProps: { chargeId: null as string | null, chargeCreatedAt: null as number | null } }
     );
 
     // Initial state: no chargeId yet (loading)

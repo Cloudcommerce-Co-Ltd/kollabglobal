@@ -264,7 +264,7 @@ describe('Maybe<T>', () => {
 
     it('should preserve null through transformation chain', () => {
       const value: Maybe<string> = null;
-      const result = mapMaybe(value, (s) => s.length);
+      const result = mapMaybe(value, (s: string) => s.length);
       expect(result).toBe(null);
     });
 
@@ -366,7 +366,7 @@ describe('Maybe<T>', () => {
     it('should handle null through chain', () => {
       const user: Maybe<{ id: number; name: string }> = null;
 
-      const name = mapMaybe(user, (u) => u.name);
+      const name = mapMaybe(user, (u: { id: number; name: string }) => u.name);
       const nameOrDefault = getOrElse(name, 'Unknown');
 
       expect(nameOrDefault).toBe('Unknown');

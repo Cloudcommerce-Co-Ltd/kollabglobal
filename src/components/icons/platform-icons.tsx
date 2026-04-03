@@ -2,7 +2,7 @@ interface IconProps {
   size?: number;
 }
 
-export function TikTokIcon({ size = 18 }: IconProps) {
+function TikTokIcon({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <path
@@ -13,7 +13,7 @@ export function TikTokIcon({ size = 18 }: IconProps) {
   );
 }
 
-export function InstagramIcon({ size = 18 }: IconProps) {
+function InstagramIcon({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <defs>

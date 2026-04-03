@@ -81,7 +81,7 @@ describe("omise lib", () => {
     it("sets expires_at to 15 minutes in the future", async () => {
       vi.stubEnv("OMISE_SECRET_KEY", "test_key");
       const before = Date.now();
-      const OmiseMock = (await import("omise")).default as ReturnType<typeof vi.fn>;
+      const OmiseMock = (await import("omise")).default as unknown as ReturnType<typeof vi.fn>;
       const chargesCreate = vi.fn().mockResolvedValue({
         id: "chrg_test_123",
         status: "pending",
@@ -129,7 +129,7 @@ describe("omise lib", () => {
     it("returns empty qrCodeUrl when scannable_code is missing", async () => {
       vi.stubEnv("OMISE_SECRET_KEY", "test_key");
       // Override the mock temporarily
-      const OmiseMock = (await import("omise")).default as ReturnType<typeof vi.fn>;
+      const OmiseMock = (await import("omise")).default as unknown as ReturnType<typeof vi.fn>;
       OmiseMock.mockReturnValueOnce({
         sources: { create: vi.fn() },
         charges: {

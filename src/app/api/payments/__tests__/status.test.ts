@@ -48,7 +48,7 @@ describe("GET /api/payments/[chargeId]/status", () => {
 
   it("returns 401 when no session", async () => {
     const { auth } = await import("@/auth");
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as never);
 
     const { request, params } = makeRequest("chrg_test_123");
     const res = await GET(request, { params });
@@ -215,7 +215,7 @@ describe("GET /api/payments/[chargeId]/status", () => {
       userId: "user_1",
     } as never);
     vi.mocked(retrieveCharge).mockResolvedValue({ status: "successful", paid: true, amount: 100000, qrCodeUrl: "" } as never);
-    vi.mocked(prisma.$transaction).mockImplementation(async (fn: (tx: typeof prisma) => Promise<void>) => fn(prisma));
+    vi.mocked(prisma.$transaction).mockImplementation(((async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma as never)) as never));
     vi.mocked(prisma.payment.update).mockResolvedValue({} as never);
     vi.mocked(prisma.campaign.update).mockResolvedValue({} as never);
 

@@ -9,7 +9,7 @@ import type { Country } from "@/types";
 // Mock next/navigation — must include useSearchParams
 const mockPush = vi.fn();
 const mockReplace = vi.fn();
-const mockSearchParams = { get: vi.fn(() => null) };
+const mockSearchParams = { get: vi.fn<() => string | null>(() => null) };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
@@ -17,7 +17,8 @@ vi.mock("next/navigation", () => ({
 
 const mkCountry = (id: number, name: string, countryCode: string, creatorsAvail: number, region: string): Country => ({
   id, name, countryCode, region, languageCode: 'en', languageName: 'English', creatorsAvail,
-  platforms: [], estReach: null, isActive: true,
+  avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null, snackTrend: null,
+  platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 });
 
 const SAMPLE_COUNTRIES: Country[] = [

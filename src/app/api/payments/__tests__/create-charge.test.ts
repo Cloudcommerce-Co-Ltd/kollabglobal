@@ -112,7 +112,7 @@ describe("POST /api/payments/create-charge", () => {
     // Should NOT fail validation — `amount` is just an extra unknown key (zod strips it)
     // But it should still proceed normally, so we need auth/omise to be set up
     const { auth } = await import("@/auth");
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as never);
     const res = await POST(req);
     expect(res.status).toBe(401); // fails on auth, not on amount field
   });
@@ -130,7 +130,7 @@ describe("POST /api/payments/create-charge", () => {
 
   it("returns 401 when no session", async () => {
     const { auth } = await import("@/auth");
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as never);
 
     const req = makeRequest(validBody);
     const res = await POST(req);
@@ -146,7 +146,7 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(null);
 
     const req = makeRequest(validBody);
@@ -164,7 +164,7 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue({
       id: "existing_campaign",
@@ -208,20 +208,19 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.$transaction).mockImplementation(
-      async (cb: (tx: unknown) => Promise<unknown>) => {
+      (async (cb: (tx: unknown) => Promise<unknown>) => {
         const tx = {
           campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
           campaignProduct: { create: vi.fn().mockResolvedValue({}) },
           campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
           payment: { create: vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" }) },
         };
-        return cb(tx);
-      }
-    );
+        return cb(tx as never);
+      }) as never);
     vi.mocked(createPromptPayCharge).mockResolvedValue({
       chargeId: "chrg_test",
       qrCodeUrl: "https://example.com/qr.png",
@@ -245,20 +244,19 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.$transaction).mockImplementation(
-      async (cb: (tx: unknown) => Promise<unknown>) => {
+      (async (cb: (tx: unknown) => Promise<unknown>) => {
         const tx = {
           campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
           campaignProduct: { create: vi.fn().mockResolvedValue({}) },
           campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
           payment: { create: vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" }) },
         };
-        return cb(tx);
-      }
-    );
+        return cb(tx as never);
+      }) as never);
     vi.mocked(createPromptPayCharge).mockResolvedValue({
       chargeId: "chrg_test",
       qrCodeUrl: "https://example.com/qr.png",
@@ -287,22 +285,21 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
 
     const txPaymentCreate = vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" });
     vi.mocked(prisma.$transaction).mockImplementation(
-      async (cb: (tx: unknown) => Promise<unknown>) => {
+      (async (cb: (tx: unknown) => Promise<unknown>) => {
         const tx = {
           campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
           campaignProduct: { create: vi.fn().mockResolvedValue({}) },
           campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
           payment: { create: txPaymentCreate },
         };
-        return cb(tx);
-      }
-    );
+        return cb(tx as never);
+      }) as never);
     vi.mocked(createPromptPayCharge).mockResolvedValue({
       chargeId: "chrg_test",
       qrCodeUrl: "https://example.com/qr.png",
@@ -340,20 +337,20 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.$transaction)
       // First call: create transaction
-      .mockImplementationOnce(async (cb: (tx: unknown) => Promise<unknown>) => {
+      .mockImplementationOnce((async (cb: (tx: unknown) => Promise<unknown>) => {
         const tx = {
           campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
           campaignProduct: { create: vi.fn().mockResolvedValue({}) },
           campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
           payment: { create: vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" }) },
         };
-        return cb(tx);
-      })
+        return cb(tx as never);
+      }) as never)
       // Second call: cleanup transaction
       .mockResolvedValueOnce([{}, {}]);
 
@@ -377,22 +374,21 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
 
     const txPaymentCreate = vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" });
     vi.mocked(prisma.$transaction).mockImplementation(
-      async (cb: (tx: unknown) => Promise<unknown>) => {
+      (async (cb: (tx: unknown) => Promise<unknown>) => {
         const tx = {
           campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
           campaignProduct: { create: vi.fn().mockResolvedValue({}) },
           campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
           payment: { create: txPaymentCreate },
         };
-        return cb(tx);
-      }
-    );
+        return cb(tx as never);
+      }) as never);
     vi.mocked(createPromptPayCharge).mockResolvedValue({
       chargeId: "chrg_test",
       qrCodeUrl: "https://example.com/qr.png",
@@ -418,7 +414,7 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
 
@@ -456,7 +452,7 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
 
@@ -486,22 +482,21 @@ describe("POST /api/payments/create-charge", () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user_1", email: "test@example.com" },
       expires: "2026-12-31",
-    });
+    } as never);
     vi.mocked(prisma.package.findUnique).mockResolvedValue(mockPackage as never);
     vi.mocked(prisma.campaign.findFirst).mockResolvedValue(null);
 
     const campaignProductCreate = vi.fn().mockResolvedValue({});
     vi.mocked(prisma.$transaction).mockImplementation(
-      async (cb: (tx: unknown) => Promise<unknown>) => {
+      (async (cb: (tx: unknown) => Promise<unknown>) => {
         const tx = {
           campaign: { create: vi.fn().mockResolvedValue({ id: "campaign_1" }) },
           campaignProduct: { create: campaignProductCreate },
           campaignCreator: { createMany: vi.fn().mockResolvedValue({}) },
           payment: { create: vi.fn().mockResolvedValue({ id: "payment_1", campaignId: "campaign_1" }) },
         };
-        return cb(tx);
-      }
-    );
+        return cb(tx as never);
+      }) as never);
     vi.mocked(createPromptPayCharge).mockResolvedValue({
       chargeId: "chrg_test",
       qrCodeUrl: "https://example.com/qr.png",

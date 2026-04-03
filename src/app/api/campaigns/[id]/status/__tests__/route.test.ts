@@ -53,7 +53,7 @@ describe('PATCH /api/campaigns/[id]/status', () => {
 
   it('returns 401 when unauthenticated', async () => {
     const { auth } = await import('@/auth');
-    vi.mocked(auth).mockResolvedValueOnce(null);
+    vi.mocked(auth).mockResolvedValueOnce(null as never);
 
     const req = new Request('http://localhost', {
       method: 'PATCH',

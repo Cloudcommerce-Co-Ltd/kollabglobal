@@ -4,12 +4,14 @@ import type { Country, Package, CreatorWithPackageInfo } from '@/types';
 
 const COUNTRY_TH: Country = {
   id: 1, name: 'Thailand', countryCode: 'TH', region: 'asia', languageCode: 'th', languageName: 'Thai',
-  creatorsAvail: 1500, platforms: [], estReach: null, isActive: true,
+  creatorsAvail: 1500, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null, snackTrend: null,
+  platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
 const COUNTRY_SG: Country = {
   id: 99, name: 'Singapore', countryCode: 'SG', region: 'global', languageCode: 'en', languageName: 'English',
-  creatorsAvail: 800, platforms: [], estReach: null, isActive: true,
+  creatorsAvail: 800, avgEyeball: null, avgCPE: null, foodBevEng: null, beautyEng: null, snackTrend: null,
+  platforms: [], cats: [], estReach: null, estOrders: null, isActive: true,
 };
 
 const PKG_STARTER: Package = {

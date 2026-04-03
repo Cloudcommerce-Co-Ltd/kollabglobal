@@ -28,7 +28,7 @@ describe("CampaignDetailPage", () => {
   const makeSearchParams = (acceptTest?: string) => Promise.resolve({ "accept-test": acceptTest } as any);
 
   it("redirects to login if not authenticated", async () => {
-    vi.mocked(auth).mockResolvedValueOnce(null);
+    vi.mocked(auth).mockResolvedValueOnce(null as never);
     await expect(CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams() })).rejects.toThrow("REDIRECT");
     expect(redirect).toHaveBeenCalledWith("/login");
   });
@@ -81,9 +81,7 @@ describe("CampaignDetailPage", () => {
   });
 
   it("renders accepting state and handles dev mode mock ACCEPTED", async () => {
-    // Process env hack for the test
-    const origEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
     const mockCampaign = {
       id: "c1",
@@ -110,7 +108,7 @@ describe("CampaignDetailPage", () => {
     const jsx = await CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams("1") });
     expect(jsx).toBeDefined();
 
-    process.env.NODE_ENV = origEnv;
+    vi.unstubAllEnvs();
   });
 
   it("renders active/live state with shipment / domestic", async () => {
