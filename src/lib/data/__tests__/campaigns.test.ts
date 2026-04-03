@@ -20,7 +20,7 @@ describe('campaigns data access', () => {
 
   describe('getUserCampaigns', () => {
     it('calls prisma with correct query', async () => {
-      (prisma.campaign.findMany as any).mockResolvedValue(['mock-campaign']);
+      vi.mocked(prisma.campaign.findMany).mockResolvedValue(['mock-campaign'] as never);
       const res = await getUserCampaigns('user-1');
       expect(prisma.campaign.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-1', status: { not: 'DRAFT' } },
@@ -38,7 +38,7 @@ describe('campaigns data access', () => {
 
   describe('getCampaignDetail', () => {
     it('calls prisma with correct query', async () => {
-      (prisma.campaign.findFirst as any).mockResolvedValue('mock-detail');
+      vi.mocked(prisma.campaign.findFirst).mockResolvedValue('mock-detail' as never);
       const res = await getCampaignDetail('user-1', 'camp-1');
       expect(prisma.campaign.findFirst).toHaveBeenCalledWith({
         where: { id: 'camp-1', userId: 'user-1' },
@@ -67,7 +67,7 @@ describe('campaigns data access', () => {
         package: { id: 2, name: 'Pack A', numCreators: 10, platforms: ['tiktok'] },
         products: [{ brandName: 'BrandX', productName: 'ProdY', isService: false, imageUrl: 'img.jpg' }],
         creators: [{ status: 'PENDING' }, { status: 'ACCEPTED' }],
-      } as any;
+      } as never;
 
       const result = mapToListItem(entity);
       expect(result).toEqual({ // Verify exact mapping
@@ -92,7 +92,7 @@ describe('campaigns data access', () => {
         package: null,
         products: [],
         creators: [],
-      } as any;
+      } as never;
 
       const result = mapToListItem(entity);
       expect(result).toEqual({ // Verify exact mapping

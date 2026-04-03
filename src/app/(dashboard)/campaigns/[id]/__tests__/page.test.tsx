@@ -25,7 +25,7 @@ describe("CampaignDetailPage", () => {
   });
 
   const makeParams = () => Promise.resolve({ id: "c1" });
-  const makeSearchParams = (acceptTest?: string) => Promise.resolve({ "accept-test": acceptTest } as any);
+  const makeSearchParams = (acceptTest?: string) => Promise.resolve({ "accept-test": acceptTest } as never);
 
   it("redirects to login if not authenticated", async () => {
     vi.mocked(auth).mockResolvedValueOnce(null as never);
@@ -34,7 +34,7 @@ describe("CampaignDetailPage", () => {
   });
 
   it("calls notFound if campaign does not exist", async () => {
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as any);
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as never);
     vi.mocked(getCampaignDetail).mockResolvedValueOnce(null);
     await expect(CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams() })).rejects.toThrow("NOT_FOUND");
     expect(notFound).toHaveBeenCalled();
@@ -50,8 +50,8 @@ describe("CampaignDetailPage", () => {
       products: [{ brandName: "B", productName: "P" }],
       creators: [],
     };
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as any);
-    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as any);
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as never);
+    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as never);
 
     const jsx = await CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams() });
     expect(jsx).toBeDefined();
@@ -73,8 +73,8 @@ describe("CampaignDetailPage", () => {
       creators: [],
       package: { platforms: ["tiktok"] },
     };
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as any);
-    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as any);
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as never);
+    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as never);
 
     const jsx = await CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams() });
     expect(jsx).toBeDefined();
@@ -102,8 +102,8 @@ describe("CampaignDetailPage", () => {
       ],
       package: { numCreators: 5 },
     };
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as any);
-    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as any);
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as never);
+    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as never);
 
     const jsx = await CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams("1") });
     expect(jsx).toBeDefined();
@@ -122,8 +122,8 @@ describe("CampaignDetailPage", () => {
       products: [],
       creators: [],
     };
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as any);
-    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as any);
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as never);
+    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as never);
 
     const jsx = await CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams() });
     expect(jsx).toBeDefined();
@@ -140,8 +140,8 @@ describe("CampaignDetailPage", () => {
       products: [],
       creators: [],
     };
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as any);
-    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as any);
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: "u1" }, expires: "" } as never);
+    vi.mocked(getCampaignDetail).mockResolvedValueOnce(mockCampaign as never);
 
     const jsx = await CampaignDetailPage({ params: makeParams(), searchParams: makeSearchParams() });
     expect(jsx).toBeDefined();

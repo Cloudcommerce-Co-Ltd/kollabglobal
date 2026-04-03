@@ -23,7 +23,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import ReactCountryFlag from "react-country-flag";
 import { isBriefContentFilled, canPublishBrief } from "@/lib/brief-utils";
@@ -36,7 +35,6 @@ import {
 import type { BriefForm, TranslatedFields } from "@/types/brief";
 import type { CampaignWithRelations } from "@/types/campaign";
 import { useEffect } from "react";
-import { Field, Input } from "@base-ui/react";
 
 type LangOption = { code: string; name: string; countryCode: string };
 

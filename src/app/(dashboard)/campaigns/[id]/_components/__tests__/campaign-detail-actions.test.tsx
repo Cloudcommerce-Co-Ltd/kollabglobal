@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 
 // Mock the pipeline component to easily trigger its callbacks
 vi.mock("@/components/campaign/creator-pipeline", () => ({
-  CreatorPipeline: ({ onAllAccepted, onShipped, displayStatus }: any) => (
+  CreatorPipeline: ({ onAllAccepted, onShipped, displayStatus }: { onAllAccepted?: (s: string) => void; onShipped?: () => void; displayStatus?: string }) => (
     <div data-testid="pipeline">
       <button data-testid="btn-accept" onClick={() => onAllAccepted?.("ACTIVE")}>Accept</button>
       <button data-testid="btn-ship" onClick={() => onShipped?.()}>Ship</button>
@@ -27,7 +27,7 @@ describe("CampaignDetailActions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as any).mockReturnValue({ refresh: mockRefresh });
+    vi.mocked(useRouter).mockReturnValue({ refresh: mockRefresh } as never);
   });
 
   const defaultProps = {

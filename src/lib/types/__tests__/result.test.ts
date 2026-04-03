@@ -146,8 +146,8 @@ describe('Result<T, E>', () => {
         const value: string = result.value;
         expect(value).toBe('success');
       } else {
-        const error: number = result.error;
-        // error is never executed in this test
+        const _error: number = result.error;
+        // _error is never executed in this test
       }
     });
 

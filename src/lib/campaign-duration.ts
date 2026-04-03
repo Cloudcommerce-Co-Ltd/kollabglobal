@@ -19,7 +19,6 @@ export function computeDurationDisplay(params: {
     displayStatus,
     duration,
     deadline,
-    liveAt,
     now = new Date(),
   } = params;
 

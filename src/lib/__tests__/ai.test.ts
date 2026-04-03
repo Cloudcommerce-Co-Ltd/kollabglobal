@@ -6,7 +6,7 @@ vi.mock('@ai-sdk/google', () => ({
 }));
 
 vi.mock('@openrouter/ai-sdk-provider', () => ({
-  createOpenRouter: vi.fn((config) => {
+  createOpenRouter: vi.fn(() => {
     return vi.fn((model) => `mock-openrouter-${model}`);
   }),
 }));

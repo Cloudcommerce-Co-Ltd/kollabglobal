@@ -152,7 +152,7 @@ describe("GET /api/campaigns/[id]", () => {
 describe("PATCH /api/campaigns/[id]", () => {
   const mockUpdate = vi.mocked(prisma.campaign.update);
 
-  function makePatchRequest(body: any = {}) {
+  function makePatchRequest(body: Record<string, unknown> = {}) {
     return {
       url: "http://localhost/api/campaigns/camp-1",
       method: "PATCH",

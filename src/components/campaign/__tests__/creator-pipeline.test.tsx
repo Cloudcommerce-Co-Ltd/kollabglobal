@@ -25,7 +25,7 @@ const mockCreator = (id: string, status: string, contentStatus: string): Campaig
     socialHandle: "@test",
     portfolioUrl: null,
   },
-} as any);
+} as never);
 
 describe("creator-pipeline utilities", () => {
   it("getStepStates returns all done for isLive=true", () => {

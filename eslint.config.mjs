@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
       // Downgrade to warn — many flags in Next.js are false positives
       "security/detect-object-injection": "warn",
       "security/detect-non-literal-fs-filename": "warn",
+      // Allow _-prefixed variables to be unused (conventional intentional-unused pattern)
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        varsIgnorePattern: "^_",
+        argsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+      }],
     },
   },
   // Override default ignores of eslint-config-next.
