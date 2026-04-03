@@ -2,20 +2,35 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
     "src/app/**/{page,layout,route,loading,error,not-found}.{ts,tsx}",
-    "src/proxy.ts",
     "src/auth.ts",
-    "src/workers/payment-worker.ts",
-    "prisma/seed.ts",
-    "scripts/**/*.{ts,mjs}"
+    "scripts/**/*.{ts,mjs}",
+    "src/components/icons/platform-icons.tsx",
+    "src/components/ui/dialog.tsx",
+    "src/lib/brief-api.ts",
+    "src/lib/campaign-steps.ts",
+    "src/lib/omise.ts",
+    "src/lib/queue/dead-letter-queue.ts",
+    "src/hooks/use-image-upload.ts",
+    "src/hooks/use-qr-payment.ts",
+    "src/lib/campaign-detail-utils.ts",
+    "src/lib/validations/brief.ts",
+    "src/lib/validations/campaign-status.ts",
+    "src/lib/validations/campaign-update.ts",
+    "src/stores/campaign-store.ts",
+    "src/types/index.ts"
   ],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": [
-    "src/generated/**",
-    "src/**/__tests__/**",
-    "src/**/*.test.{ts,tsx}"
-  ],
   "ignoreDependencies": [
     "tw-animate-css",
-    "@tailwindcss/postcss"
+    "@hookform/resolvers",
+    "pg",
+    "react-hook-form",
+    "shadcn",
+    "@bull-board/api",
+    "@bull-board/express",
+    "@types/pg",
+    "@vitejs/plugin-react",
+    "tailwindcss",
+    "postcss"
   ]
 }
