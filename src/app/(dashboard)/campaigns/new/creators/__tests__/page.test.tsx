@@ -104,7 +104,7 @@ describe("SelectCreatorsPage", () => {
     await act(async () => render(<SelectCreatorsPage />));
     const firstCreatorName = MOCK_CREATORS[0].name;
     await waitFor(() => expect(screen.getAllByText(firstCreatorName).length).toBeGreaterThan(0));
-    const card = screen.getByText(firstCreatorName).closest("div[class*='rounded-xl']") as HTMLElement;
+    const card = screen.getByText(firstCreatorName).closest("button[class*='rounded-xl']") as HTMLElement;
     await act(async () => fireEvent.click(card));
     await waitFor(() =>
       expect(screen.getByText("9/10 คนที่เลือก • เลือกได้สูงสุด 10 คน")).toBeInTheDocument()
@@ -162,7 +162,7 @@ describe("SelectCreatorsPage", () => {
     await act(async () => render(<SelectCreatorsPage />));
     const firstCreatorName = MOCK_CREATORS[0].name;
     await waitFor(() => expect(screen.getAllByText(firstCreatorName).length).toBeGreaterThan(0));
-    const card = screen.getByText(firstCreatorName).closest("div[class*='rounded-xl']") as HTMLElement;
+    const card = screen.getByText(firstCreatorName).closest("button[class*='rounded-xl']") as HTMLElement;
     await act(async () => fireEvent.click(card));
     // Store should reflect the deselection immediately
     const state = useCampaignStore.getState();

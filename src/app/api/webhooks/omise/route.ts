@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   // Reject replayed webhooks older than 5 minutes
   const MAX_WEBHOOK_AGE_SECONDS = 300;
-  if (timestamp && Date.now() / 1000 - parseInt(timestamp, 10) > MAX_WEBHOOK_AGE_SECONDS) {
+  if (timestamp && Date.now() / 1000 - Number.parseInt(timestamp, 10) > MAX_WEBHOOK_AGE_SECONDS) {
     return NextResponse.json({ error: "Webhook too old" }, { status: 401 });
   }
 

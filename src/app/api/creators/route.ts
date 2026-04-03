@@ -10,8 +10,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "packageId query param is required" }, { status: 400 });
   }
 
-  const packageId = parseInt(packageIdParam, 10);
-  if (isNaN(packageId)) {
+  const packageId = Number.parseInt(packageIdParam, 10);
+  if (Number.isNaN(packageId)) {
     return NextResponse.json({ error: "packageId must be a number" }, { status: 400 });
   }
 

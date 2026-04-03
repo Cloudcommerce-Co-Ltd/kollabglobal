@@ -366,41 +366,41 @@ export default function CreateBriefPage({
               </div>
 
               <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-semibold text-dark">
-                  Campaign Name
+                <label className="flex flex-col gap-1.5 text-sm font-semibold text-dark">
+                  Campaign Name{' '}
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="e.g., Dried Mango x Vietnam"
+                    className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-white px-3.5 py-2.75 text-sm outline-none focus:border-brand"
+                  />
                 </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g., Dried Mango x Vietnam"
-                  className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-white px-3.5 py-2.75 text-sm outline-none focus:border-brand"
-                />
               </div>
 
               {product && (
                 <>
                   <div className="mb-4">
-                    <label className="mb-1.5 block text-sm font-semibold text-dark">
-                      Brand Name
+                    <label className="flex flex-col gap-1.5 text-sm font-semibold text-dark">
+                      Brand Name{' '}
+                      <input
+                        type="text"
+                        value={product.brandName}
+                        readOnly
+                        className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
+                      />
                     </label>
-                    <input
-                      type="text"
-                      value={product.brandName}
-                      readOnly
-                      className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
-                    />
                   </div>
                   <div className="mb-0">
-                    <label className="mb-1.5 block text-sm font-semibold text-dark">
-                      {isService ? "Service" : "Product"}
+                    <label className="flex flex-col gap-1.5 text-sm font-semibold text-dark">
+                      {isService ? "Service" : "Product"}{' '}
+                      <input
+                        type="text"
+                        value={product.productName}
+                        readOnly
+                        className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
+                      />
                     </label>
-                    <input
-                      type="text"
-                      value={product.productName}
-                      readOnly
-                      className="w-full rounded-[10px] border-[1.5px] border-border-ui bg-surface px-3.5 py-2.75 text-sm outline-none"
-                    />
                   </div>
                 </>
               )}
@@ -507,24 +507,24 @@ export default function CreateBriefPage({
                     </div>
                   )}
                 </div>
-                <label className="mb-2 block text-sm font-semibold text-dark">
-                  Posting Deadline
+                <label className="flex flex-col gap-1.5 text-sm font-semibold text-dark">
+                  Posting Deadline{' '}
+                  <input
+                    type="date"
+                    value={form.deadline}
+                    min={today}
+                    onChange={(e) =>
+                      setForm({ ...form, deadline: e.target.value })
+                    }
+                    className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none ${
+                      isDeadlineFilled
+                        ? "border-brand/60"
+                        : isContentFilled
+                          ? "border-amber-400"
+                          : "border-border-ui"
+                    }`}
+                  />
                 </label>
-                <input
-                  type="date"
-                  value={form.deadline}
-                  min={today}
-                  onChange={(e) =>
-                    setForm({ ...form, deadline: e.target.value })
-                  }
-                  className={`w-full rounded-[10px] border-[1.5px] px-3.5 py-2.75 text-sm outline-none ${
-                    isDeadlineFilled
-                      ? "border-brand/60"
-                      : isContentFilled
-                        ? "border-amber-400"
-                        : "border-border-ui"
-                  }`}
-                />
               </div>
             </div>
           </div>
@@ -592,7 +592,7 @@ export default function CreateBriefPage({
                     {aiLoading ? (
                       <>
                         <span className="inline-block size-3 animate-spin rounded-full border-2 border-accent-brand border-t-accent-brand/30" />
-                        กำลังวิเคราะห์…
+                        {' '}กำลังวิเคราะห์…
                       </>
                     ) : aiFilled ? (
                       <>
@@ -735,7 +735,7 @@ export default function CreateBriefPage({
                       {translating ? (
                         <>
                           <span className="inline-block size-3 animate-spin rounded-full border-2 border-white border-t-white/30" />
-                          กำลังแปล…
+                          {' '}กำลังแปล…
                         </>
                       ) : aiTranslated ? (
                         <>
@@ -905,7 +905,7 @@ export default function CreateBriefPage({
               {publishing ? (
                 <>
                   <span className="inline-block size-4.5 animate-spin rounded-full border-2 border-white border-t-white/30" />
-                  กำลังเผยแพร่…
+                  {' '}กำลังเผยแพร่…
                 </>
               ) : (
                 <>

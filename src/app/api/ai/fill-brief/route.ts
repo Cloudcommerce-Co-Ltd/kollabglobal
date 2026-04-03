@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       keys: "เน้นจุดเด่นของสินค้า — คุณภาพสูง รสชาติอร่อย เหมาะกับทุกโอกาส",
       dos: "DO: แสดงประสบการณ์จริงของคุณกับสินค้า/บริการ\nDO: โชว์จุดเด่นที่น่าสนใจและทำให้ดูน่าใช้\n\nDON'T: เปรียบเทียบกับคู่แข่งโดยตรง\nDON'T: อ้างสรรพคุณเกินจริงหรือสิ่งที่ไม่เป็นความจริง",
       deliverables: buildMockDeliverables(packageDeliverables),
-      disclosure: `#ad #sponsored #KOLLABGlobal #${(brandName ?? "Brand").replace(/\s/g, "")}`,
+      disclosure: `#ad #sponsored #KOLLABGlobal #${(brandName ?? "Brand").replaceAll(/\s/g, "")}`,
     });
   }
 

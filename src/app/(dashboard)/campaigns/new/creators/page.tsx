@@ -21,7 +21,7 @@ function CreatorCard({
   onToggle: (id: string) => void;
 }) {
   return (
-    <div
+    <button
       onClick={() => !isDisabled && onToggle(creator.id)}
       className={`relative cursor-pointer flex flex-col items-center rounded-xl border-2 bg-white p-3.5 transition-all ${isSelected ? 'border-brand' : 'border-border-ui'
         } ${isDisabled ? 'opacity-45' : ''}`}
@@ -77,7 +77,7 @@ function CreatorCard({
           <p>{creator.reach}</p>
         </span>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -162,7 +162,7 @@ export default function SelectCreatorsPage() {
       {/* Content */}
       <div className="mx-auto max-w-265 px-4 pb-20 pt-6 sm:px-6 lg:px-8">
         {/* AI Recommendation Explanation */}
-        <div className="mb-5 flex items-start gap-3 rounded-xl bg-gradient-to-br from-brand-light to-accent-brand-light border border-brand/20 p-4">
+        <div className="mb-5 flex items-start gap-3 rounded-xl bg-linear-to-br from-brand-light to-accent-brand-light border border-brand/20 p-4">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand">
             <Target size={18} className="text-white" />
           </div>

@@ -79,8 +79,8 @@ export const useCampaignStore = create<CampaignStore>()(
       setCreators: (data) => set((state) => {
         const base: Partial<CampaignCreationState> = { selectedCreatorsData: data };
         if (state.chargeId && data.length > 0) {
-          const currentIds = state.selectedCreatorsData.map(c => c.id).sort().join(",");
-          const newIds = data.map(c => c.id).sort().join(",");
+          const currentIds = state.selectedCreatorsData.map(c => c.id).sort((a, b) => a.localeCompare(b)).join(",");
+          const newIds = data.map(c => c.id).sort((a, b) => a.localeCompare(b)).join(",");
           if (currentIds !== newIds) {
             Object.assign(base, { chargeId: null, qrCodeUrl: null, chargeCreatedAt: null, status: "draft" as const });
           }

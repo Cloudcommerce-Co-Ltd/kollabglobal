@@ -64,8 +64,8 @@ export default async function CampaignDetailPage({
   let creators = campaign.creators ?? [];
 
   if (process.env.NODE_ENV === 'development' && acceptTest && typeof acceptTest === 'string') {
-    const acceptCount = parseInt(acceptTest, 10);
-    if (!isNaN(acceptCount)) {
+    const acceptCount = Number.parseInt(acceptTest, 10);
+    if (!Number.isNaN(acceptCount)) {
       creators = creators.map((c, index) => ({
         ...c,
         status: index < acceptCount ? 'ACCEPTED' : (c.status === 'ACCEPTED' ? 'ACCEPTED' : 'PENDING'),
