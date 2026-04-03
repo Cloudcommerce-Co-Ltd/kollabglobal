@@ -15,6 +15,7 @@
     "knip": "knip",
     "sonar": "vitest run --coverage; export $(cat .env | grep -v '^#' | xargs) && /opt/homebrew/bin/sonar-scanner",
     "db:reset": "pnpm exec prisma migrate reset --force && pnpm exec prisma db seed",
+    "db:seed": "pnpm exec prisma db seed",
     "worker": "tsx src/workers/payment-worker.ts",
     "worker:dev": "tsx watch src/workers/payment-worker.ts",
     "dev:all": "node scripts/dev-all.mjs",
