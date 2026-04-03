@@ -1,0 +1,14 @@
+-- CreateEnum
+CREATE TYPE "PromotionType" AS ENUM ('PRODUCT', 'SERVICE');
+
+-- CreateEnum
+CREATE TYPE "CampaignStatus" AS ENUM ('DRAFT', 'PENDING_PAYMENT', 'ACTIVE', 'COMPLETED', 'CANCELLED');
+
+-- CreateEnum
+CREATE TYPE "CreatorStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED', 'COMPLETED');
+
+-- CreateEnum
+CREATE TYPE "PaymentMethod" AS ENUM ('CREDIT_CARD', 'BANK_TRANSFER', 'QR_CODE');
+
+-- CreateEnum
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED');

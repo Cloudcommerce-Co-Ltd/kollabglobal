@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?  @map("email_verified")
+  image         String?
+  accounts       Account[]
+  sessions       Session[]
+  campaigns      Campaign[]
+  payments       Payment[]
+  statusChanges  CampaignStatusLog[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum PromotionType {
+  PRODUCT
+  SERVICE
+}
+
+enum CampaignStatus {
+  DRAFT
+  AWAITING_PAYMENT
+  PENDING
+  ACCEPTING
+  AWAITING_SHIPMENT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CreatorStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COMPLETED
+}
+
+enum ContentStatus {
+  NOT_STARTED
+  CREATING
+  SUBMITTED
+  POSTED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  BANK_TRANSFER
+  QR_CODE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentEventStatus {
+  SUCCESSFUL
+  FAILED
+  EXPIRED
+  REVERSED
+}
+
+// ─── Business Models ─────────────────────────────────────────────────────────
+
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String
+  type     String  // "product" | "service"
+  isActive Boolean @default(true) @map("is_active")
+
+  @@map("categories")
+}
+
+model Country {
+  id            Int        @id @default(autoincrement())
+  name          String
+  countryCode   String     @map("country_code")
+  region        String     @default("global")
+  languageCode  String     @default("en") @map("language_code")
+  languageName  String     @default("English") @map("language_name")
+  creatorsAvail Int        @default(0) @map("creators_avail")
+  platforms     String[]
+  estReach      String?    @map("est_reach")
+  isActive      Boolean    @default(true) @map("is_active")
+  campaigns     Campaign[]
+  creators      Creator[]
+
+  @@map("countries")
+}
+
+model Package {
+  id              Int        @id @default(autoincrement())
+  name            String
+  tagline         String
+  badge           String?
+  numCreators     Int        @map("num_creators")
+  price           Int        @map("price")
+  platforms       String[]
+  deliverables    String[]
+  cpmLabel        String     @map("cpm_label")
+  cpmSavings      String     @map("cpm_savings")
+  estReach        String?    @map("est_reach")
+  estEngagement   String?    @map("est_engagement")
+  campaigns       Campaign[]
+  creators        PackageCreator[]
+
+  @@map("packages")
+}
+
+model Creator {
+  id            String            @id @default(cuid())
+  name          String
+  niche         String
+  engagement    String
+  reach         String
+  avatar        String
+  countryCode   String?           @map("country_code")
+  countryId     Int?              @map("country_id")
+  country       Country?          @relation(fields: [countryId], references: [id])
+  platform      String?
+  socialHandle  String?           @map("social_handle")
+  portfolioUrl  String?           @map("portfolio_url")
+  campaigns     CampaignCreator[]
+  packages      PackageCreator[]
+
+  @@map("creators")
+}
+
+model PackageCreator {
+  id        String  @id @default(cuid())
+  packageId Int     @map("package_id")
+  creatorId String  @map("creator_id")
+  isBackup  Boolean @default(false) @map("is_backup")
+  sortOrder Int     @default(0) @map("sort_order")
+
+  package  Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  creator  Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, creatorId])
+  @@map("package_creators")
+}
+
+model Campaign {
+  id            String         @id @default(cuid())
+  userId        String         @map("user_id")
+  countryId     Int            @map("country_id")
+  packageId     Int            @map("package_id")
+  promotionType PromotionType  @map("promotion_type")
+  status        CampaignStatus @default(DRAFT)
+  duration      Int            @default(30) @map("duration")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  liveAt        DateTime?      @map("live_at")
+
+  brandId   String?  @map("brand_id")
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country  Country           @relation(fields: [countryId], references: [id])
+  package  Package           @relation(fields: [packageId], references: [id])
+  brand    Brand?            @relation(fields: [brandId], references: [id])
+  products   CampaignProduct[]
+  brief      CampaignBrief?
+  creators   CampaignCreator[]
+  payment    Payment?
+  statusLogs CampaignStatusLog[]
+
+  @@map("campaigns")
+}
+
+model CampaignProduct {
+  id            String  @id @default(cuid())
+  campaignId    String  @map("campaign_id")
+  brandName     String  @map("brand_name")
+  productName   String  @map("product_name")
+  category      String
+  description   String  @db.Text
+  sellingPoints String  @map("selling_points") @db.Text
+  url           String?
+  imageUrl      String? @map("image_url")
+  isService     Boolean @default(false) @map("is_service")
+  weight        Float?
+  length        Float?
+  width         Float?
+  height        Float?
+
+  campaign         Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  assignedCreators CampaignCreator[]
+
+  @@map("campaign_products")
+}
+
+model CampaignBrief {
+  id          String    @id @default(cuid())
+  campaignId  String    @unique @map("campaign_id")
+  content     String    @db.Text
+  contentTh   String?   @map("content_th") @db.Text
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_briefs")
+}
+
+model CampaignCreator {
+  id            String        @id @default(cuid())
+  campaignId    String        @map("campaign_id")
+  creatorId     String        @map("creator_id")
+  productId     String?       @map("product_id")
+  status        CreatorStatus @default(PENDING)
+  contentStatus ContentStatus @default(NOT_STARTED) @map("content_status")
+
+  campaign Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creator  Creator           @relation(fields: [creatorId], references: [id])
+  product  CampaignProduct?  @relation(fields: [productId], references: [id])
+
+  @@unique([campaignId, creatorId])
+  @@map("campaign_creators")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String        @map("user_id")
+  campaignId    String        @unique @map("campaign_id")
+  amount        Int
+  currency      String        @default("THB")
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  omiseChargeId   String?       @unique @map("omise_charge_id")
+  chargeCreatedAt DateTime?     @map("charge_created_at")
+  idempotencyKey  String?       @unique @map("idempotency_key")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// Append-only audit log — records every payment event flowing through the event bus
+model PaymentEvent {
+  id        String             @id @default(cuid())
+  chargeId  String             @map("charge_id")
+  eventName String             @map("event_name")
+  status    PaymentEventStatus
+  payload   Json?
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  @@index([chargeId])
+  @@map("payment_events")
+}
+
+// Append-only audit log for campaign status transitions
+model CampaignStatusLog {
+  id         String         @id @default(cuid())
+  campaignId String         @map("campaign_id")
+  fromStatus CampaignStatus @map("from_status")
+  toStatus   CampaignStatus @map("to_status")
+  changedBy  String?        @map("changed_by")
+  note       String?
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [changedBy], references: [id])
+
+  @@map("campaign_status_logs")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("ADMIN")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
+
+model Brand {
+  id        String     @id @default(cuid())
+  name      String
+  email     String?
+  type      String?
+  logoUrl   String?    @map("logo_url")
+  website   String?
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  campaigns Campaign[]
+
+  @@map("brands")
+}
