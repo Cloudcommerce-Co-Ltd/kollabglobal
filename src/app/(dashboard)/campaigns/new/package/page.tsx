@@ -99,7 +99,7 @@ export default function SelectPackagePage() {
                   )}
                   <button
                     onClick={() => handleSelect(pkg)}
-                    className={`relative h-full flex cursor-pointer flex-col rounded-[18px] border-2 transition-all ${
+                    className={`relative w-full h-full text-left flex cursor-pointer flex-col rounded-[18px] border-2 transition-all ${
                       isSelected
                         ? 'border-brand shadow-[0_4px_24px_color-mix(in_srgb,var(--color-brand)_12%,transparent)]'
                         : 'border-border-ui'
@@ -184,9 +184,9 @@ export default function SelectPackagePage() {
                         ))}
                       </div>
                       <div className="flex flex-col gap-1">
-                        {pkg.deliverables.map((d) => (
+                        {pkg.deliverables.map((d, di) => (
                           <div
-                            key={pkg.id}
+                            key={`${pkg.id}-${di}`}
                             className="flex items-center gap-1.25 text-[13px] text-[#5a5e72]"
                           >
                             <span className="font-bold text-brand">·</span>
@@ -203,7 +203,7 @@ export default function SelectPackagePage() {
                       </div>
                       <div className="flex flex-wrap gap-0.5">
                         {(creatorsByPackage[pkg.id] ?? []).slice(0, avatarCount).map((cr, i) => (
-                          <button
+                          <div
                             key={cr.id}
                             className="relative"
                             onMouseEnter={() => setHover(`${pkg.id}-${i}`)}
@@ -284,7 +284,7 @@ export default function SelectPackagePage() {
                                 <div className="absolute -bottom-1.25 left-1/2 size-2.25 -translate-x-1/2 rotate-45 bg-dark" />
                               </div>
                             )}
-                          </ button>
+                          </ div>
                         ))}
                         {pkg.numCreators > 8 && (
                           <div className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-border-ui text-[11px] font-bold text-muted-text">
