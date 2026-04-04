@@ -29,6 +29,20 @@ async function main() {
   });
 
   console.log(`Admin user seeded: ${email}`);
+
+  // Dev-only: seed a next-auth User so /api/dev/login works without Google OAuth
+  if (process.env.NODE_ENV !== 'production') {
+    await prisma.user.upsert({
+      where: { id: 'dev-admin-1' },
+      update: {},
+      create: {
+        id: 'dev-admin-1',
+        email,
+        name: 'Dev Admin',
+      },
+    });
+    console.log('Dev admin User seeded: dev-admin-1');
+  }
 }
 
 main()

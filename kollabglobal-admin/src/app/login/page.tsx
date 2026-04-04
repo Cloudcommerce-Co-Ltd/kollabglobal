@@ -46,6 +46,23 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {process.env.NODE_ENV === "development" && (
+          <div className="mt-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-5 py-4">
+            <p className="mb-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-amber-600">
+              Dev Only
+            </p>
+            <a
+              href="/api/dev/login"
+              className="block w-full rounded-xl border border-amber-300 bg-white py-3 text-center text-[14px] font-semibold text-amber-700 transition-colors hover:bg-amber-50"
+            >
+              Login as Dev Admin
+            </a>
+            <p className="mt-2 text-center text-[11px] text-amber-500">
+              dev-admin-1 • admin@kollab.co
+            </p>
+          </div>
+        )}
+
         <p className="text-center mt-6 text-[11px] text-ghost">
           © 2026 KOLLAB Global • Admin Panel
         </p>
